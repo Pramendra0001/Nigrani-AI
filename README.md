@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Target:** Smart India Hackathon / Government & Public Infrastructure Vigilance  
-**Stack:** FastAPI, Python 3.13, SQLite / aiosqlite, React 19, TypeScript, Vite, Tailwind CSS
+**Stack:** FastAPI, Python 3.11+, SQLite / PostgreSQL, React 19, TypeScript, Vite, Tailwind CSS
 
 ---
 
@@ -32,18 +32,78 @@ Public Project Dataset
 
 ---
 
-## 🚀 Live Demo & Access Links
+## 🚀 Live Demo & Production Architecture
 
-### 🌐 1. Live Hosted Web Application (Instant Access Anywhere)
-You can test and demonstrate the full Nigrani AI platform directly in your browser with zero installation:
+### 🌐 1. Public Production Frontend (GitHub Pages)
+The web application is deployed and publicly accessible globally from any phone, laptop, or browser:
 👉 **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)**
 
-> **Note:** The hosted web application runs in full standalone client intelligence mode, equipped with all 500 realistic benchmark infrastructure projects, interactive multi-attribute search, the 8-tab forensic investigation profile, and reviewer triage queues.
+```
+┌────────────────────────────────────────────────────────┐
+│                      User Device                       │
+│        (Any phone, laptop, or desktop browser)         │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│             Production Frontend (Hosted)               │
+│       https://pramendra0001.github.io/Nigrani-AI/      │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                    HTTPS REST / CORS
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│          Public Cloud FastAPI Backend API              │
+│       https://<YOUR_BACKEND_URL>.onrender.com          │
+│       Swagger Docs: .../docs | Health: .../health      │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│                  Database Layer                        │
+│   SQLite (Self-Seeding Demo) or Cloud PostgreSQL       │
+└────────────────────────────────────────────────────────┘
+```
+
+> **Client Fallback Guarantee:** When the remote backend is waking up from a cloud cold-start or during offline presentations, the frontend seamlessly uses its embedded client intelligence engine with all 500 benchmark projects. The application will never crash with network errors.
 
 ---
 
-### 💻 2. Local Full-Stack Development (FastAPI + React)
-To run the full stack locally with the Python FastAPI backend and SQLite database:
+### ☁️ 2. Cloud Backend Deployment (Render / Railway)
+
+The FastAPI backend is fully cloud-ready with `render.yaml` and `Procfile`.
+
+#### Recommended: Deploy to Render (Free Tier)
+1. Log in to [Render](https://render.com) with GitHub.
+2. Click **New +** → **Blueprint** (or **Web Service**).
+3. Connect repository: `Pramendra0001/Nigrani-AI`.
+4. Render will read `render.yaml` automatically, or configure manually:
+   - **Root Directory:** *(leave blank)*
+   - **Environment:** `Python`
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT`
+   - **Environment Variables:**
+     - `CORS_ORIGINS`: `https://pramendra0001.github.io`
+     - `DEMO_MODE`: `true`
+     - `AI_PROVIDER`: `mock`
+5. Click **Deploy**. Your live backend URL will be:
+   `https://nigrani-ai-api.onrender.com` (or your assigned subdomain).
+
+#### Connecting Frontend to the Live Cloud Backend:
+Once your backend is deployed:
+1. In your GitHub repository: Go to **Settings** → **Secrets and variables** → **Actions** → **Variables**.
+2. Click **New repository variable**:
+   - **Name:** `VITE_API_BASE_URL`
+   - **Value:** `https://your-backend-app.onrender.com`
+3. Go to **Actions** tab → Select **Deploy Nigrani AI Web App to GitHub Pages** → Click **Run workflow**.
+4. GitHub Pages will rebuild and connect to your live cloud backend!
+
+---
+
+### 💻 3. Local Full-Stack Development (FastAPI + React)
+
+To run the full stack locally on your computer:
 
 | Component | Local URL | Description |
 | :--- | :--- | :--- |
@@ -111,36 +171,31 @@ Nigrani-AI/
 │   │   │   └── review_service.py  # Triage queue and audit notes
 │   │   ├── utils/
 │   │   │   └── demo_data.py       # 500-project realistic benchmark generator
-│   │   ├── config.py              # App settings & risk weights
-│   │   ├── database.py            # aiosqlite async database session
-│   │   └── main.py                # FastAPI entrypoint & auto-seeder
+│   │   ├── config.py              # App settings & dynamic CORS
+│   │   ├── database.py            # Async engine with SQLite / Postgres support
+│   │   └── main.py                # FastAPI entrypoint, healthcheck & OpenAPI
+│   ├── .env.example               # Backend environment variables template
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx         # SIH branding & demo mode indicator
-│   │   │   ├── Sidebar.tsx        # Navigation & triage counter
-│   │   │   ├── MetricCard.tsx     # Executive KPI cards
-│   │   │   ├── RiskBadge.tsx      # Multi-tier risk severity pill
-│   │   │   ├── StatusBadge.tsx    # Project & review lifecycle badges
-│   │   │   └── SvgCharts.tsx      # SVG Donut Chart, Bar Chart & Radial Gauge
-│   │   ├── pages/
-│   │   │   ├── DashboardPage.tsx  # Executive overview, KPI counters, sector breakdown
-│   │   │   ├── ProjectsPage.tsx   # Filterable & searchable database of all 500 projects
-│   │   │   ├── InvestigationPage.tsx # 8-tab deep dive forensic investigation workstation
-│   │   │   ├── ReviewQueuePage.tsx # Human reviewer triage queue
-│   │   │   ├── UploadPage.tsx     # CSV dropzone & automated column mapping
-│   │   │   └── AnalyticsPage.tsx  # Risk formula weight calibrator
-│   │   ├── api.ts                 # Typed client with transparent offline fallback
-│   │   ├── demo_projects.json     # 500 realistic benchmark infrastructure projects
+│   │   ├── components/            # UI components (Navbar, Sidebar, Charts, Badges)
+│   │   ├── pages/                 # Dashboard, Projects, Investigation, Review, Upload, Analytics
+│   │   ├── api.ts                 # Typed client with environment base URL resolution & fallback
+│   │   ├── demo_projects.json     # 500 benchmark projects dataset
 │   │   ├── types.ts               # TypeScript data models
-│   │   ├── App.tsx                # Master app shell & navigation router
+│   │   ├── App.tsx                # Master app shell
 │   │   └── main.tsx
+│   ├── .env.example               # Frontend environment template
+│   ├── .env.development          # Development configuration
+│   ├── .env.production.example   # Production configuration template
+│   ├── vite.config.ts             # Vite configuration with relative base & dev proxy
 │   └── package.json
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml             # Automatic GitHub Pages CI/CD
+│       └── deploy.yml             # GitHub Actions CI/CD with VITE_API_BASE_URL support
+├── render.yaml                    # Render.com Blueprint specification
+├── Procfile                       # Railway / Heroku process configuration
 ├── start.bat                      # 1-click Windows runner
 └── README.md
 ```

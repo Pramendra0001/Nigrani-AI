@@ -5,11 +5,46 @@ from pydantic import BaseModel
 from typing import List
 
 
+def get_cors_origins() -> List[str]:
+    """Compile allowed CORS origins including GitHub Pages and local development."""
+    origins = [
+        "https://pramendra0001.github.io",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
+    # Allow extra origins via comma-separated environment variable
+    custom = os.getenv("CORS_ORIGINS", "")
+    if custom:
+        for item in custom.split(","):
+            cleaned = item.strip().rstrip("/")
+            if cleaned and cleaned not in origins:
+                origins.append(cleaned)
+    return origins
+
+
+def get_database_url() -> str:
+    """Resolve database URL, normalizing PostgreSQL schemes for async SQLAlchemy if needed."""
+    url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./nigrani.db").strip()
+    # Normalize standard Postgres URI (e.g. from Render or Heroku) to asyncpg driver
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgresql://") and "+asyncpg" not in url:
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return url
+
+
 class Settings(BaseModel):
     """Nigrani AI application settings."""
 
-    # Database: SQLite async for zero-configuration, robust local runtime
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./nigrani.db")
+    # Server binding
+    HOST: str = os.getenv("HOST", "0.0.0.0")
+    PORT: int = int(os.getenv("PORT", "8000"))
+
+    # Database: SQLite async for zero-config demo/MVP; auto-adapts to PostgreSQL if URL provided
+    DATABASE_URL: str = get_database_url()
 
     # AI Provider: 'mock' (offline deterministic SIH demo) or 'gemini'
     AI_PROVIDER: str = os.getenv("AI_PROVIDER", "mock")
@@ -19,23 +54,18 @@ class Settings(BaseModel):
     # Mode
     DEMO_MODE: bool = os.getenv("DEMO_MODE", "true").lower() in ("true", "1", "yes")
 
-    # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://localhost:8000",
-    ]
+    # CORS Allowed Origins
+    CORS_ORIGINS: List[str] = get_cors_origins()
 
     # Deterministic Risk Weights (Must sum to 1.0)
-    COST_RISK_WEIGHT: float = 0.35
-    DUPLICATE_RISK_WEIGHT: float = 0.30
-    DELAY_RISK_WEIGHT: float = 0.25
-    DATA_QUALITY_RISK_WEIGHT: float = 0.10
+    COST_RISK_WEIGHT: float = float(os.getenv("COST_RISK_WEIGHT", "0.35"))
+    DUPLICATE_RISK_WEIGHT: float = float(os.getenv("DUPLICATE_RISK_WEIGHT", "0.30"))
+    DELAY_RISK_WEIGHT: float = float(os.getenv("DELAY_RISK_WEIGHT", "0.25"))
+    DATA_QUALITY_RISK_WEIGHT: float = float(os.getenv("DATA_QUALITY_RISK_WEIGHT", "0.10"))
 
     # Uploads
-    UPLOAD_DIR: str = "./uploads"
-    MAX_FILE_SIZE_MB: int = 50
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
+    MAX_FILE_SIZE_MB: int = int(os.getenv("MAX_FILE_SIZE_MB", "50"))
 
 
 settings = Settings()

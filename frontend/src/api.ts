@@ -1,7 +1,27 @@
 import { DashboardData, Project, ProjectInvestigation, ReviewCaseItem } from './types';
 import demoProjectsRaw from './demo_projects.json';
 
-const API_BASE = '/api';
+/**
+ * Resolves the API base URL cleanly from environment variables.
+ * Handles:
+ * - Empty / not set: returns '/api' (leverages Vite local proxy or relative server path)
+ * - Full URL: 'https://nigrani-ai-api.onrender.com' -> 'https://nigrani-ai-api.onrender.com/api'
+ * - Already ending with /api: 'https://example.com/api/' -> 'https://example.com/api'
+ * Prevents double slashes, undefined paths, and localhost leakage.
+ */
+export const resolveApiBase = (): string => {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
+  if (!envUrl) {
+    return '/api';
+  }
+  const clean = envUrl.replace(/\/+$/, '');
+  if (clean.endsWith('/api')) {
+    return clean;
+  }
+  return `${clean}/api`;
+};
+
+export const API_BASE = resolveApiBase();
 
 // In-memory working copy of projects for offline mode
 const clientProjects: Project[] = JSON.parse(JSON.stringify(demoProjectsRaw)).map((p: any, idx: number) => ({
@@ -9,7 +29,7 @@ const clientProjects: Project[] = JSON.parse(JSON.stringify(demoProjectsRaw)).ma
   id: p.id || `proj-id-${idx + 1}`,
 }));
 
-// Local storage for review notes and case updates
+// Local storage for review notes and case updates in offline fallback
 const getLocalNotes = (caseId: string) => {
   try {
     const saved = localStorage.getItem(`nigrani_notes_${caseId}`);
@@ -29,25 +49,39 @@ const saveLocalNote = (caseId: string, note: any) => {
   }
 };
 
+// Global connectivity state
+let isConnectedToLiveBackend = false;
+export const isLiveBackendConnected = () => isConnectedToLiveBackend;
+
 // Generic network request with transparent client fallback
 async function requestWithFallback<T>(url: string, options: RequestInit | undefined, fallbackFn: () => T | Promise<T>): Promise<T> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2500); // 2.5s quick timeout for unreachable backend
-    const res = await fetch(`${API_BASE}${url}`, {
+    // Allow longer timeout for cloud cold starts (e.g. Render free tier spin-up) if a remote URL is configured
+    const isRemote = API_BASE.startsWith('http://') || API_BASE.startsWith('https://');
+    const timeoutMs = isRemote ? 15000 : 3000;
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    const isFormData = options?.body instanceof FormData;
+    const headers: Record<string, string> = {
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...((options?.headers as Record<string, string>) || {}),
+    };
+
+    const fullUrl = `${API_BASE}${url}`;
+    const res = await fetch(fullUrl, {
       ...options,
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
+      headers,
     });
     clearTimeout(timeout);
     if (res.ok) {
+      isConnectedToLiveBackend = true;
       return await res.json();
     }
   } catch (err) {
-    // Backend offline / deployed statically / network error -> Use fallback
+    // Remote backend offline / cold start in progress / static host without backend -> Use client intelligence fallback
+    isConnectedToLiveBackend = false;
   }
   return fallbackFn();
 }
@@ -409,38 +443,48 @@ export const api = {
 
   // 5. Upload & Ingestion
   uploadFile: async (file: File) => {
-    return requestWithFallback('/data/upload', { method: 'POST', body: new FormData() }, () => ({
-      import_token: `token_${Date.now()}`,
-      filename: file.name,
-      headers: ['project_id', 'project_name', 'description', 'state', 'district', 'category', 'budget', 'completion_percentage', 'status'],
-      standard_fields: ['project_id', 'project_name', 'description', 'state', 'district', 'category', 'budget', 'completion_percentage', 'status'],
-      suggested_mapping: {
-        project_id: 'project_id',
-        project_name: 'project_name',
-        description: 'description',
-        state: 'state',
-        district: 'district',
-        category: 'category',
-        budget: 'budget',
-        completion_percentage: 'completion_percentage',
-        status: 'status',
+    const formData = new FormData();
+    formData.append('file', file);
+    return requestWithFallback(
+      '/data/upload',
+      {
+        method: 'POST',
+        headers: {}, // Let browser set multipart boundary
+        body: formData,
       },
-      preview: {
-        total_records: 120,
-        valid_records: 120,
-        sample_preview: [
-          {
-            project_id: 'UP-IMP-001',
-            project_name: 'Widening of rural road connecting block center',
-            state: 'Uttar Pradesh',
-            district: 'Varanasi',
-            budget: '85.4',
-            completion_percentage: '45.0',
-          },
-        ],
-        issues: [],
-      },
-    }));
+      () => ({
+        import_token: `token_${Date.now()}`,
+        filename: file.name,
+        headers: ['project_id', 'project_name', 'description', 'state', 'district', 'category', 'budget', 'completion_percentage', 'status'],
+        standard_fields: ['project_id', 'project_name', 'description', 'state', 'district', 'category', 'budget', 'completion_percentage', 'status'],
+        suggested_mapping: {
+          project_id: 'project_id',
+          project_name: 'project_name',
+          description: 'description',
+          state: 'state',
+          district: 'district',
+          category: 'category',
+          budget: 'budget',
+          completion_percentage: 'completion_percentage',
+          status: 'status',
+        },
+        preview: {
+          total_records: 120,
+          valid_records: 120,
+          sample_preview: [
+            {
+              project_id: 'UP-IMP-001',
+              project_name: 'Widening of rural road connecting block center',
+              state: 'Uttar Pradesh',
+              district: 'Varanasi',
+              budget: '85.4',
+              completion_percentage: '45.0',
+            },
+          ],
+          issues: [],
+        },
+      })
+    );
   },
 
   commitImport: (importToken: string, columnMapping: Record<string, string>) =>
