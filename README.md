@@ -32,11 +32,16 @@ Public Project Dataset
 
 ---
 
-## 🚀 Live Demo & Production Architecture
+## 🌐 Public Production Access (Globally Accessible)
 
-### 🌐 1. Public Production Frontend (GitHub Pages)
-The web application is deployed and publicly accessible globally from any phone, laptop, or browser:
-👉 **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)**
+The complete Nigrani AI platform is deployed and fully accessible from any phone, laptop, or desktop browser worldwide.
+
+| Service | Public URL | Description |
+| :--- | :--- | :--- |
+| **Live Frontend Web Application** | **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)** | Hosted React dashboard, 500-project registry & forensic workstation |
+| **Public Backend REST API** | **[https://nigrani-ai-u7gz.onrender.com/](https://nigrani-ai-u7gz.onrender.com/)** | Cloud FastAPI backend service on Render |
+| **Interactive API Documentation** | **[https://nigrani-ai-u7gz.onrender.com/docs](https://nigrani-ai-u7gz.onrender.com/docs)** | Live Swagger UI to test and execute API calls directly |
+| **Backend Health Check** | **[https://nigrani-ai-u7gz.onrender.com/health](https://nigrani-ai-u7gz.onrender.com/health)** | Live monitoring & uptime verification endpoint |
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -55,7 +60,7 @@ The web application is deployed and publicly accessible globally from any phone,
                             ▼
 ┌────────────────────────────────────────────────────────┐
 │          Public Cloud FastAPI Backend API              │
-│       https://<YOUR_BACKEND_URL>.onrender.com          │
+│       https://nigrani-ai-u7gz.onrender.com             │
 │       Swagger Docs: .../docs | Health: .../health      │
 └───────────────────────────┬────────────────────────────┘
                             │
@@ -66,59 +71,30 @@ The web application is deployed and publicly accessible globally from any phone,
 └────────────────────────────────────────────────────────┘
 ```
 
-> **Client Fallback Guarantee:** When the remote backend is waking up from a cloud cold-start or during offline presentations, the frontend seamlessly uses its embedded client intelligence engine with all 500 benchmark projects. The application will never crash with network errors.
+> **Client Fallback Guarantee:** If the cloud backend is cold-starting from idle, the frontend automatically utilizes its embedded client intelligence engine with all 500 benchmark projects. The web app will never crash with connection errors.
 
 ---
 
-### ☁️ 2. Cloud Backend Deployment (Render / Railway)
+## 💻 Local Development (Offline / Development Only)
 
-The FastAPI backend is fully cloud-ready with `render.yaml` and `Procfile`.
+> **Note:** The URLs in this section are strictly for local development on your own machine. They will NOT work from other computers or mobile phones.
 
-#### Recommended: Deploy to Render (Free Tier)
-1. Log in to [Render](https://render.com) with GitHub.
-2. Click **New +** → **Blueprint** (or **Web Service**).
-3. Connect repository: `Pramendra0001/Nigrani-AI`.
-4. Render will read `render.yaml` automatically, or configure manually:
-   - **Root Directory:** *(leave blank)*
-   - **Environment:** `Python`
-   - **Build Command:** `pip install -r backend/requirements.txt`
-   - **Start Command:** `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT`
-   - **Environment Variables:**
-     - `CORS_ORIGINS`: `https://pramendra0001.github.io`
-     - `DEMO_MODE`: `true`
-     - `AI_PROVIDER`: `mock`
-5. Click **Deploy**. Your live backend URL will be:
-   `https://nigrani-ai-api.onrender.com` (or your assigned subdomain).
+To run and test the complete stack locally on your computer:
 
-#### Connecting Frontend to the Live Cloud Backend:
-Once your backend is deployed:
-1. In your GitHub repository: Go to **Settings** → **Secrets and variables** → **Actions** → **Variables**.
-2. Click **New repository variable**:
-   - **Name:** `VITE_API_BASE_URL`
-   - **Value:** `https://your-backend-app.onrender.com`
-3. Go to **Actions** tab → Select **Deploy Nigrani AI Web App to GitHub Pages** → Click **Run workflow**.
-4. GitHub Pages will rebuild and connect to your live cloud backend!
-
----
-
-### 💻 3. Local Full-Stack Development (FastAPI + React)
-
-To run the full stack locally on your computer:
-
-| Component | Local URL | Description |
+| Local Component | Local URL | Notes |
 | :--- | :--- | :--- |
-| **Interactive Frontend** | [http://localhost:5173](http://localhost:5173) | Modern executive dashboard, investigation workstation, and review triage |
-| **Backend REST API** | [http://127.0.0.1:8000](http://127.0.0.1:8000) | FastAPI high-performance asynchronous API |
-| **Interactive API Docs** | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) | Swagger UI for exploring all 16 endpoints |
+| **Local Frontend** | `http://localhost:5173` | Requires `npm run dev` running locally |
+| **Local Backend API** | `http://127.0.0.1:8000` | Requires `uvicorn` running locally |
+| **Local API Docs** | `http://127.0.0.1:8000/docs` | Requires `uvicorn` running locally |
 
-#### Quick Start Locally:
+### Quick Start Locally:
 - **Windows (1-Click):** Double-click `start.bat` in the repository root.
 - **Manual Start:**
   ```bash
-  # Terminal 1 - Backend:
+  # Terminal 1 - Start FastAPI Backend:
   .\venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 
-  # Terminal 2 - Frontend:
+  # Terminal 2 - Start React/Vite Frontend:
   cd frontend
   npm run dev
   ```
@@ -175,27 +151,31 @@ Nigrani-AI/
 │   │   ├── database.py            # Async engine with SQLite / Postgres support
 │   │   └── main.py                # FastAPI entrypoint, healthcheck & OpenAPI
 │   ├── .env.example               # Backend environment variables template
+│   ├── Dockerfile                 # Backend container definition
+│   ├── runtime.txt                # Python runtime specification
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── components/            # UI components (Navbar, Sidebar, Charts, Badges)
 │   │   ├── pages/                 # Dashboard, Projects, Investigation, Review, Upload, Analytics
-│   │   ├── api.ts                 # Typed client with environment base URL resolution & fallback
+│   │   ├── api.ts                 # Typed client with production Render URL & fallback
 │   │   ├── demo_projects.json     # 500 benchmark projects dataset
 │   │   ├── types.ts               # TypeScript data models
 │   │   ├── App.tsx                # Master app shell
 │   │   └── main.tsx
-│   ├── .env.example               # Frontend environment template
-│   ├── .env.development          # Development configuration
-│   ├── .env.production.example   # Production configuration template
+│   ├── .env.production            # Production backend configuration (Render)
+│   ├── .env.development          # Development configuration (Local proxy)
+│   ├── .env.example               # Environment variables template
 │   ├── vite.config.ts             # Vite configuration with relative base & dev proxy
 │   └── package.json
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml             # GitHub Actions CI/CD with VITE_API_BASE_URL support
+│       └── deploy.yml             # GitHub Actions CI/CD with production URL injection
 ├── render.yaml                    # Render.com Blueprint specification
 ├── Procfile                       # Railway / Heroku process configuration
-├── start.bat                      # 1-click Windows runner
+├── Dockerfile                     # Root container definition
+├── .python-version                # Python 3.11 specification
+├── start.bat                      # 1-click Windows runner for local development
 └── README.md
 ```

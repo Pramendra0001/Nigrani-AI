@@ -11,14 +11,20 @@ import demoProjectsRaw from './demo_projects.json';
  */
 export const resolveApiBase = (): string => {
   const envUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
-  if (!envUrl) {
-    return '/api';
+  if (envUrl) {
+    const clean = envUrl.replace(/\/+$/, '');
+    if (clean.endsWith('/api')) {
+      return clean;
+    }
+    return `${clean}/api`;
   }
-  const clean = envUrl.replace(/\/+$/, '');
-  if (clean.endsWith('/api')) {
-    return clean;
+  // If no env variable is explicitly provided:
+  // In production builds (GitHub Pages), use the live public Render backend
+  if (import.meta.env.PROD) {
+    return 'https://nigrani-ai-u7gz.onrender.com/api';
   }
-  return `${clean}/api`;
+  // In local development, default to '/api' (Vite proxy)
+  return '/api';
 };
 
 export const API_BASE = resolveApiBase();
