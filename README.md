@@ -32,13 +32,36 @@ Public Project Dataset
 
 ---
 
-## 🚀 Live System URLs
+## 🚀 Live Demo & Access Links
 
-| Component | URL | Description |
+### 🌐 1. Live Hosted Web Application (Instant Access Anywhere)
+You can test and demonstrate the full Nigrani AI platform directly in your browser with zero installation:
+👉 **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)**
+
+> **Note:** The hosted web application runs in full standalone client intelligence mode, equipped with all 500 realistic benchmark infrastructure projects, interactive multi-attribute search, the 8-tab forensic investigation profile, and reviewer triage queues.
+
+---
+
+### 💻 2. Local Full-Stack Development (FastAPI + React)
+To run the full stack locally with the Python FastAPI backend and SQLite database:
+
+| Component | Local URL | Description |
 | :--- | :--- | :--- |
-| **Interactive Frontend** | [http://127.0.0.1:5173](http://127.0.0.1:5173) | Modern executive dashboard, investigation workstation, and review triage |
+| **Interactive Frontend** | [http://localhost:5173](http://localhost:5173) | Modern executive dashboard, investigation workstation, and review triage |
 | **Backend REST API** | [http://127.0.0.1:8000](http://127.0.0.1:8000) | FastAPI high-performance asynchronous API |
 | **Interactive API Docs** | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) | Swagger UI for exploring all 16 endpoints |
+
+#### Quick Start Locally:
+- **Windows (1-Click):** Double-click `start.bat` in the repository root.
+- **Manual Start:**
+  ```bash
+  # Terminal 1 - Backend:
+  .\venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+
+  # Terminal 2 - Frontend:
+  cd frontend
+  npm run dev
+  ```
 
 ---
 
@@ -58,26 +81,6 @@ The platform is equipped with a `MockAIProvider` that generates forensic investi
 
 ### 3. Flexible Dataset Ingestion & Column Mapping
 Allows analysts to upload custom CSV datasets with varying column nomenclature (e.g. `work_name` vs `project_title`, `sanctioned_amount` vs `budget`). The fuzzy mapper suggests standard assignments, presents a preview and validation report, and ingests with one click.
-
----
-
-## 🛠️ Quickstart (How to Run Locally)
-
-### Prerequisites
-- Python 3.11+ (Python 3.13 recommended)
-- Node.js v18+ & npm
-
-### Starting the Backend
-```bash
-# In the root directory:
-.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-```
-
-### Starting the Frontend
-```bash
-cd frontend
-npm run dev
-```
 
 ---
 
@@ -129,10 +132,15 @@ Nigrani-AI/
 │   │   │   ├── ReviewQueuePage.tsx # Human reviewer triage queue
 │   │   │   ├── UploadPage.tsx     # CSV dropzone & automated column mapping
 │   │   │   └── AnalyticsPage.tsx  # Risk formula weight calibrator
-│   │   ├── api.ts                 # Typed fetch client
+│   │   ├── api.ts                 # Typed client with transparent offline fallback
+│   │   ├── demo_projects.json     # 500 realistic benchmark infrastructure projects
 │   │   ├── types.ts               # TypeScript data models
 │   │   ├── App.tsx                # Master app shell & navigation router
 │   │   └── main.tsx
 │   └── package.json
+├── .github/
+│   └── workflows/
+│       └── deploy.yml             # Automatic GitHub Pages CI/CD
+├── start.bat                      # 1-click Windows runner
 └── README.md
 ```
