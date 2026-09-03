@@ -84,7 +84,7 @@ npm run dev
 ## 📂 Project Structure
 
 ```
-RR/
+Nigrani-AI/
 ├── backend/
 │   ├── app/
 │   │   ├── api/
