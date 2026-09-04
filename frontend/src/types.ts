@@ -129,7 +129,13 @@ export interface ProjectInvestigation {
       recommendations?: string[];
     };
   };
-  review_case?: {
+    financial_lifecycle?: FinancialLifecycle;
+    consistency_analysis?: ConsistencyAnalysis;
+    payment_analysis?: PaymentAnalysis;
+    fund_utilization_analysis?: FundUtilizationAnalysis;
+    asset_verification?: AssetVerification;
+    provenance?: ProvenanceMetadata;
+    review_case?: {
     id: string;
     status: string;
     priority: string;
@@ -142,6 +148,145 @@ export interface ProjectInvestigation {
       created_at: string;
     }>;
   };
+}
+
+export interface FinancialLifecycle {
+  allocation_amount?: number;
+  recommended_amount?: number;
+  sanctioned_amount?: number;
+  estimated_cost?: number;
+  contract_value?: number;
+  fund_released?: number;
+  cumulative_expenditure?: number;
+  remaining_balance?: number;
+  payment_total?: number;
+  payment_count?: number;
+  last_payment_date?: string | null;
+  financial_completion_percentage?: number;
+  closure_status?: string;
+  expenditure_exceeds_sanction?: boolean;
+  sanction_vs_estimate_variance?: number;
+  released_vs_sanction_variance?: number;
+  expenditure_vs_released_variance?: number;
+  unspent_balance?: number;
+  payment_vs_expenditure_variance?: number;
+  variances?: {
+    sanction_vs_estimate: number;
+    estimate_vs_actual_cost: number;
+    released_vs_expenditure: number;
+    expenditure_vs_physical_progress: number;
+    payment_vs_work_progress: number;
+  };
+  lifecycle_flow?: Array<{
+    step: number;
+    name: string;
+    amount?: number | null;
+    status: string;
+  }>;
+}
+
+export interface ConsistencyAnalysis {
+  physical_progress_percentage?: number;
+  financial_utilization_percentage?: number;
+  variance_percentage?: number;
+  absolute_variance?: number;
+  divergence_gap?: number;
+  consistency_score: number;
+  pattern_classification: string;
+  patterns?: string[];
+  severity?: string;
+  narrative?: string;
+  interpretation?: string;
+  recommendations?: string[];
+  status?: string;
+}
+
+export interface PaymentAnomalyItem {
+  rule_id: string;
+  rule_name: string;
+  severity: string;
+  risk_score: number;
+  observed: string;
+  expected: string;
+  deviation: string;
+  evidence: Record<string, any>;
+  recommended_action: string;
+}
+
+export interface PaymentAnalysis {
+  has_micro_payment_data: boolean;
+  status: string;
+  source_granularity: string;
+  total_disbursed_lakhs: number;
+  budget_lakhs: number;
+  risk_score: number;
+  severity: string;
+  anomaly_count: number;
+  anomalies: PaymentAnomalyItem[];
+  synthetic_demo_available: boolean;
+  disclosure: string;
+}
+
+export interface FundUtilizationAnalysis {
+  allocation_amount?: number;
+  sanctioned_amount?: number;
+  fund_released?: number;
+  expenditure?: number;
+  unspent_balance?: number;
+  utilization_percentage?: number;
+  project_utilization_rate?: number;
+  district_baseline_utilization?: number;
+  state_baseline_utilization?: number;
+  category_baseline_utilization?: number;
+  national_baseline_utilization?: number;
+  baselines?: {
+    national: number;
+    state: number;
+    district: number;
+  };
+  deviations?: {
+    national_deviation: number;
+    state_deviation: number;
+    district_deviation: number;
+  };
+  context_explanation?: {
+    normal_condition: string;
+    observed_condition: string;
+    deviation_assessment: string;
+    review_rationale: string;
+  };
+  structured_explanation?: {
+    normal_pattern: string;
+    observed_pattern: string;
+    deviation_assessment: string;
+    underlying_rationale: string;
+  };
+}
+
+export interface AssetVerification {
+  asset_expected: string;
+  asset_type: string;
+  asset_status: string;
+  physical_completion: number;
+  verification_status: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  verification_date?: string | null;
+  verification_source: string;
+  evidence_available: boolean;
+  future_integrations: string[];
+}
+
+export interface ProvenanceMetadata {
+  data_source: string;
+  source_reference: string;
+  source_url: string;
+  ingestion_timestamp: string;
+  last_updated: string;
+  record_status: string;
+  data_completeness_score: number;
+  record_tier: string;
+  tier_classification: string;
 }
 
 export interface ReviewCaseItem {

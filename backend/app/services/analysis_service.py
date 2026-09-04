@@ -23,6 +23,8 @@ from app.engines import (
     DataQualityEngine,
     DuplicateEngine,
     RiskEngine,
+    ConsistencyEngine,
+    PaymentEngine,
 )
 from app.ai.mock_provider import MockAIProvider
 from app.config import settings
@@ -39,6 +41,8 @@ class AnalysisService:
         self.dq_engine = DataQualityEngine()
         self.duplicate_engine = DuplicateEngine()
         self.risk_engine = RiskEngine()
+        self.consistency_engine = ConsistencyEngine()
+        self.payment_engine = PaymentEngine()
         self.ai_provider = MockAIProvider()
 
     async def analyze_project(self, db: AsyncSession, project_id: str) -> Dict[str, Any]:

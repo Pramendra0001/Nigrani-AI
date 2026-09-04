@@ -10,6 +10,8 @@ import { api } from '../api';
 import { NigraniLogo } from './NigraniLogo';
 import { ThemeToggle } from './ThemeToggle';
 import { IntelligenceSweepModal } from './IntelligenceSweepModal';
+import { EndToEndCaseDemoModal } from './EndToEndCaseDemoModal';
+import { Sparkles } from 'lucide-react';
 
 interface Props {
   onNavigateTab: (tab: string) => void;
@@ -27,6 +29,7 @@ export const Navbar: React.FC<Props> = ({
   const [analyzing, setAnalyzing] = useState(false);
   const [sweepNotice, setSweepNotice] = useState(false);
   const [isSweepModalOpen, setIsSweepModalOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const handleBatch = async () => {
     try {
@@ -91,11 +94,22 @@ export const Navbar: React.FC<Props> = ({
           </div>
         )}
 
+        {/* 13-Step End-to-End Case Demonstration Trigger */}
+        <button
+          onClick={() => setIsDemoModalOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-400 via-cyan-400 to-emerald-400 hover:opacity-90 px-3 py-1.5 text-xs font-black text-slate-950 shadow-xs transition active:scale-95 cursor-pointer"
+          title="Launch 13-Step End-to-End Case Demonstration"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Case Demonstration</span>
+          <span className="sm:hidden">Demo</span>
+        </button>
+
         {/* Batch Anomaly Sweep Trigger */}
         <button
           onClick={handleBatch}
           disabled={analyzing}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition active:scale-95 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
           title="Run statistical anomaly screening across all active project portfolios"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${analyzing ? 'animate-spin' : ''}`} />
@@ -111,6 +125,15 @@ export const Navbar: React.FC<Props> = ({
         isOpen={isSweepModalOpen}
         onClose={() => setIsSweepModalOpen(false)}
         onNavigateTab={onNavigateTab}
+      />
+
+      <EndToEndCaseDemoModal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+        onSelectProject={(id) => {
+          setIsDemoModalOpen(false);
+          onNavigateTab('investigation');
+        }}
       />
     </header>
   );

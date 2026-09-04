@@ -112,3 +112,61 @@ def test_duplicate_engine():
     assert len(candidates) == 1
     assert candidates[0]["combined_score"] > 0.85
     assert candidates[0]["classification"] == "POSSIBLE_DUPLICATE"
+
+
+def test_consistency_engine():
+    """Verify physical vs financial consistency scoring and divergence pattern detection."""
+    from app.engines import ConsistencyEngine
+
+    engine = ConsistencyEngine()
+
+    # Balanced execution: 60% progress, 60% spent
+    balanced_proj = {
+        "budget": 100.0,
+        "actual_cost": 60.0,
+        "completion_percentage": 60.0,
+    }
+    res_bal = engine.analyze(balanced_proj)
+    assert res_bal["consistency_score"] >= 80.0
+    assert res_bal["pattern_classification"] == "BALANCED_PHYSICAL_FINANCIAL_EXECUTION"
+
+    # Extreme asymmetry: 100% budget spent, 0% physical progress
+    stalled_proj = {
+        "budget": 100.0,
+        "actual_cost": 100.0,
+        "completion_percentage": 0.0,
+    }
+    res_stalled = engine.analyze(stalled_proj)
+    assert res_stalled["consistency_score"] <= 30.0
+    assert res_stalled["pattern_classification"] == "HIGH_EXPENDITURE_LOW_PHYSICAL_PROGRESS"
+    assert res_stalled["severity"] == "CRITICAL"
+
+
+def test_payment_engine():
+    """Verify payment anomaly detection and benchmark disclosures."""
+    from app.engines import PaymentEngine
+
+    engine = PaymentEngine()
+
+    # Standard portfolio-level record (no micro-level vouchers)
+    port_proj = {
+        "budget": 250.0,
+        "actual_cost": 200.0,
+        "completion_percentage": 75.0,
+    }
+    res_port = engine.analyze(port_proj)
+    assert res_port["has_micro_payment_data"] is False
+    assert res_port["status"] == "AWAITING_SOURCE_DATA"
+    assert "MoSPI eSAKSHI" in res_port["disclosure"]
+    assert res_port["synthetic_demo_available"] is True
+
+    # Overbudget disbursement without recorded sanction revision
+    over_proj = {
+        "budget": 100.0,
+        "actual_cost": 125.0,
+        "completion_percentage": 50.0,
+    }
+    res_over = engine.analyze(over_proj)
+    assert res_over["anomaly_count"] >= 1
+    assert any("exceed" in a["rule_name"].lower() for a in res_over["anomalies"])
+

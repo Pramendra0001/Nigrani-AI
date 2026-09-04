@@ -196,7 +196,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
                   <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-sky-600 dark:text-cyan-400' : 'text-slate-400'}`} />
                   {isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                 </div>
-                <div>
+                <div className="w-full">
                   <p className={`text-xs font-bold ${isCurrent ? 'text-sky-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                     {r.label}
                   </p>
@@ -205,6 +205,42 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
               </button>
             );
           })}
+        </div>
+
+        {/* Dynamic Role Intelligence Briefing */}
+        <div className="rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/50 dark:bg-sky-950/20 p-4 text-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sky-950 dark:text-sky-200">
+                {activeRole === 'MINISTRY' && 'Ministry National Oversight (MoSPI Headquarters)'}
+                {activeRole === 'STATE_NODAL' && 'State Nodal Department (Planning & Finance Department)'}
+                {activeRole === 'DISTRICT' && 'District Authority Perspective (Collector & District Magistrate)'}
+                {activeRole === 'MP' && 'Hon\'ble Member of Parliament (MP) Self-Audit Dossier'}
+                {activeRole === 'AUDITOR' && 'Principal Vigilance Investigator & Risk Scoring Engine'}
+                {activeRole === 'ADMIN' && 'System Engineering, Pipeline Ingestion & Model Telemetry'}
+              </span>
+              <span className="px-2 py-0.2 rounded text-[10px] font-mono font-bold bg-sky-100 dark:bg-sky-900/80 text-sky-800 dark:text-sky-300">
+                Decision Support
+              </span>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px] max-w-3xl">
+              {activeRole === 'MINISTRY' && 'Comprehensive macro-oversight across 774 parliamentary portfolios (543 Lok Sabha + 231 Rajya Sabha). Tracks national fund releases, unspent balances, state-wise utilization velocity, and equity distribution.'}
+              {activeRole === 'STATE_NODAL' && 'Jurisdiction-wide tracking across all administrative districts within state borders. Monitored for timely submission of GFR Rule 238 Utilization Certificates and interest accrual compliance.'}
+              {activeRole === 'DISTRICT' && 'Work-level execution control for technical sanction issuance, implementing agency milestones, physical Measurement Book (MB) audit compliance, and contractor payments.'}
+              {activeRole === 'MP' && 'Constituency capital tracking for submitted recommendations, administrative sanction conversion rate, durable public asset completion status, and parliamentary transparency.'}
+              {activeRole === 'AUDITOR' && 'Forensic triage focusing on 35% cost anomaly deviation, 30% duplicate overlap risk, 25% schedule delay tracking, and 10% data quality deficit flags.'}
+              {activeRole === 'ADMIN' && 'Real-time telemetry for eSAKSHI data ingestion, 16-point mathematical validation checks, database indexing, and deterministic multi-factor model health.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => onNavigateTab(activeRole === 'AUDITOR' ? 'review' : activeRole === 'DISTRICT' ? 'projects' : 'alerts')}
+              className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Explore {activeRole === 'MINISTRY' ? 'National Scope' : activeRole === 'STATE_NODAL' ? 'State Alerts' : activeRole === 'DISTRICT' ? 'District Works' : activeRole === 'MP' ? 'Constituency Records' : 'Review Queue'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
