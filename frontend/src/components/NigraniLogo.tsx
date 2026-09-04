@@ -1,105 +1,223 @@
 import React from 'react';
 
-interface LogoProps {
+export interface LogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'horizontal' | 'stacked' | 'icon' | 'app-icon';
   showWordmark?: boolean;
   showSubtitle?: boolean;
+  subtitleText?: string;
 }
 
+/**
+ * Official Nigrani AI Brand Emblem & Wordmark
+ * Faithful vector recreation of the official brand identity guide.
+ * Features:
+ * - Dimensional folded ribbon "N" with continuous Blue -> Cyan -> Green gradient flow
+ * - Precision observation / intelligence dot node at upper right
+ * - Enterprise typography with dual-theme contrast
+ */
 export const NigraniLogo: React.FC<LogoProps> = ({
   className = '',
   size = 'md',
+  variant = 'horizontal',
   showWordmark = true,
   showSubtitle = true,
+  subtitleText,
 }) => {
-  const dimensions = {
-    sm: { box: 'w-7 h-7', iconSize: 28, text: 'text-base', subText: 'text-[9px]' },
-    md: { box: 'w-9 h-9', iconSize: 36, text: 'text-lg', subText: 'text-[10px]' },
-    lg: { box: 'w-11 h-11', iconSize: 44, text: 'text-xl', subText: 'text-xs' },
-    xl: { box: 'w-14 h-14', iconSize: 56, text: 'text-2xl', subText: 'text-xs' },
+  const isStacked = variant === 'stacked';
+  const isAppIcon = variant === 'app-icon';
+  const isIconOnly = variant === 'icon';
+
+  const config = {
+    sm: {
+      box: 'w-7 h-7',
+      svgPx: 26,
+      wordmark: 'text-base',
+      aiText: 'text-base',
+      subText: 'text-[8px] tracking-wider',
+      gap: 'gap-2',
+    },
+    md: {
+      box: 'w-9 h-9',
+      svgPx: 34,
+      wordmark: 'text-lg',
+      aiText: 'text-lg',
+      subText: 'text-[9.5px] tracking-wider',
+      gap: 'gap-2.5',
+    },
+    lg: {
+      box: 'w-12 h-12',
+      svgPx: 46,
+      wordmark: 'text-2xl',
+      aiText: 'text-2xl',
+      subText: 'text-[11px] tracking-widest',
+      gap: 'gap-3',
+    },
+    xl: {
+      box: 'w-16 h-16',
+      svgPx: 60,
+      wordmark: 'text-3xl',
+      aiText: 'text-3xl',
+      subText: 'text-xs tracking-widest',
+      gap: 'gap-4',
+    },
   }[size];
 
+  // SVG Emblem Mark (100x100 viewBox coordinate space)
+  const emblemSvg = (
+    <svg
+      viewBox="0 0 100 100"
+      width={config.svgPx}
+      height={config.svgPx}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="overflow-visible select-none flex-shrink-0"
+      aria-label="Nigrani AI Official Mark"
+    >
+      <defs>
+        {/* Continuous Flow Gradient: Deep Blue -> Trust Blue -> Cyan -> Green */}
+        <linearGradient id="n-flow-grad-comp" x1="14" y1="84" x2="82" y2="16" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#1E40AF" />
+          <stop offset="25%" stopColor="#2563EB" />
+          <stop offset="65%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+
+        {/* Foreground Diagonal Ribbon */}
+        <linearGradient id="n-front-ribbon-comp" x1="32" y1="18" x2="82" y2="82" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#06B6D4" />
+          <stop offset="45%" stopColor="#2563EB" />
+          <stop offset="100%" stopColor="#1D4ED8" />
+        </linearGradient>
+
+        {/* Background Left Pillar */}
+        <linearGradient id="n-back-leg-comp" x1="14" y1="84" x2="38" y2="24" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#1E3A8A" />
+          <stop offset="60%" stopColor="#2563EB" />
+          <stop offset="100%" stopColor="#06B6D4" />
+        </linearGradient>
+
+        {/* Observation / Intelligence Dot Node */}
+        <linearGradient id="n-dot-grad-comp" x1="66" y1="12" x2="86" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#22D3EE" />
+          <stop offset="60%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+
+        {/* Upper Shimmer Arch */}
+        <linearGradient id="n-top-shimmer-comp" x1="28" y1="14" x2="56" y2="28" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
+        </linearGradient>
+
+        {/* Glow for observation node */}
+        <filter id="n-node-glow-comp" x="60" y="6" width="32" height="32" filterUnits="userSpaceOnUse">
+          <feGaussianBlur stdDeviation="1.8" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* Layer 1: Left Vertical Stem & Inner Sweep */}
+      <path
+        d="M 17 81 C 17 84 21 86 25 86 C 29 86 33 84 33 81 L 33 38 C 33 30 38 24 45 22 C 37 20 28 24 22 32 C 18 38 17 48 17 58 Z"
+        fill="url(#n-back-leg-comp)"
+      />
+
+      {/* Layer 2: Main Arch & Descending Ribbon */}
+      <path
+        d="M 17 58 C 17 38 28 17 46 15 C 57 14 67 19 72 28 C 74 32 72 38 67 46 L 47 77 C 44 82 39 85 33 85 L 25 85 C 21 85 17 83 17 81 Z"
+        fill="url(#n-flow-grad-comp)"
+      />
+
+      {/* Layer 3: Foreground Front Diagonal Fold */}
+      <path
+        d="M 44 16 C 53 14 64 18 70 28 C 73 33 71 39 66 47 L 46 78 C 43 83 37 86 31 86 L 25 86 C 22 86 20 85 19 83 C 25 83 33 79 38 71 L 58 41 C 61 36 62 31 59 27 C 55 21 47 18 38 20 C 40 18 42 17 44 16 Z"
+        fill="url(#n-front-ribbon-comp)"
+        opacity="0.95"
+      />
+
+      {/* Layer 4: Right Downward Foot Terminal */}
+      <path
+        d="M 58 41 L 76 72 C 79 77 78 83 74 85 C 70 86 65 85 62 80 L 45 52 Z"
+        fill="url(#n-front-ribbon-comp)"
+      />
+
+      {/* Layer 5: Top Curve Shimmer Highlight */}
+      <path
+        d="M 28 26 C 33 19 41 15 50 16 C 59 17 66 22 69 29 C 64 22 55 18 46 19 C 38 20 32 23 28 26 Z"
+        fill="url(#n-top-shimmer-comp)"
+      />
+
+      {/* Layer 6: Observation / Intelligence Sensor Dot */}
+      <circle
+        cx="76"
+        cy="22"
+        r="9.5"
+        fill="url(#n-dot-grad-comp)"
+        filter="url(#n-node-glow-comp)"
+      />
+    </svg>
+  );
+
+  // If icon-only
+  if (isIconOnly) {
+    return (
+      <div className={`inline-flex items-center justify-center ${className}`}>
+        {emblemSvg}
+      </div>
+    );
+  }
+
+  // If app icon (enclosed squircle)
+  if (isAppIcon) {
+    return (
+      <div
+        className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 border border-cyan-500/20 shadow-lg shadow-sky-950/30 p-2.5 ${className}`}
+      >
+        {emblemSvg}
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      {/* Official Geometric "N" Emblem with Observation Dot */}
-      <div className={`relative flex-shrink-0 flex items-center justify-center rounded-xl bg-slate-950 dark:bg-slate-900 border border-slate-800/80 dark:border-cyan-500/20 shadow-md shadow-sky-950/20 ${dimensions.box}`}>
-        <svg
-          width={dimensions.iconSize * 0.72}
-          height={dimensions.iconSize * 0.72}
-          viewBox="0 0 32 32"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="overflow-visible"
-        >
-          <defs>
-            {/* Primary Enterprise Gradient: Deep Blue -> Cyan -> Subtle Green */}
-            <linearGradient id="nigrani-grad" x1="4" y1="28" x2="28" y2="4" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#0284c7" />
-              <stop offset="55%" stopColor="#06b6d4" />
-              <stop offset="100%" stopColor="#10b981" />
-            </linearGradient>
-
-            {/* Glowing dot gradient */}
-            <linearGradient id="dot-grad" x1="22" y1="4" x2="27" y2="9" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#10b981" />
-            </linearGradient>
-
-            {/* Subtle glow filter for the vigilance focal dot */}
-            <filter id="dot-glow" x="18" y="0" width="14" height="14" filterUnits="userSpaceOnUse">
-              <feGaussianBlur stdDeviation="1" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Left Vertical Pillar */}
-          <path
-            d="M6 7C6 5.89543 6.89543 5 8 5C9.10457 5 10 5.89543 10 7V25C10 26.1046 9.10457 27 8 27C6.89543 27 6 26.1046 6 25V7Z"
-            fill="url(#nigrani-grad)"
-          />
-
-          {/* Dynamic Diagonal Bridge */}
-          <path
-            d="M8.2 6.5C8.9 5.8 10 6.2 10.4 7L22 23.5C22.6 24.3 22.3 25.4 21.5 25.9C20.7 26.4 19.6 26.1 19.1 25.2L7.6 8.7C7.2 8.1 7.4 7.2 8.2 6.5Z"
-            fill="url(#nigrani-grad)"
-            opacity="0.95"
-          />
-
-          {/* Right Vertical Pillar */}
-          <path
-            d="M20 13C20 11.8954 20.8954 11 22 11C23.1046 11 24 11.8954 24 13V25C24 26.1046 23.1046 27 22 27C20.8954 27 20 26.1046 20 25V13Z"
-            fill="url(#nigrani-grad)"
-          />
-
-          {/* Vigilance Sensor Dot (Observation, Intelligence, Monitoring Node) */}
-          <circle
-            cx="22"
-            cy="6"
-            r="3"
-            fill="url(#dot-grad)"
-            filter="url(#dot-glow)"
-          />
-        </svg>
+    <div
+      className={`inline-flex ${isStacked ? 'flex-col items-center text-center' : 'flex-row items-center'} ${config.gap} select-none ${className}`}
+    >
+      {/* Emblem Container */}
+      <div
+        className={`relative flex-shrink-0 flex items-center justify-center rounded-xl bg-slate-900/80 dark:bg-slate-900 border border-slate-700/60 dark:border-cyan-500/20 shadow-sm shadow-sky-950/20 ${config.box}`}
+      >
+        {emblemSvg}
       </div>
 
-      {/* Wordmark */}
+      {/* Official Wordmark */}
       {showWordmark && (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 leading-none">
-            <span className={`font-black tracking-tight text-slate-900 dark:text-white ${dimensions.text}`}>
-              NIGRANI
+        <div className={`flex flex-col ${isStacked ? 'items-center mt-1' : 'items-start'}`}>
+          <div className="flex items-center leading-none">
+            <span
+              className={`font-black tracking-tight text-slate-900 dark:text-white ${config.wordmark}`}
+            >
+              Nigrani
             </span>
-            <span className={`font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 ${dimensions.text}`}>
+            <span
+              className={`font-black tracking-tight ml-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400 bg-clip-text text-transparent ${config.aiText}`}
+            >
               AI
             </span>
+            <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-semibold self-start -mt-0.5 ml-0.5">
+              ™
+            </span>
           </div>
+
           {showSubtitle && (
-            <span className={`font-medium tracking-normal text-slate-500 dark:text-slate-400 mt-0.5 ${dimensions.subText}`}>
-              Public Project Intelligence
+            <span
+              className={`font-semibold uppercase text-slate-500 dark:text-slate-400 mt-1 ${config.subText}`}
+            >
+              {subtitleText || (size === 'xl' ? 'Public Project Intelligence for a Transparent India' : 'Public Project Intelligence')}
             </span>
           )}
         </div>
