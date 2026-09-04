@@ -23,7 +23,14 @@ from app.utils.security import (
     verify_otp,
 )
 from app.services.sms_provider import MSG91Provider, TwilioProvider, SMSDeliveryError, get_sms_provider
-from app.services.email_provider import SMTPEmailProvider, EmailDeliveryError, get_email_provider
+from app.services.email_provider import (
+    SMTPEmailProvider,
+    ResendEmailProvider,
+    BrevoEmailProvider,
+    EmailDeliveryError,
+    get_email_provider,
+)
+from unittest.mock import patch, AsyncMock
 
 
 @pytest.mark.asyncio
@@ -72,6 +79,68 @@ async def test_smtp_provider_configuration_guard():
     with pytest.raises(EmailDeliveryError) as exc:
         await provider.send_otp("officer@nic.in", "123456")
     assert "configuration error" in str(exc.value)
+
+
+@pytest.mark.asyncio
+async def test_resend_provider_configuration_guard():
+    """Verify that ResendEmailProvider strictly raises EmailDeliveryError when API key is missing."""
+    provider = ResendEmailProvider(api_key="")
+    with pytest.raises(EmailDeliveryError) as exc:
+        await provider.send_otp("officer@infrastructure.gov.in", "123456")
+    assert "EMAIL_API_KEY must be configured" in str(exc.value)
+
+
+@pytest.mark.asyncio
+async def test_brevo_provider_configuration_guard():
+    """Verify that BrevoEmailProvider strictly raises EmailDeliveryError when API key is missing."""
+    provider = BrevoEmailProvider(api_key="")
+    with pytest.raises(EmailDeliveryError) as exc:
+        await provider.send_otp("officer@infrastructure.gov.in", "123456")
+    assert "EMAIL_API_KEY must be configured" in str(exc.value)
+
+
+@pytest.mark.asyncio
+async def test_resend_provider_https_mock_dispatch():
+    """Verify Resend HTTP REST dispatch sends correct headers and payload over HTTPS."""
+    provider = ResendEmailProvider(api_key="re_mock_test_key", from_email="onboarding@resend.dev")
+
+    class MockResponse:
+        status_code = 200
+        def json(self):
+            return {"id": "resend_msg_12345"}
+
+    with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = MockResponse()
+        result = await provider.send_otp("officer@domain.com", "987654")
+        assert result is True
+        mock_post.assert_called_once()
+        call_kwargs = mock_post.call_args.kwargs
+        assert "Authorization" in call_kwargs["headers"]
+        assert call_kwargs["headers"]["Authorization"] == "Bearer re_mock_test_key"
+        assert call_kwargs["json"]["to"] == ["officer@domain.com"]
+        assert "987654" in call_kwargs["json"]["html"]
+
+
+@pytest.mark.asyncio
+async def test_resend_provider_delivery_failure_handling():
+    """Verify that Resend API error responses raise EmailDeliveryError without leaking secret tokens."""
+    provider = ResendEmailProvider(api_key="re_mock_test_key")
+
+    class MockErrorResponse:
+        status_code = 403
+        text = "Forbidden"
+        def json(self):
+            return {"message": "Domain not verified"}
+
+    with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_post:
+        mock_post.return_value = MockErrorResponse()
+        with pytest.raises(EmailDeliveryError) as exc:
+            await provider.send_otp("officer@domain.com", "987654")
+        assert "Resend email delivery failed (HTTP 403)" in str(exc.value)
+        assert "Domain not verified" in str(exc.value)
+        # Verify plain OTP and secret token are NEVER in error message
+        assert "987654" not in str(exc.value)
+        assert "re_mock_test_key" not in str(exc.value)
 
 
 @pytest.mark.asyncio

@@ -193,10 +193,10 @@ Officer Registration / Sign In
              │
       ┌──────┴───────────────────────────────────────┐
       ▼                                              ▼
-Real SMS OTP (MSG91 / Twilio)            Real Email OTP (SMTP TLS)
-  - E.164 phone normalization              - Multipart HTML + Text
-  - 6-digit cryptographic token            - 10-minute validity
-  - Provider failure detection             - Cooldown enforcement (60s)
+Real SMS OTP (MSG91 / Twilio)            Real Email OTP (HTTPS REST API / Resend)
+  - E.164 phone normalization              - Outbound HTTPS Port 443 (Render-compatible)
+  - 6-digit cryptographic token            - Free 3,000 emails/month via Resend
+  - Provider failure detection             - 10-minute validity & 60s cooldown
       │                                              │
       └──────────────────────┬───────────────────────┘
                              ▼
@@ -212,6 +212,7 @@ Real SMS OTP (MSG91 / Twilio)            Real Email OTP (SMTP TLS)
 | Behavior | `ENVIRONMENT=production` (Default on Render) | `ENVIRONMENT=development` (Local Dev) |
 | :--- | :--- | :--- |
 | **`ALLOW_SANDBOX_OTP`** | `false` (Mandatory) | `true` (Optional for offline dev) |
+| **Email Protocol** | **HTTPS REST API** (Port 443, Render-compatible) | HTTPS or local mock sandbox |
 | **OTP Exposure** | **NEVER** returned in JSON, UI, or logs | Only in sandbox provider when unconfigured |
 | **Gateway Failures** | Rejects request with clear provider error | Emits safe dev log |
 | **Client UI** | Shows: *"Verification code sent successfully."* | Shows: *"Verification code sent successfully."* |
@@ -244,13 +245,19 @@ MSG91_AUTH_KEY=<your-msg91-auth-key>
 MSG91_TEMPLATE_ID=<your-msg91-otp-template-id>
 MSG91_SENDER_ID=<your-approved-sender-id>
 
-# Email OTP Gateway (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=<your-email@gmail.com>
-SMTP_PASSWORD=<your-app-password>
-SMTP_FROM_EMAIL=<your-email@gmail.com>
-SMTP_USE_TLS=true
+# Transactional Email OTP Gateway (HTTPS REST API - Recommended for Render)
+# Note: Render blocks direct SMTP outbound ports (25, 465, 587) resulting in [Errno 101].
+# Use Resend API over outbound HTTPS port 443 for 100% reliable delivery.
+EMAIL_PROVIDER=resend
+EMAIL_API_KEY=<your-resend-api-key>
+EMAIL_FROM=onboarding@resend.dev
+EMAIL_FROM_NAME=Nigrani AI Vigilance
+
+# Optional SMTP Fallback (Only for local dev or servers where SMTP ports are open)
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USER=<your-email@gmail.com>
+# SMTP_PASSWORD=<your-app-password>
 
 # Google OAuth 2.0
 GOOGLE_CLIENT_ID=<your-client-id>.apps.googleusercontent.com
@@ -266,19 +273,31 @@ GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 4. Copy the **Template ID** and **Authkey**.
 5. Add `MSG91_AUTH_KEY` and `MSG91_TEMPLATE_ID` to Render environment variables.
 
-#### B. SMTP Email Gateway (Gmail Example)
-1. In your Google Account: **Security** → **2-Step Verification** → **App passwords**.
-2. Create an App Password for "Nigrani AI".
-3. Add `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER`, and `SMTP_PASSWORD` to Render environment variables.
+#### B. Resend HTTPS Email Gateway (Recommended for Render)
+Render's network policy blocks direct outbound TCP connections to SMTP ports (25, 465, 587) with `[Errno 101] Network is unreachable`. Nigrani AI integrates directly with **Resend**'s HTTPS REST API over port 443:
+1. Sign up at [https://resend.com](https://resend.com) (generous free tier: 3,000 emails/month, 100/day).
+2. Navigate to **API Keys** → click **Create API Key** (Permissions: Sending access).
+3. Copy the generated key (`re_...`).
+4. In Render Dashboard, add:
+   - `EMAIL_PROVIDER`: `resend`
+   - `EMAIL_API_KEY`: `re_...`
+   - `EMAIL_FROM`: `onboarding@resend.dev` (or your verified domain email)
+   - `EMAIL_FROM_NAME`: `Nigrani AI Vigilance`
+5. Verification emails are dispatched instantly via HTTPS with 6-digit OTPs and professional HTML templates.
 
-#### C. Google OAuth 2.0
+#### C. Optional SMTP Fallback (Non-Render / Local Only)
+If deploying on a VPS, AWS EC2, or local development where ports 587/465 are unblocked:
+1. Set `EMAIL_PROVIDER=smtp`.
+2. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL`.
+
+#### D. Google OAuth 2.0
 1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create an **OAuth 2.0 Web Client ID**.
 2. Set **Authorized JavaScript origins**: `https://pramendra0001.github.io`
 3. Set **Authorized redirect URIs**: `https://pramendra0001.github.io/Nigrani-AI/`
 4. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to Render.
 5. Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets or frontend build environment.
 
-#### D. Render PostgreSQL Persistence
+#### E. Render PostgreSQL Persistence
 1. In Render Dashboard, click **New +** → **PostgreSQL**.
 2. Set Database Name: `nigrani_db`.
 3. Copy the **Internal Database URL** and set as `DATABASE_URL` in the Backend Service.

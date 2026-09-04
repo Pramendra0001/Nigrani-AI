@@ -92,7 +92,13 @@ class Settings(BaseModel):
     TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
     TWILIO_FROM_PHONE: str = os.getenv("TWILIO_FROM_PHONE", "")
 
-    # Communication Gateways: SMTP Email Configuration
+    # Communication Gateways: HTTPS Transactional Email Provider (Render Production)
+    EMAIL_PROVIDER: str = os.getenv("EMAIL_PROVIDER", "resend").lower()
+    EMAIL_API_KEY: str = os.getenv("EMAIL_API_KEY", "")
+    EMAIL_FROM: str = os.getenv("EMAIL_FROM", "")
+    EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "Nigrani AI Vigilance")
+
+    # Communication Gateways: SMTP Email Configuration (Optional local/fallback)
     SMTP_HOST: str = os.getenv("SMTP_HOST", "")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER: str = os.getenv("SMTP_USER", "")
