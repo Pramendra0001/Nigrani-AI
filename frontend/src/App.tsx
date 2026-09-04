@@ -86,9 +86,9 @@ export function App() {
             <ProjectsPage onSelectProject={handleSelectProject} />
           )}
 
-          {activeTab === 'investigation' && selectedProjectId && (
+          {activeTab === 'investigation' && (
             <InvestigationPage
-              projectId={selectedProjectId}
+              projectId={selectedProjectId || 'MPLADS-LS-388'}
               onBack={handleBackToProjects}
               onSelectOtherProject={handleSelectProject}
             />
