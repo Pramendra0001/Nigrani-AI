@@ -1,321 +1,367 @@
-# Nigrani AI — AI-Powered MPLADS Intelligence, Anomaly Detection & Decision Support Platform
+# Nigrani AI
 
-**Primary Positioning:** AI-Powered MPLADS Intelligence, Anomaly Detection & Decision Support Platform  
-**Supporting Line:** AI-Powered Public Project Intelligence  
-**Platform Track:** National Public Infrastructure & MPLADS Vigilance Framework  
-**Organization:** Ministry of Statistics and Programme Implementation (MoSPI)  
-**Department:** Data Informatics & Innovation Division (DIID)  
-**Category:** Software | **Theme:** Smart Automation  
-**Stack:** FastAPI, Python 3.11+, SQLite / PostgreSQL, React 19, TypeScript, Vite, Tailwind CSS  
+## AI-Powered MPLADS Intelligence, Anomaly Detection & Decision-Support Platform
 
-> **Official Decision-Support Disclaimer:**  
-> Nigrani AI identifies data anomalies and risk indicators to support human review. Automated analysis does not establish corruption, misconduct, or legal liability. Nigrani AI serves strictly as an evidence-based decision-support platform for vigilance officers, State Nodal Authorities, and district administrators.
+Nigrani AI is an AI-powered public project intelligence and decision-support platform designed to support the monitoring and analysis of MPLADS (Member of Parliament Local Area Development Scheme) implementation data.
+
+The platform analyzes available project, financial, expenditure, progress, timeline, geospatial, and data-quality information to identify potential anomalies, unusual patterns, inefficiencies, inconsistencies, and high-risk cases requiring human review.
+
+> **Decision-Support Disclaimer:**  
+> A detected anomaly, risk score, or potential irregularity does not establish fraud, corruption, misconduct, or legal liability. Findings are evidence-based risk indicators intended to support verification and informed human review. Human examination of measurement books, administrative sanctions, and treasury vouchers remains essential.
 
 ---
 
-## 🎯 Executive Summary & Core Value Proposition
+## 1. Project Overview
 
-**Nigrani AI** transforms 543 official 18th Lok Sabha Parliamentary Constituency MPLADS project portfolios into an **explainable, prioritized review queue**.
+Nigrani AI serves as a direct-access, decision-support intelligence platform that ingests, audits, and analyzes parliamentary infrastructure portfolios across India. The platform supports both parliamentary houses:
+- **Lok Sabha:** 543 Parliamentary Constituency Portfolios across all 28 States and 8 Union Territories.
+- **Rajya Sabha:** 231 State-Represented Parliamentary Portfolios.
+- **Total Monitored Scope:** 774 Official Parliamentary Portfolios.
 
-Public infrastructure datasets contain vast volumes of information across budgets, expenditures, contractor bids, geolocations, categories, and timelines. Manual auditing of every project is humanly impossible. Nigrani AI does not accuse anyone of corruption; instead, it identifies statistical outliers, potential duplicate allocations, project delays, and data quality flaws, providing human reviewers with the forensic evidence needed to make informed decisions.
+The system provides vigilance officers, State Nodal Authorities, and district administrators with prioritized, evidence-backed dossiers rather than arbitrary or black-box risk scores.
+
+---
+
+## 2. Problem Addressed
+
+Monitoring public works under MPLADS presents significant administrative challenges:
+- **High Volume & Fragmented Portfolios:** Hundreds of parliamentary portfolios and thousands of localized works are executed across 700+ districts.
+- **Disproportionate Financial-Physical Velocity:** Discrepancies where financial disbursements reach near-exhaustion while physical progress lags behind.
+- **Duplicate & Overlapping Allocations:** Unintentional re-sanctioning of identical or adjacent assets across successive tenures or nearby wards.
+- **Schedule Slippage & Milestone Stagnation:** Works idling without physical progress or timely closure.
+- **Data Incompleteness & Reporting Gaps:** Missing milestone dates, conflicting progress percentages, and irregular updates.
+
+Manual portfolio audits are resource-intensive. Nigrani AI automates statistical screening to identify statistical outliers and potential compliance deviations, presenting clear forensic evidence to human reviewers.
+
+---
+
+## 3. Core Capabilities
+
+- **Multi-Format Data Ingestion:** Automated ingestion of CSV, JSON, and Excel files with fuzzy header matching and schema preview.
+- **16-Point Data Quality Audit:** Automated scoring of completeness, range sanity, date ordering, and cross-field consistency.
+- **IQR-Based Cost Outlier Detection:** Deterministic interquartile range (IQR) and percentile baseline analysis by category and state.
+- **Multi-Factor Duplicate Intelligence:** Combined TF-IDF semantic vector similarity, Haversine geospatial proximity, and temporal overlap scoring.
+- **Physical vs. Financial Consistency Analysis:** Divergence gap calculation between financial absorption and on-ground physical delivery.
+- **Disbursement Velocity & Threshold Monitoring:** Macro-level expenditure monitoring with opt-in synthetic stress-testing for sub-voucher pattern detection.
+- **Explainable Risk Scoring ("Why Flagged?"):** Transparent point attribution breakdown with full mathematical traceability.
+- **Human Review & Investigation Dossier:** Comprehensive 8-stage financial lifecycle tracking, variance analysis, and 6-state review lifecycle.
+
+---
+
+## 4. System Architecture
 
 ```
-Public Project Dataset
-         ↓
-  Data Validation (16-Point Integrity Audit)
-         ↓
-  Cost Anomaly Engine (Regional & Category Baseline)
-         ↓
-  Duplicate Intelligence (Semantic + Haversine Geo + Timeline Overlap)
-         ↓
-  Schedule Velocity Engine (Planned vs Elapsed Timeline)
-         ↓
-  Deterministic Risk Score Calculation (0–100)
-         ↓
-  AI Contextual Reasoning & Evidence Synthesis (Offline Demo Mode / Gemini)
-         ↓
-  Priority Human Review Queue & Audit Logging
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Client Browser                                │
+│        React 19 + TypeScript + Vite + Tailwind CSS + Lucide Icons       │
+│        (Direct-Access Demonstration UI • Dark/Light Mode Theme)         │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                             REST API (JSON)
+                                     │
+┌────────────────────────────────────▼────────────────────────────────────┐
+│                       FastAPI Application Server                        │
+│                 Python 3.11+ • Async SQLAlchemy                         │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                    Core Intelligence Engines                      │  │
+│  │  1. CostEngine (IQR & Percentile Peer Baselines)                  │  │
+│  │  2. DuplicateEngine (TF-IDF Cosine + Haversine Geospatial)        │  │
+│  │  3. DelayEngine (Schedule Velocity & Milestone Deviation)         │  │
+│  │  4. DataQualityEngine (16-Point Integrity & Completeness Rubric)   │  │
+│  │  5. ConsistencyEngine (Physical vs. Financial Divergence Gap)     │  │
+│  │  6. PaymentEngine (Disbursement Velocity & Threshold Rules)       │  │
+│  │  7. Unified RiskEngine (Explainable Multi-Criteria Scoring)       │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                     Services & Data Processing                    │  │
+│  │  • ImportService (CSV / JSON / Excel Fuzzy Schema Detection)      │  │
+│  │  • ReviewService (Dossier Lifecycle, Audit Notes, Status Log)     │  │
+│  │  • AnalysisService (Batch & Portfolio Pipeline Orchestrator)      │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                               Async Driver
+                                     │
+┌────────────────────────────────────▼────────────────────────────────────┐
+│                           Database Layer                                │
+│       SQLite (Local Development) / PostgreSQL (Cloud Production)        │
+│    774 Official Parliamentary Portfolios (543 Lok Sabha + 231 RS)       │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🌐 Public Production Access (Globally Accessible)
+## 5. Core Intelligence Engines
 
-The complete Nigrani AI platform is deployed and fully accessible from any phone, laptop, or desktop browser worldwide.
+The platform incorporates 7 dedicated analytical engines:
 
-| Service | Public URL | Description |
+| Engine | Primary Function | Core Methodology | Input Requirements |
+| :--- | :--- | :--- | :--- |
+| **Cost Anomaly Engine** | Detects abnormal portfolio expenditures | Interquartile Range (IQR, 1.5x / 3.0x IQR thresholds) & category medians | Sanctioned cost, cumulative expenditure, category |
+| **Duplicate Intelligence Engine** | Identifies potential overlapping works | Character 3-gram TF-IDF cosine similarity + Haversine geographical distance | Work title, category, latitude, longitude |
+| **Schedule Delay Engine** | Evaluates execution timelines | Ratio of elapsed time to planned duration vs. reported physical progress | Start date, target completion date, physical progress |
+| **Data Quality Engine** | Evaluates record completeness & integrity | 16-point deterministic rule checks with weighted completeness scoring | Mandatory identifiers, financial fields, coordinates |
+| **Consistency Engine** | Detects physical vs. financial divergence | Mathematical divergence gap: `abs(financial_% - physical_%)` | Completion percentage, budget, cumulative expenditure |
+| **Payment Intelligence Engine** | Evaluates disbursement velocity & thresholds | Macro expenditure velocity checks; statutory ceiling clustering | Expenditure totals, sanctioned ceilings, voucher logs |
+| **Unified Risk Engine** | Synthesizes explainable composite score | Weighted multi-criteria linear model with point attribution breakdown | Outputs from all active analytical engines |
+
+---
+
+## 6. End-to-End Workflow
+
+The platform follows a continuous, connected 13-step governance assurance workflow:
+
+```
+[1] Data Enters Platform
+       ↓
+[2] Schema Detection & Column Normalization
+       ↓
+[3] 16-Point Data Quality Audit
+       ↓
+[4] Cost & Expenditure Screening (IQR Outliers)
+       ↓
+[5] Duplicate & Overlap Detection (Semantic & Geospatial)
+       ↓
+[6] Schedule Velocity & Delay Assessment
+       ↓
+[7] Physical vs. Financial Consistency Evaluation
+       ↓
+[8] Payment Disbursement Velocity & Threshold Analysis
+       ↓
+[9] Unified Risk Scoring (0–100 Weighted Score)
+       ↓
+[10] Explainable Evidence Attribution ("Why Flagged?")
+       ↓
+[11] Alert Generation & Category Assignment
+       ↓
+[12] Priority Review Queue Assignment
+       ↓
+[13] Investigation Dossier, Human Decision & Immutable Audit Record
+```
+
+---
+
+## 7. Key Modules
+
+- **Executive Dashboard:** High-level summary metrics, risk distribution, category/state breakdowns, and dynamic role perspectives.
+- **Projects Database:** Full search, multi-column sorting, and filtering by parliament type (Lok Sabha / Rajya Sabha), state, district, and risk level.
+- **Investigation Dossier:** Single-case forensic view featuring financial lifecycle flow, 5 stage-variance delta cards, physical-financial consistency gauge, and point attribution math.
+- **Priority Review Queue:** Filterable review inbox allowing reviewers to assign cases, record examination findings, and log official actions.
+- **Early Warning Center:** Alert categorization covering cost anomalies, schedule slippage, duplicates, documentation gaps, and high physical-financial divergence.
+- **Geographic Intelligence:** Interactive GIS centroid map clustering parliamentary portfolios with color-coded risk markers.
+- **Compliance Monitoring:** Rule-based compliance audits tracking guideline clauses (e.g., GFR Rule 238, MPLADS Guideline 2023 Sec 4.2).
+- **Asset & Evidence Hub:** Tracks physical infrastructure assets, geo-coordinates, verification stages, and photographic evidence.
+- **Data Ingestion & Mapping:** User upload interface for CSV, JSON, and Excel datasets with real-time validation preview.
+
+---
+
+## 8. Data Ingestion and Data Quality
+
+The ingestion pipeline handles heterogeneous data formats commonly exported by state and district portals:
+- **Format Support:** CSV (`.csv`), JSON (`.json`), and Excel (`.xlsx`, `.xls`).
+- **Fuzzy Header Detection:** Recognizes aliases for project name, state, district, constituency, category, budget, expenditure, progress, and coordinates.
+- **16-Point Validation Checks:**
+  1. Mandatory Project Identifier
+  2. Non-Empty Project / Constituency Title
+  3. Valid Indian State / UT Classification
+  4. Non-Negative Budget / Sanction Amount
+  5. Cumulative Expenditure Sanity (`expenditure <= sanctioned * 1.5`)
+  6. Progress Percentage Bounds (`0 <= progress <= 100`)
+  7. Timeline Sequence (`completion_date >= start_date`)
+  8. Coordinate Latitude Bounds (`6.0 <= lat <= 38.0`)
+  9. Coordinate Longitude Bounds (`68.0 <= lng <= 98.0`)
+  10. Category Standardization
+  11. Non-Negative Allocation
+  12. Non-Negative Released Amount
+  13. Duplicate Identifier Detection
+  14. Realistic Project Duration (`<= 10 years`)
+  15. Status-Progress Consistency (e.g., Completed implies 100%)
+  16. Minimum Textual Granularity
+
+---
+
+## 9. Data Sources and Provenance
+
+Nigrani AI maintains transparent metadata for all loaded records:
+
+| Record Attribute | Official Dataset Baseline |
+| :--- | :--- |
+| **Source Authority** | Ministry of Statistics and Programme Implementation (MoSPI) / eSAKSHI Portal |
+| **Reference Publication** | 18th Lok Sabha & Rajya Sabha Consolidated Performance Bulletin |
+| **Granularity** | Parliamentary Constituency Portfolio Level |
+| **Total Monitored Units** | 774 Portfolios (543 Lok Sabha + 231 Rajya Sabha) |
+| **Default Record Tier** | `OFFICIAL_BENCHMARK` |
+| **Data Completeness Score** | 100% on core macro-indicators |
+
+---
+
+## 10. Official vs Derived vs Demo/Synthetic Data
+
+To maintain strict truthfulness, the platform categorizes every displayed record:
+- **OFFICIAL SOURCE DATA:** Baseline parliamentary constituency allocation, release, and expenditure figures sourced directly from official MoSPI eSAKSHI publications.
+- **DERIVED METRICS:** Calculated indicators computed deterministically by the platform (e.g., utilization percentage, divergence gaps, IQR thresholds, risk scores).
+- **DEMO DATA:** Pre-bundled portfolio records configured to allow immediate evaluation of all platform capabilities without mandatory cloud connectivity.
+- **SYNTHETIC TEST DATA:** Isolated sandbox test records (e.g., sub-voucher simulation `VCH-SIM-9921`) clearly marked and strictly segregated from official datasets to test transaction-splitting detection algorithms.
+
+---
+
+## 11. Data-Dependent Capabilities
+
+The platform transparently discloses data limitations where external data is not published in standard macro reports:
+
+| Capability | Current Status | Operating Behavior |
 | :--- | :--- | :--- |
-| **Live Frontend Web Application** | **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)** | Hosted React dashboard, 543 18th Lok Sabha MPLADS project registry & forensic workstation |
-| **Public Backend REST API** | **[https://nigrani-ai-u7gz.onrender.com/](https://nigrani-ai-u7gz.onrender.com/)** | Cloud FastAPI backend service on Render |
-| **Interactive API Documentation** | **[https://nigrani-ai-u7gz.onrender.com/docs](https://nigrani-ai-u7gz.onrender.com/docs)** | Live Swagger UI to test and execute API calls directly |
-| **Backend Health Check** | **[https://nigrani-ai-u7gz.onrender.com/health](https://nigrani-ai-u7gz.onrender.com/health)** | Live monitoring & uptime verification endpoint |
-
-```
-┌────────────────────────────────────────────────────────┐
-│                      User Device                       │
-│        (Any phone, laptop, or desktop browser)         │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│             Production Frontend (Hosted)               │
-│       https://pramendra0001.github.io/Nigrani-AI/      │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                    HTTPS REST / CORS
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│          Public Cloud FastAPI Backend API              │
-│       https://nigrani-ai-u7gz.onrender.com             │
-│       Swagger Docs: .../docs | Health: .../health      │
-└───────────────────────────┬────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                  Database Layer                        │
-│   PostgreSQL (Render Cloud) or SQLite (Local Dev)      │
-│   543 Official 18th Lok Sabha Constituencies (eSAKSHI) │
-└────────────────────────────────────────────────────────┘
-```
-
-> **Client Fallback Guarantee:** If the cloud backend is cold-starting from idle, the frontend automatically utilizes its embedded client intelligence engine with all 543 official 18th Lok Sabha benchmark projects across all 36 States & Union Territories. The web app will never crash with connection errors.
+| **Micro-Level Voucher Auditing** | `DATA-DEPENDENT` | Displays official notice: *"Awaiting payment-level source data"*. Macro-expenditure is evaluated; sub-voucher analysis is enabled via the opt-in simulation sandbox. |
+| **Remote-Sensing Satellite Verification** | `DATA-DEPENDENT` | Geographic coordinate validation within sovereign bounds is active. High-resolution optical change detection is noted as an optional external GIS API integration. |
+| **Contractor GSTIN Cross-Verification** | `DATA-DEPENDENT` | Implementing agency names are recorded. Direct tax portal queries require external commercial tax department API linkage. |
 
 ---
 
-## 💻 Local Development (Offline / Development Only)
+## 12. Technology Stack
 
-> **Note:** The URLs in this section are strictly for local development on your own machine. They will NOT work from other computers or mobile phones.
-
-To run and test the complete stack locally on your computer:
-
-| Local Component | Local URL | Notes |
-| :--- | :--- | :--- |
-| **Local Frontend** | `http://localhost:5173` | Requires `npm run dev` running locally |
-| **Local Backend API** | `http://127.0.0.1:8000` | Requires `uvicorn` running locally |
-| **Local API Docs** | `http://127.0.0.1:8000/docs` | Requires `uvicorn` running locally |
-
-### Quick Start Locally:
-- **Windows (1-Click):** Double-click `start.bat` in the repository root.
-- **Manual Start:**
-  ```bash
-  # Terminal 1 - Start FastAPI Backend:
-  .\venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
-
-  # Terminal 2 - Start React/Vite Frontend:
-  cd frontend
-  npm run dev
-  ```
+- **Frontend:**
+  - React 19, TypeScript 5.7+
+  - Vite 8.2+
+  - Tailwind CSS 4+
+  - Lucide React Icons
+- **Backend:**
+  - FastAPI 0.115+
+  - Python 3.11+ / 3.13+
+  - SQLAlchemy 2.0+ (Async)
+  - aiosqlite (SQLite) / asyncpg (PostgreSQL)
+  - Pydantic v2
+  - scikit-learn & NumPy (TF-IDF & IQR mathematical analysis)
+- **Deployment:**
+  - GitHub Pages (Frontend static hosting)
+  - Render (Cloud API hosting)
 
 ---
 
-## 💡 Key Architectural Features
+## 13. Installation and Local Setup
 
-### 1. 5 Deterministic Analysis Engines
-1. **Cost Anomaly Engine:** Computes median, mean, standard deviation, percentile ranking, and cost deviation against comparable projects in the same district and state.
-2. **Duplicate Intelligence Engine:** Combines description token shingles, Haversine geographic distance in kilometers, timeline Jaccard overlap, and budget ratios to classify `POSSIBLE_DUPLICATE`, `POSSIBLE_OVERLAP`, or `RELATED_PROJECT`.
-3. **Schedule Delay Engine:** Evaluates contractual start/end dates against reported physical completion to detect critical progress stalling.
-4. **Data Quality Engine:** Audits 16 distinct schema anomalies (impossible completion %, negative budgets, dates out of sequence, coordinates outside Indian territorial bounds).
-5. **Unified Risk Engine:** Configurable formula:
-   $$\text{Risk Score} = (\text{Cost Risk} \times 0.35) + (\text{Duplicate Risk} \times 0.30) + (\text{Delay Risk} \times 0.25) + (\text{DQ Risk} \times 0.10)$$
-   Classified as **LOW (0–30)**, **MEDIUM (31–60)**, **HIGH (61–80)**, or **CRITICAL (81–100)**.
+### Prerequisites
+- Node.js (v18 or later)
+- Python (v3.11 or later)
+- Git
 
-### 2. Offline Demo Mode (No API Keys Required)
-The platform is equipped with a `MockAIProvider` that generates forensic investigation briefs, actionable vigilance recommendations, and contextual explanations directly from statistical evidence. A real Google Gemini API key can be added to `.env` seamlessly without modifying application code.
-
-### 3. Flexible Dataset Ingestion & Column Mapping
-Allows analysts to upload custom CSV datasets with varying column nomenclature (e.g. `work_name` vs `project_title`, `sanctioned_amount` vs `budget`). The fuzzy mapper suggests standard assignments, presents a preview and validation report, and ingests with one click.
-
-### 4. Official MPLADS National Dataset Integration
-Nigrani AI is pre-loaded with the official 18th Lok Sabha dataset sourced directly from the Ministry of Statistics and Programme Implementation eSAKSHI portal (`mplads.gov.in`):
-- **Scale:** 543 Members of Parliament (All 543 Lok Sabha Parliamentary Constituencies) across all 36 States and Union Territories.
-- **Financial Scope:** ₹8,333.67 Crore allocated limit, ₹2,771.91 Crore cumulative expenditure (33.26% utilization), 106,458 recommended works (₹5,705.28 Cr value), 79,082 sanctioned works, and 34,275 completed works (32.2% physical completion rate).
-- **Forensic Pipeline:** Automatically flags severe completion backlogs, zero-completion anomalies despite large expenditures, unspent balance accumulation, and stalled constituency works into an actionable vigilance queue.
-
----
-
-## 📂 Project Structure
-
+### Clone the Repository
+```bash
+git clone https://github.com/Pramendra0001/Nigrani-AI.git
+cd Nigrani-AI
 ```
-Nigrani-AI/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── router.py          # All REST endpoints (Dashboard, Projects, Upload, Review, Settings)
-│   │   ├── engines/
-│   │   │   ├── cost_engine.py     # Statistical cost deviation & percentiles
-│   │   │   ├── delay_engine.py    # Schedule delay calculation
-│   │   │   ├── data_quality_engine.py # 16-point schema validation
-│   │   │   ├── duplicate_engine.py # Multi-factor duplicate intelligence
-│   │   │   └── risk_engine.py     # Unified deterministic risk scoring
-│   │   ├── ai/
-│   │   │   ├── base.py            # Abstract AI provider
-│   │   │   └── mock_provider.py   # Offline evidence-based narrative generator
-│   │   ├── models/
-│   │   │   └── models.py          # SQLAlchemy ORM entities (12 tables)
-│   │   ├── schemas/
-│   │   │   └── schemas.py         # Pydantic v2 schemas
-│   │   ├── services/
-│   │   │   ├── analysis_service.py # Orchestrator for all 5 engines
-│   │   │   ├── import_service.py  # CSV parser & fuzzy column mapper
-│   │   │   └── review_service.py  # Triage queue and audit notes
-│   │   ├── utils/
-│   │   │   ├── mplads_loader.py   # Official MPLADS eSAKSHI ingestion engine (543 MPs)
-│   │   │   ├── mplads_data.json   # Bundled 543 18th Lok Sabha project records
-│   │   │   └── demo_data.py       # Benchmark generator & legacy compatibility layer
-│   │   ├── config.py              # App settings & dynamic CORS
-│   │   ├── database.py            # Async engine with SQLite / Postgres support
-│   │   └── main.py                # FastAPI entrypoint, healthcheck & OpenAPI
-│   ├── .env.example               # Backend environment variables template
-│   ├── Dockerfile                 # Backend container definition
-│   ├── runtime.txt                # Python runtime specification
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/            # UI components (Navbar, Sidebar, Charts, Badges)
-│   │   ├── pages/                 # Dashboard, Projects, Investigation, Review, Upload, Analytics
-│   │   ├── api.ts                 # Typed client with production Render URL & fallback
-│   │   ├── demo_projects.json     # 543 official 18th Lok Sabha benchmark projects dataset
-│   │   ├── types.ts               # TypeScript data models
-│   │   ├── App.tsx                # Master app shell
-│   │   └── main.tsx
-│   ├── .env.production            # Production backend configuration (Render)
-│   ├── .env.development          # Development configuration (Local proxy)
-│   ├── .env.example               # Environment variables template
-│   ├── vite.config.ts             # Vite configuration with relative base & dev proxy
-│   └── package.json
-├── .github/
-│   └── workflows/
-│       └── deploy.yml             # GitHub Actions CI/CD with production URL injection
-├── render.yaml                    # Render.com Blueprint specification
-├── Procfile                       # Railway / Heroku process configuration
-├── Dockerfile                     # Root container definition
-├── .python-version                # Python 3.11 specification
-├── start.bat                      # 1-click Windows runner for local development
-└── README.md
+
+### Backend Setup
+```bash
+cd backend
+python -m venv ../venv
+# On Windows:
+..\venv\Scripts\activate
+# On Linux/macOS:
+source ../venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### Frontend Setup
+```bash
+cd ../frontend
+npm install
 ```
 
 ---
 
-## 🔐 Enterprise Authentication & Real OTP Delivery Architecture
+## 14. Environment Configuration
 
-Nigrani AI includes a multi-factor authentication and identity management system designed for public sector compliance:
-
-```
-Officer Registration / Sign In
-             │
-      Password Check (PBKDF2-HMAC-SHA256, 600k iters)
-             │
-      ┌──────┴───────────────────────────────────────┐
-      ▼                                              ▼
-Real SMS OTP (MSG91 / Twilio)            Real Email OTP (HTTPS REST API / Resend)
-  - E.164 phone normalization              - Outbound HTTPS Port 443 (Render-compatible)
-  - 6-digit cryptographic token            - Free 3,000 emails/month via Resend
-  - Provider failure detection             - 10-minute validity & 60s cooldown
-      │                                              │
-      └──────────────────────┬───────────────────────┘
-                             ▼
-               Dual-Channel Account Verification
-                             ▼
-         HMAC-SHA256 Signed Session Token Issued
-                             ▼
-                 Officer Dossier Activated
-```
-
-### 1. Production vs Development Mode
-
-| Behavior | `ENVIRONMENT=production` (Default on Render) | `ENVIRONMENT=development` (Local Dev) |
-| :--- | :--- | :--- |
-| **`ALLOW_SANDBOX_OTP`** | `false` (Mandatory) | `true` (Optional for offline dev) |
-| **Email Protocol** | **HTTPS REST API** (Port 443, Render-compatible) | HTTPS or local mock sandbox |
-| **OTP Exposure** | **NEVER** returned in JSON, UI, or logs | Only in sandbox provider when unconfigured |
-| **Gateway Failures** | Rejects request with clear provider error | Emits safe dev log |
-| **Client UI** | Shows: *"Verification code sent successfully."* | Shows: *"Verification code sent successfully."* |
-
----
-
-## 🛠️ Production Setup Instructions (Render Cloud)
-
-### 1. Exact Environment Variables to Configure on Render
-
-In your **Render Dashboard** → Select **Nigrani-AI** Web Service → **Environment**:
-
+### Backend (`backend/.env`)
 ```env
-# Server & Security Profile
-ENVIRONMENT=production
-ALLOW_SANDBOX_OTP=false
-SECRET_KEY=<generate-with: openssl rand -hex 32>
+ENVIRONMENT=development
+HOST=0.0.0.0
+PORT=8000
+DATABASE_URL=sqlite+aiosqlite:///./nigrani.db
+DEMO_MODE=true
 APP_CURRENT_YEAR=2026
-APP_CURRENT_DATE=2026-09-04
-
-# Database Connection (Render PostgreSQL)
-DATABASE_URL=postgresql+asyncpg://<username>:<password>@<render-db-host>:5432/<database>
-
-# CORS Origins
-CORS_ORIGINS=https://pramendra0001.github.io,http://localhost:5173,http://127.0.0.1:5173
-
-# SMS OTP Provider (MSG91 - India Primary)
-SMS_PROVIDER=msg91
-MSG91_AUTH_KEY=<your-msg91-auth-key>
-MSG91_TEMPLATE_ID=<your-msg91-otp-template-id>
-MSG91_SENDER_ID=<your-approved-sender-id>
-
-# Transactional Email OTP Gateway (HTTPS REST API - Recommended for Render)
-# Note: Render blocks direct SMTP outbound ports (25, 465, 587) resulting in [Errno 101].
-# Use Resend API over outbound HTTPS port 443 for 100% reliable delivery.
-EMAIL_PROVIDER=resend
-EMAIL_API_KEY=<your-resend-api-key>
-EMAIL_FROM=onboarding@resend.dev
-EMAIL_FROM_NAME=Nigrani AI Vigilance
-
-# Optional SMTP Fallback (Only for local dev or servers where SMTP ports are open)
-# SMTP_HOST=smtp.gmail.com
-# SMTP_PORT=587
-# SMTP_USER=<your-email@gmail.com>
-# SMTP_PASSWORD=<your-app-password>
-
-# Google OAuth 2.0
-GOOGLE_CLIENT_ID=<your-client-id>.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-### 2. Provider Account Setup Details
+### Frontend (`frontend/.env`)
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
 
-#### A. MSG91 SMS Gateway (Primary for India)
-1. Sign up at [https://msg91.com](https://msg91.com).
-2. Go to **OTP Service** and create an OTP Template.
-3. Set Template Message: `Your Nigrani AI verification code is ##OTP##. Valid for 10 minutes.`
-4. Copy the **Template ID** and **Authkey**.
-5. Add `MSG91_AUTH_KEY` and `MSG91_TEMPLATE_ID` to Render environment variables.
+---
 
-#### B. Resend HTTPS Email Gateway (Recommended for Render)
-Render's network policy blocks direct outbound TCP connections to SMTP ports (25, 465, 587) with `[Errno 101] Network is unreachable`. Nigrani AI integrates directly with **Resend**'s HTTPS REST API over port 443:
-1. Sign up at [https://resend.com](https://resend.com) (generous free tier: 3,000 emails/month, 100/day).
-2. Navigate to **API Keys** → click **Create API Key** (Permissions: Sending access).
-3. Copy the generated key (`re_...`).
-4. In Render Dashboard, add:
-   - `EMAIL_PROVIDER`: `resend`
-   - `EMAIL_API_KEY`: `re_...`
-   - `EMAIL_FROM`: `onboarding@resend.dev` (or your verified domain email)
-   - `EMAIL_FROM_NAME`: `Nigrani AI Vigilance`
-5. Verification emails are dispatched instantly via HTTPS with 6-digit OTPs and professional HTML templates.
+## 15. Running the Application
 
-#### C. Optional SMTP Fallback (Non-Render / Local Only)
-If deploying on a VPS, AWS EC2, or local development where ports 587/465 are unblocked:
-1. Set `EMAIL_PROVIDER=smtp`.
-2. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL`.
+### 1-Click Startup (Windows)
+Double-click `start.bat` in the repository root to launch both the backend API and frontend dev server simultaneously.
 
-#### D. Google OAuth 2.0
-1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create an **OAuth 2.0 Web Client ID**.
-2. Set **Authorized JavaScript origins**: `https://pramendra0001.github.io`
-3. Set **Authorized redirect URIs**: `https://pramendra0001.github.io/Nigrani-AI/`
-4. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to Render.
-5. Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets or frontend build environment.
+### Manual Startup
+**Terminal 1 — Backend:**
+```bash
+cd backend
+..\venv\Scripts\activate
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-#### E. Render PostgreSQL Persistence
-1. In Render Dashboard, click **New +** → **PostgreSQL**.
-2. Set Database Name: `nigrani_db`.
-3. Copy the **Internal Database URL** and set as `DATABASE_URL` in the Backend Service.
-4. On startup, `init_db()` provisions tables safely with connection pooling (`pool_pre_ping=True`).
+**Terminal 2 — Frontend:**
+```bash
+cd frontend
+npm run dev
+```
 
+Open `http://localhost:5173` in your browser.
+
+---
+
+## 16. Testing
+
+### Automated Backend Tests
+Run the comprehensive pytest suite from the `backend/` directory:
+```bash
+cd backend
+..\venv\Scripts\python.exe -m pytest tests
+```
+*Current test suite: 14 tests across API endpoints, analytical engines, and parliament type filters with 100% pass rate.*
+
+### Frontend Production Build & Typecheck
+```bash
+cd frontend
+npm run build
+```
+*Builds client bundles with zero TypeScript errors.*
+
+---
+
+## 17. Deployment
+
+- **Frontend (GitHub Pages):** Built via Vite into `frontend/dist` and served via GitHub Pages.
+- **Backend (Render):** Deployed as a web service running FastAPI via Uvicorn.
+- **Client Fallback Resiliency:** If the remote backend is offline or starting from cold idle, the frontend automatically falls back to an embedded client intelligence engine containing all 774 official parliamentary records.
+
+---
+
+## 18. Security and Data Handling
+
+- **Direct-Access Architecture:** Intentionally operates without user authentication barriers for transparent public and institutional auditing demonstrations.
+- **Input Sanitization & Bounds Checking:** All file imports and query parameters undergo strict Pydantic and regex validation.
+- **CORS Protection:** Configurable origin whitelisting restricting cross-origin API access.
+- **Zero Hardcoded Secrets:** Cryptographic tokens are derived dynamically from environment variables or secure entropy.
+
+---
+
+## 19. Limitations
+
+- Official public datasets provide macro constituency-level cumulative expenditure rather than individual contractor line-item vouchers.
+- Geospatial mapping visualizes constituency administrative centroids where exact asset-level GPS coordinates are not published in public bulletins.
+- AI summaries and anomaly risk scores are decision-support indicators and do not substitute for on-site statutory audits.
+
+---
+
+## 20. Future Integration Possibilities
+
+- **PFMS Integration:** Direct linkage with Public Financial Management System APIs for micro-voucher reconciliation.
+- **ISRO Bhuvan / Sentinel Satellite Feed:** Automated optical and radar change detection over reported asset coordinates.
+- **State Treasury Inward Scroll Sync:** Direct bank scroll reconciliation for automated payment velocity monitoring.
+- **Mobile Geo-Tagging App:** Field surveyor app for real-time photographic upload with cryptographic EXIF geo-stamps.

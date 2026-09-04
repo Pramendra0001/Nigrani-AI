@@ -3,9 +3,6 @@ import {
   Project,
   ProjectInvestigation,
   ReviewCaseItem,
-  UserProfile,
-  AuthResponse,
-  UserSessionItem,
   GeoSummary,
   ComplianceSummary,
   PredictiveSummary,
@@ -81,10 +78,8 @@ async function requestWithFallback<T>(url: string, options: RequestInit | undefi
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     const isFormData = options?.body instanceof FormData;
-    const token = localStorage.getItem('nigrani_access_token');
     const headers: Record<string, string> = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...((options?.headers as Record<string, string>) || {}),
     };
 
@@ -98,11 +93,6 @@ async function requestWithFallback<T>(url: string, options: RequestInit | undefi
     if (res.ok) {
       isConnectedToLiveBackend = true;
       return await res.json();
-    }
-    // If backend returned a deliberate error (e.g. 400 Bad Request, 401 Unauthorized), check if it's an auth endpoint
-    if (url.startsWith('/auth')) {
-      const errData = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(errData.detail || 'Authentication request failed');
     }
   } catch (err) {
     // Remote backend offline / cold start in progress / static host without backend -> Use client intelligence fallback
@@ -607,208 +597,7 @@ export const api = {
       status: 'OPERATIONAL',
     })),
 
-  // 7. Authentication, MFA & Profile
-  register: (payload: { full_name: string; email: string; phone: string; password: string; organization?: string; designation?: string }) =>
-    requestWithFallback<AuthResponse>('/auth/register', { method: 'POST', body: JSON.stringify(payload) }, () => {
-      const mockUser: UserProfile = {
-        id: 'usr-mock-001',
-        full_name: payload.full_name,
-        email: payload.email.toLowerCase().trim(),
-        phone: payload.phone,
-        role: 'Analyst',
-        organization: payload.organization || 'National Infrastructure Review Cell',
-        designation: payload.designation || 'Project Review Analyst',
-        is_email_verified: false,
-        is_phone_verified: false,
-        is_active: true,
-        created_at: new Date().toISOString(),
-      };
-      const res: AuthResponse = {
-        user: mockUser,
-        access_token: 'mock-access-token-2026',
-        session_token: 'mock-session-token-2026',
-        verification: {
-          email_verified: false,
-          phone_verified: false,
-        },
-        message: 'Account created successfully. Verification code sent successfully.',
-      };
-      localStorage.setItem('nigrani_access_token', res.access_token);
-      localStorage.setItem('nigrani_user_profile', JSON.stringify(mockUser));
-      return res;
-    }),
-
-  login: (payload: { identifier: string; password: string }) =>
-    requestWithFallback<AuthResponse>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }, () => {
-      const savedUserStr = localStorage.getItem('nigrani_user_profile');
-      const baseUser: UserProfile = savedUserStr
-        ? JSON.parse(savedUserStr)
-        : {
-            id: 'usr-analyst-001',
-            full_name: 'Senior Vigilance Analyst',
-            email: payload.identifier.includes('@') ? payload.identifier : 'analyst.vigilance@infrastructure.gov.in',
-            phone: payload.identifier.includes('@') ? '+919876543210' : payload.identifier,
-            role: 'Analyst',
-            organization: 'Central Vigilance Commission (Mock)',
-            designation: 'Senior Infrastructure Audit Officer',
-            is_email_verified: true,
-            is_phone_verified: true,
-            is_active: true,
-            created_at: '2026-01-15T10:00:00Z',
-          };
-      const res: AuthResponse = {
-        user: baseUser,
-        access_token: 'mock-access-token-2026',
-        session_token: 'mock-session-token-2026',
-        verification: { email_verified: baseUser.is_email_verified, phone_verified: baseUser.is_phone_verified },
-      };
-      localStorage.setItem('nigrani_access_token', res.access_token);
-      localStorage.setItem('nigrani_user_profile', JSON.stringify(baseUser));
-      return res;
-    }),
-
-  logout: async () => {
-    try {
-      await requestWithFallback('/auth/logout', { method: 'POST' }, () => ({ status: 'success' }));
-    } finally {
-      localStorage.removeItem('nigrani_access_token');
-      localStorage.removeItem('nigrani_user_profile');
-    }
-  },
-
-  getMe: () =>
-    requestWithFallback<UserProfile>('/auth/me', undefined, () => {
-      const saved = localStorage.getItem('nigrani_user_profile');
-      if (saved) return JSON.parse(saved);
-      return {
-        id: 'usr-analyst-001',
-        full_name: 'Senior Vigilance Analyst',
-        email: 'analyst.vigilance@infrastructure.gov.in',
-        phone: '+919876543210',
-        role: 'Analyst',
-        organization: 'Central Vigilance Commission',
-        designation: 'Senior Infrastructure Audit Officer',
-        is_email_verified: true,
-        is_phone_verified: true,
-        is_active: true,
-        created_at: '2026-01-15T10:00:00Z',
-      };
-    }),
-
-  verifyEmailOtp: (email: string, otp: string) =>
-    requestWithFallback('/auth/verify-email-otp', { method: 'POST', body: JSON.stringify({ email, otp }) }, () => {
-      const saved = localStorage.getItem('nigrani_user_profile');
-      if (saved) {
-        const u = JSON.parse(saved);
-        u.is_email_verified = true;
-        localStorage.setItem('nigrani_user_profile', JSON.stringify(u));
-        return { status: 'verified', email_verified: true, user: u };
-      }
-      return { status: 'verified', email_verified: true };
-    }),
-
-  verifyPhoneOtp: (phone: string, otp: string) =>
-    requestWithFallback('/auth/verify-phone-otp', { method: 'POST', body: JSON.stringify({ phone, otp }) }, () => {
-      const saved = localStorage.getItem('nigrani_user_profile');
-      if (saved) {
-        const u = JSON.parse(saved);
-        u.is_phone_verified = true;
-        localStorage.setItem('nigrani_user_profile', JSON.stringify(u));
-        return { status: 'verified', phone_verified: true, user: u };
-      }
-      return { status: 'verified', phone_verified: true };
-    }),
-
-  resendOtp: (target: string, codeType: string = 'EMAIL_VERIFICATION') =>
-    requestWithFallback('/auth/resend-otp', { method: 'POST', body: JSON.stringify({ target, code_type: codeType }) }, () => ({
-      status: 'sent',
-      message: 'Verification code sent successfully.',
-    })),
-
-  googleAuth: (credential: string) =>
-    requestWithFallback<AuthResponse>('/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }, () => {
-      const gUser: UserProfile = {
-        id: 'usr-google-demo',
-        full_name: 'Dr. A. Sharma (Google OAuth)',
-        email: 'a.sharma.cvo@nic.in',
-        phone: '+919988776655',
-        role: 'Reviewer',
-        organization: 'Ministry of Infrastructure Oversight',
-        designation: 'Director of Public Vigilance',
-        is_email_verified: true,
-        is_phone_verified: false,
-        is_active: true,
-        created_at: new Date().toISOString(),
-      };
-      const res: AuthResponse = {
-        user: gUser,
-        access_token: 'google-oauth-mock-token-2026',
-        session_token: 'google-session-mock-2026',
-        verification: { email_verified: true, phone_verified: false },
-      };
-      localStorage.setItem('nigrani_access_token', res.access_token);
-      localStorage.setItem('nigrani_user_profile', JSON.stringify(gUser));
-      return res;
-    }),
-
-  forgotPassword: (email: string) =>
-    requestWithFallback('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }, () => ({
-      status: 'sent',
-      message: 'If an account with this email exists, a password reset code has been sent.',
-    })),
-
-  resetPassword: (payload: { email: string; otp: string; new_password: string }) =>
-    requestWithFallback('/auth/reset-password', { method: 'POST', body: JSON.stringify(payload) }, () => ({
-      status: 'success',
-      message: 'Password reset successfully.',
-    })),
-
-  changePassword: (payload: { current_password: string; new_password: string }) =>
-    requestWithFallback('/auth/change-password', { method: 'POST', body: JSON.stringify(payload) }, () => ({
-      status: 'success',
-      message: 'Password updated successfully.',
-    })),
-
-  updateProfile: (payload: { full_name?: string; organization?: string; designation?: string; avatar_url?: string }) =>
-    requestWithFallback('/auth/profile', { method: 'PUT', body: JSON.stringify(payload) }, () => {
-      const saved = localStorage.getItem('nigrani_user_profile');
-      const u = saved ? JSON.parse(saved) : {};
-      const updated = { ...u, ...payload };
-      localStorage.setItem('nigrani_user_profile', JSON.stringify(updated));
-      return { user: updated, message: 'Profile updated.' };
-    }),
-
-  listSessions: () =>
-    requestWithFallback<UserSessionItem[]>('/auth/sessions', undefined, () => [
-      {
-        id: 'sess-current-01',
-        device_info: navigator.userAgent.slice(0, 100),
-        ip_address: '103.212.144.18 (Current)',
-        created_at: new Date().toISOString(),
-        is_current: true,
-      },
-      {
-        id: 'sess-mobile-02',
-        device_info: 'Chrome on Android 14 (Mobile Station)',
-        ip_address: '49.36.12.94',
-        created_at: '2026-09-02T14:22:10Z',
-        is_current: false,
-      },
-    ]),
-
-  revokeOtherSessions: () =>
-    requestWithFallback('/auth/sessions/revoke-others', { method: 'POST' }, () => ({
-      status: 'success',
-      message: 'Other sessions revoked.',
-    })),
-
-  deleteAccount: (password_confirmation: string) =>
-    requestWithFallback('/auth/account', { method: 'DELETE', body: JSON.stringify({ password_confirmation }) }, () => {
-      localStorage.removeItem('nigrani_access_token');
-      localStorage.removeItem('nigrani_user_profile');
-      return { status: 'success', message: 'Account permanently deleted.' };
-    }),
-
+  // 7. System Utilities & Operations
   getHealth: () =>
     fetch(`${API_BASE.replace(/\/api$/, '')}/health`)
       .then((r) => r.json())

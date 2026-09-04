@@ -66,59 +66,8 @@ class Settings(BaseModel):
     # Database: SQLite async for zero-config demo/MVP; auto-adapts to PostgreSQL if URL provided
     DATABASE_URL: str = get_database_url()
 
-    # Authentication & Security
+    # Secret Key for secure server tokens and sessions
     SECRET_KEY: str = get_secret_key()
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
-    REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
-    OTP_EXPIRE_MINUTES: int = int(os.getenv("OTP_EXPIRE_MINUTES", "10"))
-    OTP_RESEND_COOLDOWN_SECONDS: int = int(os.getenv("OTP_RESEND_COOLDOWN_SECONDS", "60"))
-    OTP_MAX_ATTEMPTS: int = int(os.getenv("OTP_MAX_ATTEMPTS", "5"))
-
-    # OTP Sandbox Production Guard: Strictly disabled in production
-    ALLOW_SANDBOX_OTP: bool = os.getenv("ALLOW_SANDBOX_OTP", "false").lower() in ("true", "1", "yes")
-
-    # Google OAuth
-    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
-    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
-
-    # Communication Gateways: SMS OTP Provider Configuration
-    SMS_PROVIDER: str = (os.getenv("SMS_PROVIDER") or "msg91").lower().strip().strip('"\'')
-    MSG91_AUTH_KEY: str = (os.getenv("MSG91_AUTH_KEY") or os.getenv("MSG91_KEY") or "").strip().strip('"\'')
-    MSG91_TEMPLATE_ID: str = (os.getenv("MSG91_TEMPLATE_ID") or "").strip().strip('"\'')
-    MSG91_SENDER_ID: str = (os.getenv("MSG91_SENDER_ID") or "").strip().strip('"\'')
-
-    # Optional Twilio Provider
-    TWILIO_ACCOUNT_SID: str = (os.getenv("TWILIO_ACCOUNT_SID") or "").strip().strip('"\'')
-    TWILIO_AUTH_TOKEN: str = (os.getenv("TWILIO_AUTH_TOKEN") or "").strip().strip('"\'')
-    TWILIO_FROM_PHONE: str = (os.getenv("TWILIO_FROM_PHONE") or "").strip().strip('"\'')
-
-    # Communication Gateways: HTTPS Transactional Email Provider (Render Production)
-    EMAIL_PROVIDER: str = (os.getenv("EMAIL_PROVIDER") or "resend").lower().strip().strip('"\'')
-    EMAIL_API_KEY: str = (
-        os.getenv("EMAIL_API_KEY") or
-        os.getenv("RESEND_API_KEY") or
-        os.getenv("RESEND_KEY") or
-        ""
-    ).strip().strip('"\'')
-    EMAIL_FROM: str = (
-        os.getenv("EMAIL_FROM") or
-        os.getenv("RESEND_FROM") or
-        os.getenv("MAIL_FROM") or
-        ""
-    ).strip().strip('"\'')
-    EMAIL_FROM_NAME: str = (
-        os.getenv("EMAIL_FROM_NAME") or
-        "Nigrani AI Vigilance"
-    ).strip().strip('"\'')
-
-    # Communication Gateways: SMTP Email Configuration (Optional local/fallback)
-    SMTP_HOST: str = (os.getenv("SMTP_HOST") or "").strip().strip('"\'')
-    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
-    SMTP_USER: str = (os.getenv("SMTP_USER") or "").strip().strip('"\'')
-    SMTP_PASSWORD: str = (os.getenv("SMTP_PASSWORD") or "").strip().strip('"\'')
-    SMTP_FROM_EMAIL: str = (os.getenv("SMTP_FROM_EMAIL") or "").strip().strip('"\'')
-    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("true", "1", "yes")
-    SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "false").lower() in ("true", "1", "yes")
 
     # AI Provider: 'mock' (offline deterministic offline demo) or 'gemini'
     AI_PROVIDER: str = os.getenv("AI_PROVIDER", "mock")
@@ -140,16 +89,6 @@ class Settings(BaseModel):
     # Uploads
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
     MAX_FILE_SIZE_MB: int = int(os.getenv("MAX_FILE_SIZE_MB", "50"))
-
-    def is_sandbox_otp_allowed(self) -> bool:
-        """
-        STRICT SECURITY GUARD:
-        In production, sandbox OTP display in API responses is NEVER permitted.
-        Only allowed when ENVIRONMENT is explicitly 'development' or 'test' AND ALLOW_SANDBOX_OTP is True.
-        """
-        if self.ENVIRONMENT in ("production", "prod"):
-            return False
-        return self.ALLOW_SANDBOX_OTP
 
 
 settings = Settings()
