@@ -179,3 +179,108 @@ Nigrani-AI/
 ├── start.bat                      # 1-click Windows runner for local development
 └── README.md
 ```
+
+---
+
+## 🔐 Enterprise Authentication & Real OTP Delivery Architecture
+
+Nigrani AI includes a multi-factor authentication and identity management system designed for public sector compliance:
+
+```
+Officer Registration / Sign In
+             │
+      Password Check (PBKDF2-HMAC-SHA256, 600k iters)
+             │
+      ┌──────┴───────────────────────────────────────┐
+      ▼                                              ▼
+Real SMS OTP (MSG91 / Twilio)            Real Email OTP (SMTP TLS)
+  - E.164 phone normalization              - Multipart HTML + Text
+  - 6-digit cryptographic token            - 10-minute validity
+  - Provider failure detection             - Cooldown enforcement (60s)
+      │                                              │
+      └──────────────────────┬───────────────────────┘
+                             ▼
+               Dual-Channel Account Verification
+                             ▼
+         HMAC-SHA256 Signed Session Token Issued
+                             ▼
+                 Officer Dossier Activated
+```
+
+### 1. Production vs Development Mode
+
+| Behavior | `ENVIRONMENT=production` (Default on Render) | `ENVIRONMENT=development` (Local Dev) |
+| :--- | :--- | :--- |
+| **`ALLOW_SANDBOX_OTP`** | `false` (Mandatory) | `true` (Optional for offline dev) |
+| **OTP Exposure** | **NEVER** returned in JSON, UI, or logs | Only in sandbox provider when unconfigured |
+| **Gateway Failures** | Rejects request with clear provider error | Emits safe dev log |
+| **Client UI** | Shows: *"Verification code sent successfully."* | Shows: *"Verification code sent successfully."* |
+
+---
+
+## 🛠️ Production Setup Instructions (Render Cloud)
+
+### 1. Exact Environment Variables to Configure on Render
+
+In your **Render Dashboard** → Select **Nigrani-AI** Web Service → **Environment**:
+
+```env
+# Server & Security Profile
+ENVIRONMENT=production
+ALLOW_SANDBOX_OTP=false
+SECRET_KEY=<generate-with: openssl rand -hex 32>
+APP_CURRENT_YEAR=2026
+APP_CURRENT_DATE=2026-09-04
+
+# Database Connection (Render PostgreSQL)
+DATABASE_URL=postgresql+asyncpg://<username>:<password>@<render-db-host>:5432/<database>
+
+# CORS Origins
+CORS_ORIGINS=https://pramendra0001.github.io,http://localhost:5173,http://127.0.0.1:5173
+
+# SMS OTP Provider (MSG91 - India Primary)
+SMS_PROVIDER=msg91
+MSG91_AUTH_KEY=<your-msg91-auth-key>
+MSG91_TEMPLATE_ID=<your-msg91-otp-template-id>
+MSG91_SENDER_ID=<your-approved-sender-id>
+
+# Email OTP Gateway (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=<your-email@gmail.com>
+SMTP_PASSWORD=<your-app-password>
+SMTP_FROM_EMAIL=<your-email@gmail.com>
+SMTP_USE_TLS=true
+
+# Google OAuth 2.0
+GOOGLE_CLIENT_ID=<your-client-id>.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
+```
+
+### 2. Provider Account Setup Details
+
+#### A. MSG91 SMS Gateway (Primary for India)
+1. Sign up at [https://msg91.com](https://msg91.com).
+2. Go to **OTP Service** and create an OTP Template.
+3. Set Template Message: `Your Nigrani AI verification code is ##OTP##. Valid for 10 minutes.`
+4. Copy the **Template ID** and **Authkey**.
+5. Add `MSG91_AUTH_KEY` and `MSG91_TEMPLATE_ID` to Render environment variables.
+
+#### B. SMTP Email Gateway (Gmail Example)
+1. In your Google Account: **Security** → **2-Step Verification** → **App passwords**.
+2. Create an App Password for "Nigrani AI".
+3. Add `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER`, and `SMTP_PASSWORD` to Render environment variables.
+
+#### C. Google OAuth 2.0
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create an **OAuth 2.0 Web Client ID**.
+2. Set **Authorized JavaScript origins**: `https://pramendra0001.github.io`
+3. Set **Authorized redirect URIs**: `https://pramendra0001.github.io/Nigrani-AI/`
+4. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to Render.
+5. Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets or frontend build environment.
+
+#### D. Render PostgreSQL Persistence
+1. In Render Dashboard, click **New +** → **PostgreSQL**.
+2. Set Database Name: `nigrani_db`.
+3. Copy the **Internal Database URL** and set as `DATABASE_URL` in the Backend Service.
+4. On startup, `init_db()` provisions tables safely with connection pooling (`pool_pre_ping=True`).
+

@@ -188,8 +188,6 @@ export interface AuthResponse {
   verification?: {
     email_verified: boolean;
     phone_verified: boolean;
-    sandbox_email_otp?: string | null;
-    sandbox_phone_otp?: string | null;
   };
   message?: string;
 }

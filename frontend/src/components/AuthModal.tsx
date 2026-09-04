@@ -47,7 +47,6 @@ export const AuthModal: React.FC<Props> = ({
   // Verification states
   const [verifyTarget, setVerifyTarget] = useState<'email' | 'phone'>('email');
   const [otpValue, setOtpValue] = useState('');
-  const [sandboxOtp, setSandboxOtp] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
   // Reset password states
@@ -86,10 +85,7 @@ export const AuthModal: React.FC<Props> = ({
         organization,
         designation,
       });
-      setSuccessMsg(res.message || 'Account registered! Please verify your contact information.');
-      if (res.verification?.sandbox_email_otp) {
-        setSandboxOtp(res.verification.sandbox_email_otp);
-      }
+      setSuccessMsg(res.message || 'Account registered! Verification code sent successfully.');
       setMode('verify');
       setCooldown(60);
     } catch (err: any) {
@@ -123,11 +119,10 @@ export const AuthModal: React.FC<Props> = ({
     try {
       if (verifyTarget === 'email') {
         await api.verifyEmailOtp(email, otpValue);
-        setSuccessMsg('Email successfully verified!');
+        setSuccessMsg('Email successfully verified! Please verify your phone number.');
         // Move to phone verification if unverified
         setVerifyTarget('phone');
         setOtpValue('');
-        setSandboxOtp(null);
         setCooldown(60);
       } else {
         await api.verifyPhoneOtp(phone, otpValue);
@@ -151,8 +146,7 @@ export const AuthModal: React.FC<Props> = ({
       const target = verifyTarget === 'email' ? email : phone;
       const type = verifyTarget === 'email' ? 'EMAIL_VERIFICATION' : 'PHONE_VERIFICATION';
       const res: any = await api.resendOtp(target, type);
-      setSuccessMsg(res.message);
-      if (res.sandbox_otp) setSandboxOtp(res.sandbox_otp);
+      setSuccessMsg(res.message || 'Verification code sent successfully.');
       setCooldown(60);
     } catch (err: any) {
       setError(err.message || 'Failed to resend verification code.');
@@ -213,8 +207,7 @@ export const AuthModal: React.FC<Props> = ({
     try {
       if (resetStep === 'request') {
         const res: any = await api.forgotPassword(resetEmail);
-        setSuccessMsg(res.message);
-        if (res.sandbox_otp) setSandboxOtp(res.sandbox_otp);
+        setSuccessMsg(res.message || 'If an account with this email exists, a password reset code has been sent.');
         setResetStep('submit');
       } else {
         await api.resetPassword({
@@ -275,19 +268,6 @@ export const AuthModal: React.FC<Props> = ({
             </div>
           )}
 
-          {sandboxOtp && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-900">
-              <div className="flex items-center justify-between font-bold">
-                <span>⚡ Sandbox Code Active:</span>
-                <span className="font-mono bg-white px-2 py-0.5 rounded border border-amber-300 text-amber-800 text-sm">
-                  {sandboxOtp}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] text-amber-700">
-                (External SMS/SMTP provider unconfigured. Use this instant verification code).
-              </p>
-            </div>
-          )}
 
           {/* ---------------- LOGIN MODE ---------------- */}
           {mode === 'login' && (

@@ -556,10 +556,8 @@ export const api = {
         verification: {
           email_verified: false,
           phone_verified: false,
-          sandbox_email_otp: '123456',
-          sandbox_phone_otp: '123456',
         },
-        message: 'Account created successfully (Offline Sandbox). Use OTP 123456.',
+        message: 'Account created successfully. Verification code sent successfully.',
       };
       localStorage.setItem('nigrani_access_token', res.access_token);
       localStorage.setItem('nigrani_user_profile', JSON.stringify(mockUser));
@@ -650,8 +648,7 @@ export const api = {
   resendOtp: (target: string, codeType: string = 'EMAIL_VERIFICATION') =>
     requestWithFallback('/auth/resend-otp', { method: 'POST', body: JSON.stringify({ target, code_type: codeType }) }, () => ({
       status: 'sent',
-      message: `Code sent to ${target} (Sandbox Code: 123456)`,
-      sandbox_otp: '123456',
+      message: 'Verification code sent successfully.',
     })),
 
   googleAuth: (credential: string) =>
@@ -683,8 +680,7 @@ export const api = {
   forgotPassword: (email: string) =>
     requestWithFallback('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }, () => ({
       status: 'sent',
-      message: 'Password reset code dispatched (Sandbox Code: 654321)',
-      sandbox_otp: '654321',
+      message: 'If an account with this email exists, a password reset code has been sent.',
     })),
 
   resetPassword: (payload: { email: string; otp: string; new_password: string }) =>

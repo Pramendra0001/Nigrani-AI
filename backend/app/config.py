@@ -81,13 +81,25 @@ class Settings(BaseModel):
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
-    # Communication Gateways (Optional: If empty, messages are logged to audit trail)
+    # Communication Gateways: SMS OTP Provider Configuration
+    SMS_PROVIDER: str = os.getenv("SMS_PROVIDER", "msg91").lower()
+    MSG91_AUTH_KEY: str = os.getenv("MSG91_AUTH_KEY", "")
+    MSG91_TEMPLATE_ID: str = os.getenv("MSG91_TEMPLATE_ID", "")
+    MSG91_SENDER_ID: str = os.getenv("MSG91_SENDER_ID", "")
+
+    # Optional Twilio Provider
+    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_FROM_PHONE: str = os.getenv("TWILIO_FROM_PHONE", "")
+
+    # Communication Gateways: SMTP Email Configuration
     SMTP_HOST: str = os.getenv("SMTP_HOST", "")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER: str = os.getenv("SMTP_USER", "")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
-    SMS_GATEWAY_URL: str = os.getenv("SMS_GATEWAY_URL", "")
-    SMS_API_KEY: str = os.getenv("SMS_API_KEY", "")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "")
+    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("true", "1", "yes")
+    SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "false").lower() in ("true", "1", "yes")
 
     # AI Provider: 'mock' (offline deterministic SIH demo) or 'gemini'
     AI_PROVIDER: str = os.getenv("AI_PROVIDER", "mock")

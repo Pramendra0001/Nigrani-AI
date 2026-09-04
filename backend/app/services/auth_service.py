@@ -21,6 +21,8 @@ from app.utils.security import (
     verify_otp,
     rate_limiter,
 )
+from app.services.sms_provider import get_sms_provider, SMSDeliveryError
+from app.services.email_provider import get_email_provider, EmailDeliveryError
 
 logger = logging.getLogger("nigrani.auth")
 
@@ -117,17 +119,20 @@ class AuthService:
 
         # STRICT PRODUCTION GUARD: Never expose OTP in response if in production mode
         allow_sandbox = settings.is_sandbox_otp_allowed()
+        verif_data: Dict[str, Any] = {
+            "email_verified": user.is_email_verified,
+            "phone_verified": user.is_phone_verified,
+        }
+        if allow_sandbox:
+            verif_data["sandbox_email_otp"] = email_otp
+            verif_data["sandbox_phone_otp"] = phone_otp
+
         return {
             "user": self._user_dict(user),
             "access_token": access_token,
             "session_token": raw_session_token,
-            "verification": {
-                "email_verified": user.is_email_verified,
-                "phone_verified": user.is_phone_verified,
-                "sandbox_email_otp": email_otp if (allow_sandbox and not settings.SMTP_HOST) else None,
-                "sandbox_phone_otp": phone_otp if (allow_sandbox and not settings.SMS_GATEWAY_URL) else None,
-            },
-            "message": "Account created successfully. Please verify your email and phone number.",
+            "verification": verif_data,
+            "message": "Account created successfully. Verification code sent successfully.",
         }
 
     # ---------------------------------------------------------
@@ -242,13 +247,18 @@ class AuthService:
         )
         db.add(code)
 
-        # Dispatch
-        if code_type == "EMAIL_VERIFICATION" and settings.SMTP_HOST:
-            logger.info(f"Dispatching production verification email to {target}")
-        elif code_type == "PHONE_VERIFICATION" and settings.SMS_GATEWAY_URL:
-            logger.info(f"Dispatching production SMS OTP to {target}")
-        else:
-            logger.info(f"[SANDBOX OTP DISPATCH] Target: {target} | Type: {code_type} | Code: {plain_otp}")
+        # Dispatch via real external communication providers
+        try:
+            if code_type in ("EMAIL_VERIFICATION", "PASSWORD_RESET"):
+                email_provider = get_email_provider()
+                await email_provider.send_otp(target, plain_otp)
+            elif code_type == "PHONE_VERIFICATION":
+                sms_provider = get_sms_provider()
+                await sms_provider.send_otp(target, plain_otp)
+        except (SMSDeliveryError, EmailDeliveryError) as exc:
+            logger.error(f"OTP delivery error for {target} ({code_type}): {str(exc)}")
+            # Do NOT pretend it was sent if provider delivery failed
+            raise ValueError(f"OTP delivery failed: {str(exc)}")
 
         return plain_otp
 
@@ -312,7 +322,7 @@ class AuthService:
             .order_by(VerificationCode.created_at.desc())
         )).scalars().first()
 
-        if last_code and not last_code.is_used:
+        if last_code:
             elapsed = (datetime.utcnow() - last_code.last_sent_at).total_seconds()
             if elapsed < settings.OTP_RESEND_COOLDOWN_SECONDS:
                 wait_sec = int(settings.OTP_RESEND_COOLDOWN_SECONDS - elapsed)
@@ -323,11 +333,10 @@ class AuthService:
         await db.commit()
 
         allow_sandbox = settings.is_sandbox_otp_allowed()
-        has_gateway = settings.SMTP_HOST if code_type == "EMAIL_VERIFICATION" else settings.SMS_GATEWAY_URL
         return {
             "status": "sent",
-            "message": f"Verification code sent to {clean_target}.",
-            "sandbox_otp": new_otp if (allow_sandbox and not has_gateway) else None,
+            "message": "Verification code sent successfully.",
+            "sandbox_otp": new_otp if allow_sandbox else None,
         }
 
     async def _validate_and_consume_otp(self, db: AsyncSession, target: str, code_type: str, otp: str) -> VerificationCode:
@@ -526,7 +535,7 @@ class AuthService:
         return {
             "status": "sent",
             "message": "If an account with this email exists, a password reset code has been sent.",
-            "sandbox_otp": reset_otp if (allow_sandbox and not settings.SMTP_HOST) else None,
+            "sandbox_otp": reset_otp if allow_sandbox else None,
         }
 
     async def reset_password(self, db: AsyncSession, email: str, otp: str, new_password: str) -> Dict[str, Any]:
