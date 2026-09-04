@@ -168,6 +168,24 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         </div>
       </div>
 
+      {/* Official Decision-Support Protocol Banner */}
+      <div className="flex items-start gap-3 rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/70 dark:bg-sky-950/30 p-4 text-xs">
+        <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sky-950 dark:text-sky-200">
+              Official Decision-Support Notice • Smart India Hackathon Track 26102
+            </span>
+            <span className="rounded bg-sky-100 dark:bg-sky-900/80 px-1.5 py-0.2 text-[10px] font-mono text-sky-700 dark:text-sky-300">
+              Non-Accusatory Protocol
+            </span>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
+            Automated anomaly scores are statistical indicators designed to prioritize human review queues. High scores reflect statistical cost variance, physical delay, or data discrepancies, and do not constitute an automatic determination of corruption or guilt.
+          </p>
+        </div>
+      </div>
+
       {/* Top Profile Summary Card */}
       <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">

@@ -112,6 +112,24 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
         </div>
       </div>
 
+      {/* Featured SIH Demonstration Shortcut */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-sky-300/70 dark:border-sky-800/70 bg-sky-50/50 dark:bg-sky-950/20 text-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="rounded bg-sky-600 text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-wide shrink-0">
+            SIH Demo Case
+          </span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200">
+            <strong className="font-mono text-sky-600 dark:text-sky-400">MPLADS-LS-002</strong>: Ravindra Dattaram Waikar — Mumbai North West (₹537.99L disbursed, 0% works completed)
+          </span>
+        </div>
+        <button
+          onClick={() => onSelectProject('MPLADS-LS-002')}
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 dark:bg-sky-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-bold shrink-0 transition"
+        >
+          <span>Open Case</span>
+        </button>
+      </div>
+
       {/* Filter Control Bar */}
       <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-4 shadow-xs space-y-3">
         {/* Search bar */}

@@ -1,14 +1,21 @@
-# Nigrani AI — Public Project Intelligence & Anomaly Review Platform
+# Nigrani AI — AI-Powered MPLADS Intelligence, Anomaly Detection & Decision Support Platform
 
-**Version:** 1.0  
-**Target:** Smart India Hackathon / Government & Public Infrastructure Vigilance  
-**Stack:** FastAPI, Python 3.11+, SQLite / PostgreSQL, React 19, TypeScript, Vite, Tailwind CSS
+**Primary Positioning:** AI-Powered MPLADS Intelligence, Anomaly Detection & Decision Support Platform  
+**Supporting Line:** AI-Powered Public Project Intelligence  
+**Problem Statement ID:** 26102  
+**Organization:** Ministry of Statistics and Programme Implementation (MoSPI)  
+**Department:** Data Informatics & Innovation Division (DIID)  
+**Category:** Software | **Theme:** Smart Automation  
+**Stack:** FastAPI, Python 3.11+, SQLite / PostgreSQL, React 19, TypeScript, Vite, Tailwind CSS  
+
+> **Official Decision-Support Disclaimer:**  
+> An anomaly or risk score is an analytical indicator requiring human review and does not constitute proof of corruption, fraud, or wrongdoing. Nigrani AI serves as a decision-support platform for vigilance officers, State Nodal Authorities, and district administrators.
 
 ---
 
 ## 🎯 Executive Summary & Core Value Proposition
 
-**Nigrani AI** transforms thousands of raw public infrastructure project records into an **explainable, prioritized review queue**.
+**Nigrani AI** transforms 774 official Parliamentary Constituency MPLADS project portfolios into an **explainable, prioritized review queue**.
 
 Public infrastructure datasets contain vast volumes of information across budgets, expenditures, contractor bids, geolocations, categories, and timelines. Manual auditing of every project is humanly impossible. Nigrani AI does not accuse anyone of corruption; instead, it identifies statistical outliers, potential duplicate allocations, project delays, and data quality flaws, providing human reviewers with the forensic evidence needed to make informed decisions.
 

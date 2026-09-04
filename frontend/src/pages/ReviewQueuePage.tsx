@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ClipboardList, ArrowRight, Filter, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
+import { ClipboardList, ArrowRight, Filter, RefreshCw, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 import { api } from '../api';
 import { ReviewCaseItem } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
@@ -59,6 +59,14 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
         </button>
       </div>
 
+      {/* Non-Accusatory Human Review Protocol Notice */}
+      <div className="flex items-center gap-2.5 rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/70 dark:bg-sky-950/30 px-4 py-2.5 text-[11px] text-slate-600 dark:text-slate-400">
+        <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+        <span>
+          <strong>Human-in-the-Loop Protocol:</strong> Cases in this queue are prioritized via statistical variance models. Human analysts verify evidence, invoices, and physical progress before any administrative action.
+        </span>
+      </div>
+
       {/* Filters bar */}
       <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-[#0b1222] p-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs text-xs">
         <div className="flex items-center gap-2">
@@ -114,12 +122,12 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
           cases.map((c) => (
             <div
               key={c.id}
-              onClick={() => onSelectProject(c.project_id)}
+              onClick={() => onSelectProject(c.project_code || c.project_id)}
               className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] hover:border-sky-500/50 hover:bg-sky-50/20 dark:hover:bg-slate-800/30 transition-all cursor-pointer shadow-xs gap-4"
             >
               <div className="space-y-1.5 flex-1">
                 <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">{c.project_id}</span>
+                  <span className="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">{c.project_code || c.project_id}</span>
                   <StatusBadge status={c.status} type="review" />
                   <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">•</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
