@@ -119,11 +119,11 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
             SIH Demo Case
           </span>
           <span className="font-semibold text-slate-800 dark:text-slate-200">
-            <strong className="font-mono text-sky-600 dark:text-sky-400">MPLADS-LS-002</strong>: Ravindra Dattaram Waikar — Mumbai North West (₹537.99L disbursed, 0% works completed)
+            <strong className="font-mono text-sky-600 dark:text-sky-400">MPLADS-LS-388</strong>: Ravindra Dattaram Waikar — Mumbai North West (₹537.99L disbursed, 0% works completed)
           </span>
         </div>
         <button
-          onClick={() => onSelectProject('MPLADS-LS-002')}
+          onClick={() => onSelectProject('MPLADS-LS-388')}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 dark:bg-sky-900 hover:bg-slate-800 text-white px-3 py-1.5 text-xs font-bold shrink-0 transition"
         >
           <span>Open Case</span>

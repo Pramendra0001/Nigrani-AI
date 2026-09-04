@@ -50,7 +50,7 @@ export const SettingsPage: React.FC = () => {
       organization: 'Ministry of Statistics & Programme Implementation (MoSPI) / Public Infrastructure Track',
       jurisdiction: 'National Vigilance Track — MPLADS & Infrastructure Funds',
       platform: 'Nigrani AI — Public Project Intelligence Platform',
-      active_dataset: 'MPLADS_Nigrani_AI_Data_Package (774 Parliamentary Constituencies)',
+      active_dataset: 'Official 18th Lok Sabha eSAKSHI Dataset (543 Parliamentary Constituencies)',
       deterministic_scoring_weights: {
         cost_variance: 0.35,
         duplicate_intelligence: 0.30,
@@ -266,7 +266,7 @@ export const SettingsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 dark:text-slate-400">Jurisdiction Track:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">774 MPs Parliamentary Constituency Funds (All 36 States/UTs)</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">543 Lok Sabha MPs Parliamentary Funds (All 36 States/UTs)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 dark:text-slate-400">Cryptographic Integrity:</span>
@@ -293,28 +293,28 @@ export const SettingsPage: React.FC = () => {
           {activeSection === 'dataset' && (
             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Official National MPLADS Dataset</h2>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Official 18th Lok Sabha eSAKSHI Dataset</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Package derived directly from the official portal (<code className="text-[11px] font-mono">mplads.gov.in</code>).
+                  Package derived directly from the official MoSPI eSAKSHI portal (<code className="text-[11px] font-mono">mplads.gov.in</code>).
                 </p>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Total Portfolios</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">774 MPs</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">543 MPs</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Allocated Funds</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹11,682 Cr</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Allocated Limit</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹8,333.67 Cr</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Expenditure</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹3,995 Cr</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹2,771.91 Cr</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Works Monitored</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">131,141</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">106,458</span>
                 </div>
               </div>
 

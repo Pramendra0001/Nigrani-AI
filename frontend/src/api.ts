@@ -743,8 +743,8 @@ export const api = {
   reloadMpladsDataset: () =>
     requestWithFallback('/data/mplads/reload', { method: 'POST' }, () => ({
       status: 'success',
-      dataset: 'MPLADS_Nigrani_AI_Data_Package',
+      dataset: 'Official 18th Lok Sabha eSAKSHI Dataset',
       total_records: clientProjects.length,
-      message: `Successfully reloaded and screened ${clientProjects.length} official MPLADS parliamentary project portfolios.`,
+      message: `Successfully reloaded and screened ${clientProjects.length} official 18th Lok Sabha parliamentary project portfolios.`,
     })),
 };

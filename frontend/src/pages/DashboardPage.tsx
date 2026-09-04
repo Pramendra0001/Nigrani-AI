@@ -105,13 +105,13 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Continuous vigilance and statistical anomaly screening across {metrics.total_projects.toLocaleString()} Parliamentary Constituency portfolios (543 Lok Sabha + 231 Rajya Sabha). Identifying unusual expenditure patterns, schedule deficits, and prioritizing {metrics.projects_requiring_review} high-variance cases for human review.
+              Continuous vigilance and statistical anomaly screening across {metrics.total_projects.toLocaleString()} official 18th Lok Sabha Parliamentary Constituency portfolios (All 543 Lok Sabha MPs across 36 States & UTs). Identifying unusual expenditure patterns, schedule deficits, and prioritizing {metrics.projects_requiring_review} high-variance cases for human review.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
             <button
-              onClick={() => onSelectProject('MPLADS-LS-002')}
+              onClick={() => onSelectProject('MPLADS-LS-388')}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2.5 text-xs font-bold text-cyan-300 shadow-md transition active:scale-95"
               title="Launch Featured SIH Review Case: Mumbai North West"
             >
@@ -137,37 +137,42 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2.5 mb-3 gap-1">
           <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-sky-500" />
-            <span>National MPLADS Scheme Overview (Official MoSPI Dataset)</span>
+            <span>National MPLADS eSAKSHI Overview (Official 18th Lok Sabha Dataset)</span>
           </span>
           <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-            All 36 States & Union Territories • 774 Members of Parliament
+            All 36 States & Union Territories • 543 Hon'ble Members of Parliament
           </span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Total Allocation</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">₹11,682.00 Cr</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹15.09 Cr Avg / MP</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">₹8,333.67 Cr</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹15.35 Cr Avg / MP</span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Cumulative Expenditure</span>
-            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400">₹3,995.40 Cr</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">34.2% Utilization</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400">₹2,771.91 Cr</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">33.26% Utilization</span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Monitored</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">131,141</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">Sanctioned projects</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Recommended</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">106,458</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹5,705.28 Cr Value</span>
+          </div>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Sanctioned</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-sky-400">79,082</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹4,169.27 Cr Value</span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Completed</span>
-            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">88,432</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">67.4% Completion Rate</span>
+            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">34,275</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">32.2% Physical Rate</span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 col-span-2 md:col-span-1">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Constituencies</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">774 MPs</span>
-            <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold block mt-0.5">543 LS + 231 RS</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Calamity Consented</span>
+            <span className="text-base sm:text-lg font-black font-mono text-amber-600 dark:text-amber-400">₹4.06 Cr</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block mt-0.5">Special Disaster Aid</span>
           </div>
         </div>
       </div>
@@ -180,7 +185,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
               Featured SIH Demo Case
             </span>
             <span className="font-mono text-xs font-bold text-sky-800 dark:text-sky-300">
-              MPLADS-LS-002 • Mumbai North West
+              MPLADS-LS-388 • Mumbai North West
             </span>
             <RiskBadge level="HIGH" score={70.0} size="sm" />
           </div>
@@ -192,7 +197,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
           </p>
         </div>
         <button
-          onClick={() => onSelectProject('MPLADS-LS-002')}
+          onClick={() => onSelectProject('MPLADS-LS-388')}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 dark:bg-sky-900 hover:bg-slate-800 dark:hover:bg-sky-800 text-white px-4 py-2 text-xs font-bold shrink-0 transition"
         >
           <span>Open Investigation Dossier</span>
@@ -217,7 +222,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
           <MetricCard
             title="Total Projects"
             value={metrics.total_projects}
-            subtitle="774 MPs Parliamentary Funds"
+            subtitle="543 LS Parliamentary Funds"
             icon={FolderKanban}
             variant="default"
             onClick={() => onNavigateTab('projects')}

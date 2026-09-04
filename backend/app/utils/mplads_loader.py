@@ -283,34 +283,78 @@ def transform_mplads_record(record: Dict[str, Any], index: int) -> Dict[str, Any
     }
 
 
+def find_mplads_json_path() -> Optional[str]:
+    """Locates the official 18th Lok Sabha MPLADS JSON file across repository paths."""
+    candidates = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "mplads_data.json")),
+        os.path.abspath(os.path.join(os.getcwd(), "backend", "app", "utils", "mplads_data.json")),
+        os.path.abspath(os.path.join(os.getcwd(), "frontend", "src", "demo_projects.json")),
+    ]
+    for p in candidates:
+        if os.path.exists(p) and os.path.getsize(p) > 1000:
+            return p
+    return None
+
+
 async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> int:
     """
-    Ingests the official MPLADS Excel dataset into the SQLite/Postgres database.
-    Replaces any existing mock project data with the real 774 MP records.
+    Ingests the official 18th Lok Sabha MPLADS dataset (543 MPs) into the SQLite/Postgres database.
+    Replaces any existing mock or legacy project data with the real 543 MP records.
     Runs baseline computational intelligence analysis across all records.
     """
+    json_path = find_mplads_json_path()
     excel_path = find_mplads_excel_path()
-    if not excel_path:
-        logger.warning("MPLADS Excel file not found on filesystem. Skipping real data ingestion.")
+    if not json_path and not excel_path:
+        logger.warning("Neither MPLADS JSON nor Excel dataset found on filesystem. Skipping real data ingestion.")
         return 0
 
-    # Check if database already has real MPLADS data
+    # Check if database already has official 543 MPLADS data
     existing_count = (await db.execute(select(func.count()).select_from(Project))).scalar() or 0
     first_proj = (await db.execute(select(Project).limit(1))).scalar_one_or_none()
     is_mplads_already = first_proj and first_proj.project_id.startswith("MPLADS-")
 
-    if existing_count > 0 and is_mplads_already and not force_reload:
-        logger.info(f"Database already contains {existing_count} official MPLADS project records. Skipping re-seed.")
+    if existing_count == 543 and is_mplads_already and not force_reload:
+        logger.info(f"Database already contains {existing_count} official 18th Lok Sabha project records. Skipping re-seed.")
         return existing_count
 
-    logger.info(f"Ingesting real MPLADS dataset from: {excel_path}")
-    raw_records = parse_mplads_excel(excel_path)
-    if not raw_records:
-        logger.error("No records parsed from MPLADS Excel file.")
+    # Prepare items to insert
+    items_to_insert = []
+    if json_path:
+        logger.info(f"Ingesting official 18th Lok Sabha MPLADS dataset from: {json_path}")
+        with open(json_path, "r", encoding="utf-8") as f:
+            json_items = json.load(f)
+        for item in json_items:
+            s_d = datetime.strptime(item["start_date"], "%Y-%m-%d").date() if isinstance(item["start_date"], str) else item["start_date"]
+            e_d = datetime.strptime(item["expected_end_date"], "%Y-%m-%d").date() if isinstance(item["expected_end_date"], str) else item["expected_end_date"]
+            items_to_insert.append({
+                "project_id": item["project_id"],
+                "project_name": item["project_name"],
+                "description": item["description"],
+                "state": item["state"],
+                "district": item["district"],
+                "category": item.get("category", "MPLADS — Lok Sabha"),
+                "budget": float(item["budget"]),
+                "actual_cost": float(item["actual_cost"]),
+                "start_date": s_d,
+                "expected_end_date": e_d,
+                "completion_percentage": float(item["completion_percentage"]),
+                "status": item["status"],
+                "latitude": float(item["latitude"]),
+                "longitude": float(item["longitude"]),
+                "raw_record": item,
+            })
+    elif excel_path:
+        logger.info(f"Ingesting MPLADS dataset from Excel fallback: {excel_path}")
+        raw_records = parse_mplads_excel(excel_path)
+        for idx, raw in enumerate(raw_records, start=1):
+            items_to_insert.append(transform_mplads_record(raw, idx))
+
+    if not items_to_insert:
+        logger.error("No records loaded from MPLADS dataset sources.")
         return 0
 
     # Wipe previous mock data safely
-    logger.info("Purging legacy mock project data to ensure pristine government dataset state...")
+    logger.info("Purging legacy project data to ensure pristine government dataset state...")
     await db.execute(delete(ReviewNote))
     await db.execute(delete(ReviewCase))
     await db.execute(delete(DuplicateCandidate))
@@ -323,11 +367,9 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
     await db.execute(delete(Project))
     await db.flush()
 
-    # Insert 774 real MPLADS projects
+    # Insert real MPLADS projects
     created_projects = []
-    for idx, raw in enumerate(raw_records, start=1):
-        item = transform_mplads_record(raw, idx)
-
+    for item in items_to_insert:
         proj = Project(
             id=str(uuid.uuid4()),
             project_id=item["project_id"],
@@ -361,7 +403,7 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
     logger.info(f"Successfully committed {len(created_projects)} real MPLADS project records to database.")
 
     # Run AI & statistical anomaly engines over the new real dataset
-    logger.info("Executing unified anomaly detection and risk scoring across all 774 MPLADS records...")
+    logger.info(f"Executing unified anomaly detection and risk scoring across all {len(created_projects)} records...")
     analysis_service = AnalysisService()
     analysis_summary = await analysis_service.analyze_batch(db)
     logger.info(f"MPLADS Analysis Complete: {analysis_summary['completed']} analyzed, {analysis_summary['errors']} errors.")

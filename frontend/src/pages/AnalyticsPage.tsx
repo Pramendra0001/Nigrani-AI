@@ -167,7 +167,7 @@ export const AnalyticsPage: React.FC = () => {
             </div>
             <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Dataset Scale</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">774 MPLADS Projects</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">543 LS Constituencies</span>
             </div>
             <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">AI Provider</span>

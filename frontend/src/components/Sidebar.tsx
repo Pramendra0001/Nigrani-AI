@@ -120,7 +120,7 @@ export const Sidebar: React.FC<Props> = ({
               Nigrani AI prioritizes review queues through reproducible statistical baselines, not arbitrary accusations.
             </p>
             <div className="mt-2.5 pt-2 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between text-[10px] font-semibold font-mono">
-              <span className="text-slate-500 dark:text-slate-400">774 MPLADS Projects</span>
+              <span className="text-slate-500 dark:text-slate-400">543 LS Constituencies</span>
               <span className="text-emerald-600 dark:text-emerald-400">Deterministic</span>
             </div>
           </div>
