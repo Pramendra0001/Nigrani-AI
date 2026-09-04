@@ -2,12 +2,29 @@
 
 ## AI-Powered MPLADS Intelligence, Anomaly Detection & Decision-Support Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-0284c7?style=flat-square&logo=github)](https://pramendra0001.github.io/Nigrani-AI/)
+[![Backend API](https://img.shields.io/badge/API-FastAPI%20Render-10b981?style=flat-square&logo=fastapi)](https://nigrani-ai-u7gz.onrender.com/)
+[![API Docs](https://img.shields.io/badge/Documentation-Swagger%20UI-38bdf8?style=flat-square&logo=swagger)](https://nigrani-ai-u7gz.onrender.com/docs)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-24292e?style=flat-square&logo=github)](https://github.com/Pramendra0001/Nigrani-AI)
+
 Nigrani AI is an AI-powered public project intelligence and decision-support platform designed to support the monitoring and analysis of MPLADS (Member of Parliament Local Area Development Scheme) implementation data.
 
 The platform analyzes available project, financial, expenditure, progress, timeline, geospatial, and data-quality information to identify potential anomalies, unusual patterns, inefficiencies, inconsistencies, and high-risk cases requiring human review.
 
 > **Decision-Support Disclaimer:**  
 > A detected anomaly, risk score, or potential irregularity does not establish fraud, corruption, misconduct, or legal liability. Findings are evidence-based risk indicators intended to support verification and informed human review. Human examination of measurement books, administrative sanctions, and treasury vouchers remains essential.
+
+---
+
+## 🌐 Live Project & Access
+
+| Service | Access |
+|---|---|
+| 🚀 Live Application | [Open Nigrani AI](https://pramendra0001.github.io/Nigrani-AI/) |
+| ⚙️ Backend API | [Backend Service](https://nigrani-ai-u7gz.onrender.com/) |
+| 📚 API Documentation | [Interactive API Docs](https://nigrani-ai-u7gz.onrender.com/docs) |
+| ❤️ Health Check | [API Health Status](https://nigrani-ai-u7gz.onrender.com/health) |
+| 💻 Source Code | [GitHub Repository](https://github.com/Pramendra0001/Nigrani-AI) |
 
 ---
 
@@ -336,9 +353,9 @@ npm run build
 
 ## 17. Deployment
 
-- **Frontend (GitHub Pages):** Built via Vite into `frontend/dist` and served via GitHub Pages.
-- **Backend (Render):** Deployed as a web service running FastAPI via Uvicorn.
-- **Client Fallback Resiliency:** If the remote backend is offline or starting from cold idle, the frontend automatically falls back to an embedded client intelligence engine containing all 774 official parliamentary records.
+- **Frontend (GitHub Pages):** Hosted at [https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/) (compiled via Vite into `frontend/dist`).
+- **Backend (Render Cloud Web Service):** Publicly available at [https://nigrani-ai-u7gz.onrender.com/](https://nigrani-ai-u7gz.onrender.com/) with interactive Swagger docs at [/docs](https://nigrani-ai-u7gz.onrender.com/docs) and health check at [/health](https://nigrani-ai-u7gz.onrender.com/health).
+- **Client Fallback Resiliency:** If the remote backend is offline or waking from idle, the frontend automatically activates an embedded client intelligence engine containing all 774 official parliamentary records.
 
 ---
 
