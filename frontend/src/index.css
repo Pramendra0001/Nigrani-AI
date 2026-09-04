@@ -58,3 +58,18 @@ body, header, aside, main, div, button, input, select, table {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+/* Scoped Dark Mode Sidebar Menu Contrast & Visibility (Light Mode 100% untouched) */
+html.dark aside nav button {
+  color: #cbd5e1;
+}
+
+html.dark aside nav button:hover {
+  background-color: rgba(30, 41, 59, 0.85);
+  color: #ffffff;
+}
+
+html.dark aside nav button:hover svg {
+  color: #67e8f9;
+}
+

@@ -41,7 +41,7 @@ export const Navbar: React.FC<Props> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-[#070b14]/90 px-4 sm:px-6 backdrop-blur-md transition-colors">
+    <header className="fixed top-0 left-0 right-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-[#070b14]/95 px-4 sm:px-6 backdrop-blur-md transition-colors">
       {/* Brand & Identity */}
       <div className="flex items-center gap-3">
         {onToggleMobileSidebar && (

@@ -55,7 +55,7 @@ export function App() {
       />
 
       {/* Main Responsive Split Layout */}
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 relative pt-16">
         {/* Left Navigation Sidebar */}
         <Sidebar
           activeTab={activeTab === 'investigation' ? 'projects' : activeTab}
