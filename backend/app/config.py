@@ -82,28 +82,41 @@ class Settings(BaseModel):
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
     # Communication Gateways: SMS OTP Provider Configuration
-    SMS_PROVIDER: str = os.getenv("SMS_PROVIDER", "msg91").lower()
-    MSG91_AUTH_KEY: str = os.getenv("MSG91_AUTH_KEY", "")
-    MSG91_TEMPLATE_ID: str = os.getenv("MSG91_TEMPLATE_ID", "")
-    MSG91_SENDER_ID: str = os.getenv("MSG91_SENDER_ID", "")
+    SMS_PROVIDER: str = (os.getenv("SMS_PROVIDER") or "msg91").lower().strip().strip('"\'')
+    MSG91_AUTH_KEY: str = (os.getenv("MSG91_AUTH_KEY") or os.getenv("MSG91_KEY") or "").strip().strip('"\'')
+    MSG91_TEMPLATE_ID: str = (os.getenv("MSG91_TEMPLATE_ID") or "").strip().strip('"\'')
+    MSG91_SENDER_ID: str = (os.getenv("MSG91_SENDER_ID") or "").strip().strip('"\'')
 
     # Optional Twilio Provider
-    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
-    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
-    TWILIO_FROM_PHONE: str = os.getenv("TWILIO_FROM_PHONE", "")
+    TWILIO_ACCOUNT_SID: str = (os.getenv("TWILIO_ACCOUNT_SID") or "").strip().strip('"\'')
+    TWILIO_AUTH_TOKEN: str = (os.getenv("TWILIO_AUTH_TOKEN") or "").strip().strip('"\'')
+    TWILIO_FROM_PHONE: str = (os.getenv("TWILIO_FROM_PHONE") or "").strip().strip('"\'')
 
     # Communication Gateways: HTTPS Transactional Email Provider (Render Production)
-    EMAIL_PROVIDER: str = os.getenv("EMAIL_PROVIDER", "resend").lower()
-    EMAIL_API_KEY: str = os.getenv("EMAIL_API_KEY", "")
-    EMAIL_FROM: str = os.getenv("EMAIL_FROM", "")
-    EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "Nigrani AI Vigilance")
+    EMAIL_PROVIDER: str = (os.getenv("EMAIL_PROVIDER") or "resend").lower().strip().strip('"\'')
+    EMAIL_API_KEY: str = (
+        os.getenv("EMAIL_API_KEY") or
+        os.getenv("RESEND_API_KEY") or
+        os.getenv("RESEND_KEY") or
+        ""
+    ).strip().strip('"\'')
+    EMAIL_FROM: str = (
+        os.getenv("EMAIL_FROM") or
+        os.getenv("RESEND_FROM") or
+        os.getenv("MAIL_FROM") or
+        ""
+    ).strip().strip('"\'')
+    EMAIL_FROM_NAME: str = (
+        os.getenv("EMAIL_FROM_NAME") or
+        "Nigrani AI Vigilance"
+    ).strip().strip('"\'')
 
     # Communication Gateways: SMTP Email Configuration (Optional local/fallback)
-    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_HOST: str = (os.getenv("SMTP_HOST") or "").strip().strip('"\'')
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
-    SMTP_USER: str = os.getenv("SMTP_USER", "")
-    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
-    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "")
+    SMTP_USER: str = (os.getenv("SMTP_USER") or "").strip().strip('"\'')
+    SMTP_PASSWORD: str = (os.getenv("SMTP_PASSWORD") or "").strip().strip('"\'')
+    SMTP_FROM_EMAIL: str = (os.getenv("SMTP_FROM_EMAIL") or "").strip().strip('"\'')
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("true", "1", "yes")
     SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "false").lower() in ("true", "1", "yes")
 

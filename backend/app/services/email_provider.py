@@ -79,6 +79,9 @@ class EmailProvider(ABC):
         pass
 
 
+import email.utils
+
+
 class ResendEmailProvider(EmailProvider):
     """
     Primary Production HTTPS Transactional Email Provider (Render-optimized).
@@ -92,9 +95,16 @@ class ResendEmailProvider(EmailProvider):
         from_email: Optional[str] = None,
         from_name: Optional[str] = None,
     ):
-        self.api_key = (api_key if api_key is not None else settings.EMAIL_API_KEY).strip()
-        self.from_email = (from_email if from_email is not None else settings.EMAIL_FROM or "onboarding@resend.dev").strip()
-        self.from_name = (from_name if from_name is not None else settings.EMAIL_FROM_NAME or "Nigrani AI Vigilance").strip()
+        raw_key = (api_key if api_key is not None else settings.EMAIL_API_KEY).strip().strip('"\'')
+        self.api_key = raw_key
+        raw_from = (from_email if from_email is not None else settings.EMAIL_FROM or "onboarding@resend.dev").strip().strip('"\'')
+        self.from_name = (from_name if from_name is not None else settings.EMAIL_FROM_NAME or "Nigrani AI Vigilance").strip().strip('"\'')
+
+        parsed_name, parsed_addr = email.utils.parseaddr(raw_from)
+        self.from_email = parsed_addr.strip() if parsed_addr else raw_from
+        if parsed_name and not from_name and not settings.EMAIL_FROM_NAME:
+            self.from_name = parsed_name.strip()
+
         self.api_url = "https://api.resend.com/emails"
 
     async def send_otp(self, email: str, otp: str, subject: str = "Nigrani AI — Official Verification Code") -> bool:
@@ -134,6 +144,21 @@ class ResendEmailProvider(EmailProvider):
                         err_detail = err_json.get("message") or str(err_json)
                     except Exception:
                         err_detail = response.text[:200]
+
+                    if response.status_code == 403:
+                        msg_low = err_detail.lower()
+                        if "only send testing emails to your own email address" in msg_low or "resend.com/domains" in msg_low:
+                            logger.error(
+                                f"Resend 403 Testing Restriction for {masked_email}: {err_detail}"
+                            )
+                            raise EmailDeliveryError(
+                                f"Resend testing restriction (HTTP 403): Unverified sender ({self.from_email}) can only deliver to the Resend account owner's email address. To deliver verification emails to any user, verify a custom domain at https://resend.com/domains."
+                            )
+                        elif "restricted_api_key" in str(err_json).lower() or "permission" in msg_low:
+                            logger.error(f"Resend 403 API Key Permission Error: {err_detail}")
+                            raise EmailDeliveryError(
+                                "Resend API key permission error (HTTP 403): Ensure your API key has Sending Access for this domain at https://resend.com/api-keys."
+                            )
 
                     logger.error(f"Resend API error HTTP {response.status_code} for {masked_email}: {err_detail}")
                     raise EmailDeliveryError(f"Resend email delivery failed (HTTP {response.status_code}): {err_detail}")
