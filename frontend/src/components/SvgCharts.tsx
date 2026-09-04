@@ -12,7 +12,7 @@ interface DonutSlice {
 export const DonutChart: React.FC<{ data: DonutSlice[]; title?: string; size?: number }> = ({
   data,
   title,
-  size = 220,
+  size = 180,
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const total = data.reduce((sum, d) => sum + d.value, 0);
@@ -31,9 +31,9 @@ export const DonutChart: React.FC<{ data: DonutSlice[]; title?: string; size?: n
   let accumulatedPercent = 0;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox="0 0 200 200" className="rotate-[-90deg]">
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full min-w-0">
+      <div className="relative shrink-0" style={{ width: size, height: size, maxWidth: '100%' }}>
+        <svg width={size} height={size} viewBox="0 0 200 200" className="rotate-[-90deg] w-full h-full max-w-full">
           {data.map((slice, i) => {
             const percent = slice.value / total;
             const strokeDasharray = `${percent * circumference} ${circumference}`;
@@ -68,22 +68,22 @@ export const DonutChart: React.FC<{ data: DonutSlice[]; title?: string; size?: n
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5 w-full min-w-0 max-w-xs">
         {data.map((slice, i) => (
           <div
             key={slice.label}
             onMouseEnter={() => setHoveredIdx(i)}
             onMouseLeave={() => setHoveredIdx(null)}
-            className={`flex items-center gap-3 px-2 py-1 rounded-md transition-colors cursor-pointer text-xs ${
+            className={`flex items-center gap-2.5 px-2 py-1 rounded-md transition-colors cursor-pointer text-xs min-w-0 ${
               hoveredIdx === i
                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
                 : 'text-slate-600 dark:text-slate-400'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: slice.color }} />
-            <span className="flex-1 min-w-[90px]">{slice.label}</span>
-            <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{slice.value}</span>
-            <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+            <span className="flex-1 truncate min-w-0 text-left" title={slice.label}>{slice.label}</span>
+            <span className="font-mono font-bold text-slate-800 dark:text-slate-200 shrink-0">{slice.value}</span>
+            <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500 shrink-0">
               ({total > 0 ? ((slice.value / total) * 100).toFixed(0) : 0}%)
             </span>
           </div>
@@ -113,21 +113,21 @@ export const HorizontalBarChart: React.FC<{
   const maxValue = Math.max(...displayData.map((d) => d.value), 1);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 w-full min-w-0">
       {displayData.map((item) => {
         const pct = Math.round((item.value / maxValue) * 100);
         return (
-          <div key={item.label} className="group">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px]" title={item.label}>
+          <div key={item.label} className="group w-full min-w-0">
+            <div className="flex items-center justify-between text-xs mb-1 gap-2 min-w-0">
+              <span className="font-medium text-slate-700 dark:text-slate-300 truncate min-w-0 flex-1" title={item.label}>
                 {item.label}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 text-right">
                 <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                   {item.value} {valueLabel}
                 </span>
                 {item.subValue !== undefined && (
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">({item.subValue})</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">({item.subValue})</span>
                 )}
               </div>
             </div>

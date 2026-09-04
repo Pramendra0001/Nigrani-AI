@@ -54,25 +54,25 @@ export const MetricCard: React.FC<Props> = ({
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl border bg-white dark:bg-[#0b1222] p-4 sm:p-5 shadow-xs transition-all duration-200 ${styles.border} ${styles.accent} ${
+      className={`rounded-xl border bg-white dark:bg-[#0b1222] p-4 sm:p-5 shadow-xs transition-all duration-200 w-full min-w-0 overflow-hidden ${styles.border} ${styles.accent} ${
         onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md' : ''
       }`}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <div className="flex items-start justify-between gap-3 min-w-0">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
             {title}
           </p>
-          <p className={`mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight ${styles.valColor}`}>
+          <p className={`mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight truncate ${styles.valColor}`}>
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
           {subtitle && (
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
               {subtitle}
             </p>
           )}
         </div>
-        <div className={`rounded-xl p-2.5 sm:p-3 ${styles.iconBg}`}>
+        <div className={`rounded-xl p-2.5 sm:p-3 shrink-0 ${styles.iconBg}`}>
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>

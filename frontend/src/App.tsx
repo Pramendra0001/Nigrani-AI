@@ -55,7 +55,7 @@ export function App() {
       />
 
       {/* Main Responsive Split Layout */}
-      <div className="flex flex-1 relative pt-16">
+      <div className="flex flex-1 relative pt-16 w-full min-w-0">
         {/* Left Navigation Sidebar */}
         <Sidebar
           activeTab={activeTab === 'investigation' ? 'projects' : activeTab}
@@ -69,7 +69,7 @@ export function App() {
         />
 
         {/* Dynamic Center Canvas */}
-        <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full overflow-x-hidden">
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full min-w-0 overflow-x-hidden">
           {activeTab === 'dashboard' && (
             <DashboardPage
               onSelectProject={handleSelectProject}

@@ -82,11 +82,11 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0 max-w-full">
       {/* Top Banner / Executive Welcome */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#0c162d] to-[#071022] border border-slate-800/80 dark:border-sky-500/20 p-6 sm:p-7 text-white shadow-lg shadow-sky-950/10">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#0c162d] to-[#071022] border border-slate-800/80 dark:border-sky-500/20 p-6 sm:p-7 text-white shadow-lg shadow-sky-950/10 w-full min-w-0">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md bg-white/10 dark:bg-sky-950/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-300 border border-white/10 dark:border-sky-800/40 backdrop-blur-sm">
                 <Sparkles className="w-3 h-3 text-cyan-400" />
@@ -133,7 +133,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
       </div>
 
       {/* National Fiscal & Operational Overview */}
-      <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-4 shadow-xs">
+      <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-4 shadow-xs w-full min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2.5 mb-3 gap-1">
           <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-sky-500" />
@@ -143,36 +143,36 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
             All 36 States & Union Territories • 543 Hon'ble Members of Parliament
           </span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs">
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Total Allocation</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">₹8,333.67 Cr</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹15.35 Cr Avg / MP</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 text-xs w-full min-w-0">
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Total Allocation</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">₹8,333.67 Cr</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹15.35 Cr Avg / MP</span>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Cumulative Expenditure</span>
-            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400">₹2,771.91 Cr</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">33.26% Utilization</span>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Cumulative Expenditure</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400 block truncate">₹2,771.91 Cr</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">33.26% Utilization</span>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Recommended</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white">106,458</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹5,705.28 Cr Value</span>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Recommended</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">106,458</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹5,705.28 Cr Value</span>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Sanctioned</span>
-            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-sky-400">79,082</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">₹4,169.27 Cr Value</span>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Sanctioned</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-sky-400 block truncate">79,082</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹4,169.27 Cr Value</span>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Works Completed</span>
-            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">34,275</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">32.2% Physical Rate</span>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Completed</span>
+            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 block truncate">34,275</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">32.2% Physical Rate</span>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 col-span-2 md:col-span-1">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Calamity Consented</span>
-            <span className="text-base sm:text-lg font-black font-mono text-amber-600 dark:text-amber-400">₹4.06 Cr</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block mt-0.5">Special Disaster Aid</span>
+          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden col-span-2 sm:col-span-1 xl:col-span-1">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Calamity Consented</span>
+            <span className="text-base sm:text-lg font-black font-mono text-amber-600 dark:text-amber-400 block truncate">₹4.06 Cr</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block mt-0.5 truncate">Special Disaster Aid</span>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
         <h2 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 px-1">
           Core Anomaly & Pipeline Indicators
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4 w-full min-w-0">
           <MetricCard
             title="Total Projects"
             value={metrics.total_projects}
@@ -283,21 +283,21 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6 w-full min-w-0">
         {/* Risk Distribution Donut */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">Overall Risk Distribution</h3>
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">4 Tier Standard</span>
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs w-full min-w-0 overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Overall Risk Distribution</h3>
+            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 shrink-0">4 Tier Standard</span>
           </div>
-          <DonutChart data={donutData} title="Risk Profile" />
+          <DonutChart data={donutData} title="Risk Profile" size={170} />
         </div>
 
         {/* Category Breakdown Bar Chart */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">Projects by Sector Category</h3>
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Count (Avg Risk)</span>
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs w-full min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Projects by Sector Category</h3>
+            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 shrink-0">Count (Avg Risk)</span>
           </div>
           <HorizontalBarChart
             data={category_distribution.map((c) => ({
@@ -311,10 +311,10 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
         </div>
 
         {/* State Distribution */}
-        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">Geographic Spread (States)</h3>
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Regional Volume</span>
+        <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-5 shadow-xs w-full min-w-0 overflow-hidden col-span-1 md:col-span-2 xl:col-span-1">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Geographic Spread (States)</h3>
+            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 shrink-0">Regional Volume</span>
           </div>
           <HorizontalBarChart
             data={state_distribution.map((s) => ({
@@ -329,7 +329,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
       </div>
 
       {/* Priority Review Queue: Top 10 High Risk Projects */}
-      <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] shadow-xs overflow-hidden w-full min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 px-5 sm:px-6 py-4 bg-slate-50/50 dark:bg-slate-900/40 gap-3">
           <div>
             <h3 className="text-xs font-bold text-slate-900 dark:text-white">Immediate Action: Top 10 Highest Risk Projects</h3>
@@ -346,8 +346,8 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left text-xs min-w-[700px]">
             <thead className="bg-slate-50/80 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200/80 dark:border-slate-800/80 uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="py-3 px-4">Project ID</th>
