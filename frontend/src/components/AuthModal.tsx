@@ -165,9 +165,37 @@ export const AuthModal: React.FC<Props> = ({
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading(true);
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    // If real Google Client ID is provided in environment and Google script is ready
+    if (googleClientId && (window as any).google?.accounts?.id) {
+      try {
+        (window as any).google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: async (response: any) => {
+            if (response.credential) {
+              try {
+                const res = await api.googleAuth(response.credential);
+                onSuccess(res.user);
+                onClose();
+              } catch (err: any) {
+                setError(err.message || 'Google token verification failed.');
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        });
+        (window as any).google.accounts.id.prompt();
+        return;
+      } catch (err: any) {
+        console.warn('Google prompt initialization error:', err);
+      }
+    }
+
+    // Transparent evaluation fallback when external Google credentials are not yet configured
     try {
-      // Passes simulated Google credential token (ready for real Google client ID)
-      const res = await api.googleAuth('google-credential-token-sih-2026');
+      const res = await api.googleAuth('google-credential-token-demo');
       onSuccess(res.user);
       onClose();
     } catch (err: any) {
@@ -349,7 +377,9 @@ export const AuthModal: React.FC<Props> = ({
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>Continue with Google</span>
+                <span>
+                  {import.meta.env.VITE_GOOGLE_CLIENT_ID ? 'Continue with Google' : 'Continue with Google (Demo Sign-In)'}
+                </span>
               </button>
 
               <div className="pt-2 text-center text-xs text-slate-500">

@@ -126,8 +126,12 @@ async def login(req: UserLoginRequest, request: Request, db: AsyncSession = Depe
 
 
 @auth_router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)):
-    """Logs out user and invalidates client session."""
+async def logout(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Logs out user and invalidates all active sessions in the database."""
+    await auth_service.revoke_user_sessions(db, current_user.id)
     return {"status": "success", "message": "Logged out successfully."}
 
 

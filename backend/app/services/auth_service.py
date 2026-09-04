@@ -115,6 +115,8 @@ class AuthService:
         # Access token
         access_token = create_access_token(user.id, user.role)
 
+        # STRICT PRODUCTION GUARD: Never expose OTP in response if in production mode
+        allow_sandbox = settings.is_sandbox_otp_allowed()
         return {
             "user": self._user_dict(user),
             "access_token": access_token,
@@ -122,9 +124,8 @@ class AuthService:
             "verification": {
                 "email_verified": user.is_email_verified,
                 "phone_verified": user.is_phone_verified,
-                # Sandbox display when external gateways are unconfigured
-                "sandbox_email_otp": email_otp if not settings.SMTP_HOST else None,
-                "sandbox_phone_otp": phone_otp if not settings.SMS_GATEWAY_URL else None,
+                "sandbox_email_otp": email_otp if (allow_sandbox and not settings.SMTP_HOST) else None,
+                "sandbox_phone_otp": phone_otp if (allow_sandbox and not settings.SMS_GATEWAY_URL) else None,
             },
             "message": "Account created successfully. Please verify your email and phone number.",
         }
@@ -321,11 +322,12 @@ class AuthService:
         new_otp = await self._issue_otp(db, user.id if user else None, clean_target, code_type)
         await db.commit()
 
-        is_sandbox = (code_type == "EMAIL_VERIFICATION" and not settings.SMTP_HOST) or (code_type == "PHONE_VERIFICATION" and not settings.SMS_GATEWAY_URL)
+        allow_sandbox = settings.is_sandbox_otp_allowed()
+        has_gateway = settings.SMTP_HOST if code_type == "EMAIL_VERIFICATION" else settings.SMS_GATEWAY_URL
         return {
             "status": "sent",
             "message": f"Verification code sent to {clean_target}.",
-            "sandbox_otp": new_otp if is_sandbox else None,
+            "sandbox_otp": new_otp if (allow_sandbox and not has_gateway) else None,
         }
 
     async def _validate_and_consume_otp(self, db: AsyncSession, target: str, code_type: str, otp: str) -> VerificationCode:
@@ -373,24 +375,47 @@ class AuthService:
         Performs secure identity linking avoiding duplicate accounts.
         """
         import json
+        import httpx
         google_user: Dict[str, Any] = {}
 
-        # 1. Verify Google token
-        try:
-            # Decode JWT payload safely (Google ID tokens have standard format: header.payload.sig)
-            payload_part = credential_token.split(".")[1]
-            padded = payload_part + "=" * (4 - len(payload_part) % 4)
-            decoded_bytes = base64.urlsafe_b64decode(padded)
-            google_user = json.loads(decoded_bytes.decode("utf-8"))
-        except Exception:
-            # Fallback for demonstration/mock Google payload
-            google_user = {
-                "sub": f"google_sub_{abs(hash(credential_token))}",
-                "email": "analyst.demo@infrastructure.gov.in",
-                "name": "Senior Review Analyst (Google)",
-                "picture": None,
-                "email_verified": True,
-            }
+        # 1. Verify Google token securely
+        if settings.GOOGLE_CLIENT_ID:
+            # Genuine Google Identity token verification against Google OAuth2 tokeninfo endpoint
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as http_client:
+                    resp = await http_client.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={credential_token}")
+                    if resp.status_code != 200:
+                        raise ValueError("Google OAuth token verification failed. The provided token is invalid or expired.")
+                    google_user = resp.json()
+            except Exception as e:
+                raise ValueError(f"Google authentication failed: {str(e)}")
+
+            # Validate audience, issuer, and email verification
+            if google_user.get("aud") != settings.GOOGLE_CLIENT_ID:
+                raise ValueError("Google token audience mismatch: this token was not issued for this application.")
+            if google_user.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+                raise ValueError("Invalid Google token issuer.")
+            if not google_user.get("email_verified") or str(google_user.get("email_verified")).lower() != "true":
+                raise ValueError("Google email address is not verified by Google.")
+        else:
+            # In production, do NOT accept unverified tokens if GOOGLE_CLIENT_ID is not configured
+            if not settings.is_sandbox_otp_allowed():
+                raise ValueError("Google OAuth is not configured on this production instance. Please configure GOOGLE_CLIENT_ID.")
+
+            # Explicit development or local test demo fallback
+            try:
+                payload_part = credential_token.split(".")[1]
+                padded = payload_part + "=" * (4 - len(payload_part) % 4)
+                decoded_bytes = base64.urlsafe_b64decode(padded)
+                google_user = json.loads(decoded_bytes.decode("utf-8"))
+            except Exception:
+                google_user = {
+                    "sub": f"google_sub_{abs(hash(credential_token))}",
+                    "email": "analyst.demo@infrastructure.gov.in",
+                    "name": "Senior Review Analyst (Google)",
+                    "picture": None,
+                    "email_verified": True,
+                }
 
         google_sub = google_user.get("sub")
         raw_email = google_user.get("email")
@@ -497,11 +522,11 @@ class AuthService:
         reset_otp = await self._issue_otp(db, user.id, clean_email, "PASSWORD_RESET")
         await db.commit()
 
-        is_sandbox = not settings.SMTP_HOST
+        allow_sandbox = settings.is_sandbox_otp_allowed()
         return {
             "status": "sent",
-            "message": "A password reset code has been dispatched.",
-            "sandbox_otp": reset_otp if is_sandbox else None,
+            "message": "If an account with this email exists, a password reset code has been sent.",
+            "sandbox_otp": reset_otp if (allow_sandbox and not settings.SMTP_HOST) else None,
         }
 
     async def reset_password(self, db: AsyncSession, email: str, otp: str, new_password: str) -> Dict[str, Any]:
@@ -595,6 +620,11 @@ class AuthService:
         await db.execute(stmt.values(is_revoked=True))
         await db.commit()
         return {"status": "success", "message": "Logged out from all other active devices."}
+
+    async def revoke_user_sessions(self, db: AsyncSession, user_id: str) -> None:
+        """Revoke all active sessions on user logout."""
+        await db.execute(update(UserSession).where(UserSession.user_id == user_id).values(is_revoked=True))
+        await db.commit()
 
     # ---------------------------------------------------------
     # 7. Secure Account Deletion (Danger Zone)

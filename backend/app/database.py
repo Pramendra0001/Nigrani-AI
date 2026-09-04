@@ -1,4 +1,4 @@
-"""SQLAlchemy async database setup and session management."""
+"""SQLAlchemy async database setup and connection management."""
 
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -12,11 +12,22 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    future=True,
-)
+# Production connection pooling and resilience configuration
+engine_kwargs = {
+    "echo": False,
+    "future": True,
+}
+
+if "sqlite" in settings.DATABASE_URL:
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    # High-performance PostgreSQL production pooling (Render / Cloud DB)
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+    engine_kwargs["pool_recycle"] = 300
+
+engine = create_async_engine(settings.DATABASE_URL, **engine_kwargs)
 
 async_session = async_sessionmaker(
     engine,
@@ -39,7 +50,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db():
-    """Create all tables in the database."""
+    """Create and verify all tables in the database with schema self-healing."""
     async with engine.begin() as conn:
         from app.models import models  # noqa
         await conn.run_sync(Base.metadata.create_all)
