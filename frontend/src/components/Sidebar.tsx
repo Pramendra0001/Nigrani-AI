@@ -9,6 +9,10 @@ import {
   Settings as SettingsIcon,
   X,
   FileCheck2,
+  MapPin,
+  ShieldCheck,
+  TrendingUp,
+  Camera,
 } from 'lucide-react';
 import { NigraniLogo } from './NigraniLogo';
 import { ThemeToggle } from './ThemeToggle';
@@ -37,6 +41,10 @@ export const Sidebar: React.FC<Props> = ({
       icon: ClipboardCheck,
       badge: reviewCount > 0 ? reviewCount : undefined,
     },
+    { id: 'geo', label: 'Geographic Intelligence', icon: MapPin },
+    { id: 'compliance', label: 'Compliance Monitoring', icon: ShieldCheck },
+    { id: 'predictive', label: 'Predictive Insights', icon: TrendingUp },
+    { id: 'evidence', label: 'Asset & Evidence Hub', icon: Camera },
     { id: 'analytics', label: 'Sector Analytics & Weights', icon: Sliders },
     { id: 'upload', label: 'Data Ingestion & Mapping', icon: UploadCloud },
     { id: 'settings', label: 'System & Vigilance Settings', icon: SettingsIcon },
@@ -143,7 +151,7 @@ export const Sidebar: React.FC<Props> = ({
 
           <div className="text-[10px] text-slate-400 dark:text-slate-500 space-y-0.5 px-1">
             <p className="font-semibold text-slate-600 dark:text-slate-400">Nigrani AI Platform • 2026</p>
-            <p>Smart India Hackathon • Public Track</p>
+            <p>MoSPI • National Public Track</p>
           </div>
         </div>
       </aside>

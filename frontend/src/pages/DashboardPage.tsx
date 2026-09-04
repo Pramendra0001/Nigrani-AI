@@ -12,12 +12,18 @@ import {
   TrendingUp,
   Sparkles,
   Building2,
+  ShieldCheck,
+  UserCheck,
+  MapPin,
+  Sliders,
 } from 'lucide-react';
 import { api } from '../api';
 import { DashboardData, Project } from '../types';
 import { MetricCard } from '../components/MetricCard';
 import { RiskBadge } from '../components/RiskBadge';
 import { DonutChart, HorizontalBarChart } from '../components/SvgCharts';
+
+export type DashboardRole = 'MINISTRY' | 'STATE_NODAL' | 'DISTRICT' | 'MP' | 'AUDITOR' | 'ADMIN';
 
 interface Props {
   onSelectProject: (projectId: string) => void;
@@ -26,6 +32,7 @@ interface Props {
 
 export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab }) => {
   const [parliamentType, setParliamentType] = useState<'All' | 'Lok Sabha' | 'Rajya Sabha'>('All');
+  const [activeRole, setActiveRole] = useState<DashboardRole>('MINISTRY');
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,10 +105,10 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md bg-white/10 dark:bg-sky-950/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-300 border border-white/10 dark:border-sky-800/40 backdrop-blur-sm">
                 <Sparkles className="w-3 h-3 text-cyan-400" />
-                <span>MoSPI • DIID Smart Automation Track</span>
+                <span>MoSPI • Public Infrastructure Track</span>
               </span>
               <span className="rounded-md bg-slate-800/70 border border-slate-700/60 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
-                Problem Statement ID: 26102
+                Official eSAKSHI Intelligence
               </span>
               <span className="text-[11px] text-slate-400 font-mono hidden lg:inline">
                 National Coverage • 2026
@@ -121,9 +128,9 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
             <button
               onClick={() => onSelectProject('MPLADS-LS-388')}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2.5 text-xs font-bold text-cyan-300 shadow-md transition active:scale-95"
-              title="Launch Featured SIH Review Case: Mumbai North West"
+              title="Launch Priority Investigation Dossier: Mumbai North West"
             >
-              <span>SIH Showcase Case</span>
+              <span>Priority Dossier</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button
@@ -138,6 +145,67 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
 
         {/* Ambient Subtle Background Accent */}
         <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
+      </div>
+
+      {/* Role-Based Dashboard View Switcher */}
+      <div className="bg-white dark:bg-[#0b1222] p-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-sky-600 dark:text-cyan-400" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">
+              Institutional Role & Vigilance Perspective
+            </span>
+            <span className="text-[10px] rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-cyan-300 font-mono px-1.5 py-0.2">
+              Multi-Role Intelligence
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-400 font-mono">
+            Active: {
+              activeRole === 'MINISTRY' ? 'MoSPI National Oversight' :
+              activeRole === 'STATE_NODAL' ? 'State Nodal Authority' :
+              activeRole === 'DISTRICT' ? 'District Authority / Collector' :
+              activeRole === 'MP' ? 'Member of Parliament Self-Audit' :
+              activeRole === 'AUDITOR' ? 'Principal Vigilance Investigator' :
+              'Platform Data Administrator'
+            }
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {[
+            { id: 'MINISTRY', label: 'Ministry National', icon: Building2, desc: 'Macro oversight & allocations' },
+            { id: 'STATE_NODAL', label: 'State Nodal', icon: MapPin, desc: 'Jurisdiction & UC compliance' },
+            { id: 'DISTRICT', label: 'District Collector', icon: FolderKanban, desc: 'Executing agency milestones' },
+            { id: 'MP', label: 'MP Portfolio', icon: UserCheck, desc: 'Self-audit & sanction rate' },
+            { id: 'AUDITOR', label: 'Vigilance Auditor', icon: ShieldCheck, desc: 'Forensics & review triage' },
+            { id: 'ADMIN', label: 'Data Administrator', icon: Sliders, desc: 'Pipeline health & telemetry' },
+          ].map((r) => {
+            const Icon = r.icon;
+            const isCurrent = activeRole === r.id;
+            return (
+              <button
+                key={r.id}
+                onClick={() => setActiveRole(r.id as any)}
+                className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between gap-1.5 ${
+                  isCurrent
+                    ? 'border-sky-500 bg-sky-50/70 dark:bg-sky-950/40 dark:border-cyan-500 shadow-xs'
+                    : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/40'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-sky-600 dark:text-cyan-400' : 'text-slate-400'}`} />
+                  {isCurrent && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                </div>
+                <div>
+                  <p className={`text-xs font-bold ${isCurrent ? 'text-sky-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {r.label}
+                  </p>
+                  <p className="text-[10px] text-slate-400 leading-tight line-clamp-1">{r.desc}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Parliamentary Scope Selector */}
@@ -267,12 +335,12 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
         </div>
       </div>
 
-      {/* Featured SIH Demonstration Showcase Card */}
+      {/* Priority National Vigilance Dossier */}
       <div className="rounded-xl border border-sky-300/70 dark:border-sky-800/70 bg-sky-50/50 dark:bg-sky-950/20 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="rounded bg-sky-600 text-white text-[9px] font-bold px-2 py-0.5 uppercase tracking-wide">
-              Featured SIH Demo Case
+              Priority Vigilance Dossier
             </span>
             <span className="font-mono text-xs font-bold text-sky-800 dark:text-sky-300">
               MPLADS-LS-388 • Mumbai North West

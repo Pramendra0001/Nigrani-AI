@@ -120,7 +120,7 @@ class Settings(BaseModel):
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("true", "1", "yes")
     SMTP_USE_SSL: bool = os.getenv("SMTP_USE_SSL", "false").lower() in ("true", "1", "yes")
 
-    # AI Provider: 'mock' (offline deterministic SIH demo) or 'gemini'
+    # AI Provider: 'mock' (offline deterministic offline demo) or 'gemini'
     AI_PROVIDER: str = os.getenv("AI_PROVIDER", "mock")
     AI_API_KEY: str = os.getenv("AI_API_KEY", "")
     AI_MODEL: str = os.getenv("AI_MODEL", "gemini-1.5-flash")

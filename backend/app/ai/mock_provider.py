@@ -1,4 +1,4 @@
-"""Deterministic Mock AI Provider for offline SIH demonstration."""
+"""Deterministic Mock AI Provider for offline national vigilance platform."""
 
 from typing import Dict, Any, List
 from app.ai.base import BaseAIProvider

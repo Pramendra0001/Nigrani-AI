@@ -2,7 +2,7 @@
 
 **Primary Positioning:** AI-Powered MPLADS Intelligence, Anomaly Detection & Decision Support Platform  
 **Supporting Line:** AI-Powered Public Project Intelligence  
-**Problem Statement ID:** 26102  
+**Platform Track:** National Public Infrastructure & MPLADS Vigilance Framework  
 **Organization:** Ministry of Statistics and Programme Implementation (MoSPI)  
 **Department:** Data Informatics & Innovation Division (DIID)  
 **Category:** Software | **Theme:** Smart Automation  

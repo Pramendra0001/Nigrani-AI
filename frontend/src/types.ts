@@ -201,3 +201,77 @@ export interface UserSessionItem {
   is_current: boolean;
 }
 
+export interface GeoStateData {
+  state: string;
+  project_count: number;
+  total_budget: number;
+  total_expenditure: number;
+  avg_risk: number;
+  high_risk_count: number;
+  critical_risk_count: number;
+  lat: number;
+  lng: number;
+}
+
+export interface GeoSummary {
+  total_states: number;
+  states: GeoStateData[];
+}
+
+export interface ComplianceRuleItem {
+  rule_code: string;
+  name: string;
+  category: 'FINANCIAL' | 'TIMELINE' | 'PHYSICAL' | 'DOCUMENTATION';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  clause: string;
+  description: string;
+}
+
+export interface ComplianceSummary {
+  total_portfolios_audited: number;
+  compliance_rate_percent: number;
+  rules: ComplianceRuleItem[];
+  rule_violations: Record<string, number>;
+}
+
+export interface PredictiveSummary {
+  total_portfolios_modeled: number;
+  delay_probability: {
+    high_probability: number;
+    medium_probability: number;
+    low_probability: number;
+  };
+  overrun_likelihood: {
+    high_likelihood: number;
+    moderate_likelihood: number;
+    controlled_budget: number;
+  };
+  estimated_completion_quarters: Array<{
+    quarter: string;
+    projected_completed_portfolios: number;
+    forecast_spend_cr: number;
+  }>;
+}
+
+export interface EvidenceItem {
+  id: string;
+  project_id: string;
+  project_name: string;
+  stage: 'BEFORE_COMMENCEMENT' | 'DURING_EXECUTION' | 'COMPLETION_AUDIT' | 'SATELLITE_SURVEILLANCE' | 'DRONE_INSPECTION' | string;
+  location: string;
+  coordinates: string;
+  timestamp: string;
+  sha256: string;
+  status: 'VERIFIED_GEOTAGGED' | 'ANOMALY_SUSPECTED' | 'MATCH_CONFIRMED' | string;
+  finding: string;
+}
+
+export interface EvidenceSummary {
+  total_evidence_records: number;
+  verified_geotagged: number;
+  discrepancies_flagged: number;
+  drone_surveys_completed: number;
+  samples: EvidenceItem[];
+}
+
+

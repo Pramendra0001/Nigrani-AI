@@ -8,11 +8,15 @@ import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { UploadPage } from './pages/UploadPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { GeoMapPage } from './pages/GeoMapPage';
+import { CompliancePage } from './pages/CompliancePage';
+import { PredictivePage } from './pages/PredictivePage';
+import { EvidencePage } from './pages/EvidencePage';
 import { api } from './api';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'projects' | 'investigation' | 'review' | 'upload' | 'analytics' | 'settings'
+    'dashboard' | 'projects' | 'investigation' | 'review' | 'upload' | 'analytics' | 'settings' | 'geo' | 'compliance' | 'predictive' | 'evidence'
   >('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [reviewCount, setReviewCount] = useState<number>(0);
@@ -93,6 +97,22 @@ export function App() {
             <ReviewQueuePage onSelectProject={handleSelectProject} />
           )}
 
+          {activeTab === 'geo' && (
+            <GeoMapPage onSelectProject={handleSelectProject} />
+          )}
+
+          {activeTab === 'compliance' && (
+            <CompliancePage onSelectProject={handleSelectProject} />
+          )}
+
+          {activeTab === 'predictive' && (
+            <PredictivePage onSelectProject={handleSelectProject} />
+          )}
+
+          {activeTab === 'evidence' && (
+            <EvidencePage onSelectProject={handleSelectProject} />
+          )}
+
           {activeTab === 'upload' && (
             <UploadPage
               onUploadSuccess={() => {
@@ -112,3 +132,4 @@ export function App() {
 }
 
 export default App;
+

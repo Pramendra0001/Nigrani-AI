@@ -341,3 +341,99 @@ class SecurityAuditLog(Base):
     user_agent: Mapped[str] = mapped_column(String(255), default="Unknown")
     details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class MemberOfParliament(Base):
+    """Elected/Nominated Member of Parliament representing Lok Sabha or Rajya Sabha."""
+    __tablename__ = "members_of_parliament"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    mp_name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    house: Mapped[str] = mapped_column(String(50), index=True, nullable=False)  # Lok Sabha, Rajya Sabha
+    state: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    constituency: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    party: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    term: Mapped[str] = mapped_column(String(50), default="18th Lok Sabha / Current RS")
+    total_entitlement: Mapped[float] = mapped_column(Float, default=0.0)
+    total_sanctioned: Mapped[float] = mapped_column(Float, default=0.0)
+    total_expenditure: Mapped[float] = mapped_column(Float, default=0.0)
+    project_id: Mapped[Optional[str]] = mapped_column(String(50), ForeignKey("projects.project_id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Constituency(Base):
+    """Parliamentary or Administrative Constituency."""
+    __tablename__ = "constituencies"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    house: Mapped[str] = mapped_column(String(50), default="Lok Sabha")
+    state: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    district: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ProjectDocument(Base):
+    """Official audit, sanction, and expenditure verification documents."""
+    __tablename__ = "project_documents"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), index=True, nullable=False)
+    doc_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_size_kb: Mapped[int] = mapped_column(Integer, default=124)
+    file_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    verification_status: Mapped[str] = mapped_column(String(50), default="VERIFIED")
+    uploaded_by: Mapped[str] = mapped_column(String(100), default="eSAKSHI Integration Portal")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ProjectEvidenceImage(Base):
+    """Geotagged physical evidence images and drone/satellite surveillance captures."""
+    __tablename__ = "project_evidence_images"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), index=True, nullable=False)
+    stage: Mapped[str] = mapped_column(String(50), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    caption: Mapped[str] = mapped_column(String(500), nullable=False)
+    latitude: Mapped[float] = mapped_column(Float, nullable=False)
+    longitude: Mapped[float] = mapped_column(Float, nullable=False)
+    geo_accuracy_meters: Mapped[float] = mapped_column(Float, default=3.5)
+    captured_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    tamper_proof_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    ai_validation_status: Mapped[str] = mapped_column(String(50), default="MATCH_CONFIRMED")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ComplianceRule(Base):
+    """Configurable national vigilance and MPLADS guideline compliance rules."""
+    __tablename__ = "compliance_rules"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    rule_code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    rule_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    category: Mapped[str] = mapped_column(String(100), nullable=False)
+    severity: Mapped[str] = mapped_column(String(50), default="HIGH")
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    guideline_clause: Mapped[str] = mapped_column(String(100), nullable=False)
+    threshold_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ComplianceRecord(Base):
+    """Audit evaluation findings linking projects with compliance rules."""
+    __tablename__ = "compliance_records"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), index=True, nullable=False)
+    rule_code: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="COMPLIANT")
+    deviation_amount_lakhs: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    details: Mapped[str] = mapped_column(Text, nullable=False)
+    audited_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
