@@ -181,7 +181,7 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             </span>
           </div>
           <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
-            Automated anomaly scores are statistical indicators designed to prioritize human review queues. High scores reflect statistical cost variance, physical delay, or data discrepancies, and do not constitute an automatic determination of corruption or guilt.
+            Nigrani AI identifies data anomalies and risk indicators to support human review. Automated analysis does not establish corruption, misconduct, or legal liability. High scores reflect statistical cost variance, physical delay, or data discrepancies requiring prioritized auditor examination.
           </p>
         </div>
       </div>

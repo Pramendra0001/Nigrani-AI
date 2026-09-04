@@ -9,7 +9,7 @@
 **Stack:** FastAPI, Python 3.11+, SQLite / PostgreSQL, React 19, TypeScript, Vite, Tailwind CSS  
 
 > **Official Decision-Support Disclaimer:**  
-> An anomaly or risk score is an analytical indicator requiring human review and does not constitute proof of corruption, fraud, or wrongdoing. Nigrani AI serves as a decision-support platform for vigilance officers, State Nodal Authorities, and district administrators.
+> Nigrani AI identifies data anomalies and risk indicators to support human review. Automated analysis does not establish corruption, misconduct, or legal liability. Nigrani AI serves strictly as an evidence-based decision-support platform for vigilance officers, State Nodal Authorities, and district administrators.
 
 ---
 

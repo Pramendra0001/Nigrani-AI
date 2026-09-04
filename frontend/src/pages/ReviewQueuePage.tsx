@@ -63,7 +63,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
       <div className="flex items-center gap-2.5 rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/70 dark:bg-sky-950/30 px-4 py-2.5 text-[11px] text-slate-600 dark:text-slate-400">
         <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
         <span>
-          <strong>Human-in-the-Loop Protocol:</strong> Cases in this queue are prioritized via statistical variance models. Human analysts verify evidence, invoices, and physical progress before any administrative action.
+          <strong>Human-in-the-Loop Protocol:</strong> Nigrani AI identifies data anomalies and risk indicators to support human review. Automated analysis does not establish corruption, misconduct, or legal liability. Human analysts verify evidence, invoices, and physical progress before any administrative action.
         </span>
       </div>
 
