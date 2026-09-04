@@ -101,14 +101,28 @@ async function requestWithFallback<T>(url: string, options: RequestInit | undefi
 
 export const api = {
   // 1. Dashboard
-  getDashboard: () =>
-    requestWithFallback<DashboardData>('/dashboard', undefined, () => {
-      const total = clientProjects.length;
+  getDashboard: (parliamentType?: string) => {
+    const url = parliamentType && parliamentType !== 'ALL'
+      ? `/dashboard?parliament_type=${encodeURIComponent(parliamentType)}`
+      : '/dashboard';
+
+    return requestWithFallback<DashboardData>(url, undefined, () => {
+      let pool = [...clientProjects];
+      if (parliamentType && parliamentType !== 'ALL') {
+        const pType = parliamentType.toLowerCase();
+        pool = pool.filter(
+          (p) =>
+            (p.parliament_type && p.parliament_type.toLowerCase().includes(pType)) ||
+            (p.category && p.category.toLowerCase().includes(pType))
+        );
+      }
+
+      const total = pool.length;
       const risk_distribution: Record<string, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 };
       const catMap: Record<string, { count: number; sumRisk: number }> = {};
       const stateMap: Record<string, { count: number; sumRisk: number }> = {};
 
-      clientProjects.forEach((p) => {
+      pool.forEach((p) => {
         const lvl = (p.risk_level || 'LOW').toUpperCase();
         risk_distribution[lvl] = (risk_distribution[lvl] || 0) + 1;
 
@@ -125,7 +139,7 @@ export const api = {
         }
       });
 
-      const high_priority_projects = [...clientProjects]
+      const high_priority_projects = [...pool]
         .sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))
         .slice(0, 10);
 
@@ -137,10 +151,10 @@ export const api = {
           projects_requiring_review: reviewCount,
           high_risk_count: risk_distribution.HIGH || 0,
           critical_risk_count: risk_distribution.CRITICAL || 0,
-          duplicate_cases: 10,
-          cost_anomalies: 30,
-          schedule_risks: 30,
-          data_quality_issues: 25,
+          duplicate_cases: Math.round(total * 0.02) || 2,
+          cost_anomalies: Math.round(total * 0.06) || 5,
+          schedule_risks: Math.round(total * 0.05) || 4,
+          data_quality_issues: Math.round(total * 0.04) || 3,
         },
         risk_distribution,
         category_distribution: Object.entries(catMap).map(([cat, val]) => ({
@@ -155,13 +169,15 @@ export const api = {
         })),
         high_priority_projects,
       };
-    }),
+    });
+  },
 
   // 2. Projects
   getProjects: (params: {
     page?: number;
     page_size?: number;
     search?: string;
+    parliament_type?: string;
     state?: string;
     district?: string;
     category?: string;
@@ -184,6 +200,15 @@ export const api = {
               p.project_id.toLowerCase().includes(s) ||
               (p.district && p.district.toLowerCase().includes(s)) ||
               (p.description && p.description.toLowerCase().includes(s))
+          );
+        }
+
+        if (params.parliament_type && params.parliament_type !== 'ALL') {
+          const pType = params.parliament_type.toLowerCase();
+          filtered = filtered.filter(
+            (p) =>
+              (p.parliament_type && p.parliament_type.toLowerCase().includes(pType)) ||
+              (p.category && p.category.toLowerCase().includes(pType))
           );
         }
 
@@ -235,6 +260,7 @@ export const api = {
         const districts = Array.from(new Set(clientProjects.map((p) => p.district).filter(Boolean))) as string[];
         const categories = Array.from(new Set(clientProjects.map((p) => p.category).filter(Boolean))) as string[];
         return {
+          parliament_types: ['Lok Sabha', 'Rajya Sabha'],
           states: states.sort(),
           districts: districts.sort(),
           categories: categories.sort(),
@@ -393,12 +419,16 @@ export const api = {
     })),
 
   // 4. Review Queue
-  getReviewQueue: (params: { status?: string; priority?: string; page?: number; page_size?: number }) =>
+  getReviewQueue: (params: { status?: string; priority?: string; parliament_type?: string; page?: number; page_size?: number }) =>
     requestWithFallback<{ cases: ReviewCaseItem[]; total: number; page: number; page_size: number }>(
       '/review-queue?' + new URLSearchParams(Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '') as any).toString(),
       undefined,
       () => {
         let flagged = clientProjects.filter((p) => (p.risk_score || 0) >= 35.0);
+        if (params.parliament_type && params.parliament_type !== 'ALL') {
+          const pt = params.parliament_type;
+          flagged = flagged.filter((p) => p.parliament_type === pt || p.category?.includes(pt));
+        }
         if (params.priority && params.priority !== 'ALL') {
           flagged = flagged.filter((p) => p.risk_level === params.priority);
         }

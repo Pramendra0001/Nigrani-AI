@@ -54,3 +54,12 @@ async def init_db():
     async with engine.begin() as conn:
         from app.models import models  # noqa
         await conn.run_sync(Base.metadata.create_all)
+
+        # Automatic schema migration / column healing for parliament_type
+        from sqlalchemy import text
+        try:
+            await conn.execute(text("ALTER TABLE projects ADD COLUMN parliament_type VARCHAR(50) DEFAULT 'Lok Sabha'"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_projects_parliament_type ON projects (parliament_type)"))
+        except Exception:
+            # Column already exists
+            pass

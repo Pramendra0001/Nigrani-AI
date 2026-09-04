@@ -213,8 +213,9 @@ def transform_mplads_record(record: Dict[str, Any], index: int) -> Dict[str, Any
     prefix = "LS" if "Lok" in house else "RS"
     project_id = f"MPLADS-{prefix}-{index:03d}"
 
-    # Category division
+    # Category division & parliament type
     category = f"MPLADS — {house}"
+    parliament_type = "Rajya Sabha" if "Rajya" in house else "Lok Sabha"
 
     # Project Name
     project_name = f"{mp_name} — {constituency}"
@@ -256,7 +257,7 @@ def transform_mplads_record(record: Dict[str, Any], index: int) -> Dict[str, Any
 
     # Narrative Description
     description = (
-        f"Official MPLADS Parliamentary Constituency Fund Portfolio for {mp_name}, representing "
+        f"Official MPLADS Parliamentary Fund Portfolio for {mp_name}, representing "
         f"{constituency} ({house}, {state}). Allocated Budget: ₹{budget_lakhs:,.2f} Lakh | Sanctioned/Recommended: "
         f"₹{rec_lakhs:,.2f} Lakh across {rec_works} works. Completed: {comp_works} works ({comp_rate}% completion rate). "
         f"Cumulative Expenditure: ₹{actual_cost_lakhs:,.2f} Lakh ({util_pct}% utilization). "
@@ -271,6 +272,7 @@ def transform_mplads_record(record: Dict[str, Any], index: int) -> Dict[str, Any
         "state": state,
         "district": constituency,
         "category": category,
+        "parliament_type": parliament_type,
         "budget": budget_lakhs,
         "actual_cost": actual_cost_lakhs,
         "start_date": start_d,
@@ -308,31 +310,34 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
         logger.warning("Neither MPLADS JSON nor Excel dataset found on filesystem. Skipping real data ingestion.")
         return 0
 
-    # Check if database already has official 543 MPLADS data
+    # Check if database already has official 774 MPLADS data (543 Lok Sabha + 231 Rajya Sabha)
     existing_count = (await db.execute(select(func.count()).select_from(Project))).scalar() or 0
     first_proj = (await db.execute(select(Project).limit(1))).scalar_one_or_none()
     is_mplads_already = first_proj and first_proj.project_id.startswith("MPLADS-")
 
-    if existing_count == 543 and is_mplads_already and not force_reload:
-        logger.info(f"Database already contains {existing_count} official 18th Lok Sabha project records. Skipping re-seed.")
+    if existing_count == 774 and is_mplads_already and not force_reload:
+        logger.info(f"Database already contains {existing_count} official parliamentary project records (Lok Sabha + Rajya Sabha). Skipping re-seed.")
         return existing_count
 
     # Prepare items to insert
     items_to_insert = []
     if json_path:
-        logger.info(f"Ingesting official 18th Lok Sabha MPLADS dataset from: {json_path}")
+        logger.info(f"Ingesting official MPLADS dataset from: {json_path}")
         with open(json_path, "r", encoding="utf-8") as f:
             json_items = json.load(f)
         for item in json_items:
             s_d = datetime.strptime(item["start_date"], "%Y-%m-%d").date() if isinstance(item["start_date"], str) else item["start_date"]
             e_d = datetime.strptime(item["expected_end_date"], "%Y-%m-%d").date() if isinstance(item["expected_end_date"], str) else item["expected_end_date"]
+            cat = item.get("category", "MPLADS — Lok Sabha")
+            p_house = item.get("parliament_type") or ("Rajya Sabha" if "Rajya" in cat else "Lok Sabha")
             items_to_insert.append({
                 "project_id": item["project_id"],
                 "project_name": item["project_name"],
                 "description": item["description"],
                 "state": item["state"],
                 "district": item["district"],
-                "category": item.get("category", "MPLADS — Lok Sabha"),
+                "category": cat,
+                "parliament_type": p_house,
                 "budget": float(item["budget"]),
                 "actual_cost": float(item["actual_cost"]),
                 "start_date": s_d,
@@ -346,7 +351,15 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
     elif excel_path:
         logger.info(f"Ingesting MPLADS dataset from Excel fallback: {excel_path}")
         raw_records = parse_mplads_excel(excel_path)
-        for idx, raw in enumerate(raw_records, start=1):
+        ls_idx = 1
+        rs_idx = 1
+        for raw in raw_records:
+            house = (raw.get("House") or "Lok Sabha").strip()
+            idx = ls_idx if "Lok" in house else rs_idx
+            if "Lok" in house:
+                ls_idx += 1
+            else:
+                rs_idx += 1
             items_to_insert.append(transform_mplads_record(raw, idx))
 
     if not items_to_insert:
@@ -378,6 +391,7 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
             state=item["state"],
             district=item["district"],
             category=item["category"],
+            parliament_type=item.get("parliament_type", "Lok Sabha"),
             budget=item["budget"],
             actual_cost=item["actual_cost"],
             start_date=item["start_date"],
@@ -422,7 +436,15 @@ def export_mplads_json_for_frontend(dest_path: str) -> int:
 
     raw_records = parse_mplads_excel(excel_path)
     output = []
-    for idx, raw in enumerate(raw_records, start=1):
+    ls_idx = 1
+    rs_idx = 1
+    for raw in raw_records:
+        house = (raw.get("House") or "Lok Sabha").strip()
+        idx = ls_idx if "Lok" in house else rs_idx
+        if "Lok" in house:
+            ls_idx += 1
+        else:
+            rs_idx += 1
         item = transform_mplads_record(raw, idx)
         # Compute baseline initial risk score for frontend offline mode
         alloc = item["budget"]
@@ -455,6 +477,7 @@ def export_mplads_json_for_frontend(dest_path: str) -> int:
             "state": item["state"],
             "district": item["district"],
             "category": item["category"],
+            "parliament_type": item.get("parliament_type", "Lok Sabha"),
             "budget": item["budget"],
             "actual_cost": item["actual_cost"],
             "start_date": item["start_date"].isoformat(),

@@ -15,7 +15,7 @@ class ImportService:
 
     STANDARD_FIELDS = [
         "project_id", "project_name", "description", "state", "district",
-        "category", "budget", "actual_cost", "start_date", "expected_end_date",
+        "category", "parliament_type", "budget", "actual_cost", "start_date", "expected_end_date",
         "completion_percentage", "status", "latitude", "longitude"
     ]
 
@@ -26,6 +26,7 @@ class ImportService:
         "state": ["state_name", "province", "region"],
         "district": ["district_name", "dist", "zila"],
         "category": ["sector", "type", "project_type", "work_category", "scheme"],
+        "parliament_type": ["house", "parliament", "parliament_type", "sabha", "house_type"],
         "budget": ["cost", "estimated_cost", "sanctioned_amount", "approved_budget", "amount_lakh"],
         "actual_cost": ["expenditure", "spent", "actual_spend", "booked_expenditure"],
         "start_date": ["commencement_date", "begin_date", "start", "sanction_date"],
@@ -161,13 +162,19 @@ class ImportService:
                 lat = float(mapped.get("latitude")) if mapped.get("latitude") else None
                 lng = float(mapped.get("longitude")) if mapped.get("longitude") else None
 
+                p_cat = mapped.get("category")
+                p_house = mapped.get("parliament_type")
+                if not p_house:
+                    p_house = "Rajya Sabha" if "Rajya" in (p_cat or "") else "Lok Sabha"
+
                 proj = Project(
                     project_id=p_id,
                     project_name=p_name,
                     description=mapped.get("description"),
                     state=mapped.get("state"),
                     district=mapped.get("district"),
-                    category=mapped.get("category"),
+                    category=p_cat,
+                    parliament_type=p_house,
                     budget=budget,
                     actual_cost=actual,
                     start_date=start_d,

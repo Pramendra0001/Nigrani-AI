@@ -50,7 +50,7 @@ export const SettingsPage: React.FC = () => {
       organization: 'Ministry of Statistics & Programme Implementation (MoSPI) / Public Infrastructure Track',
       jurisdiction: 'National Vigilance Track — MPLADS & Infrastructure Funds',
       platform: 'Nigrani AI — Public Project Intelligence Platform',
-      active_dataset: 'Official 18th Lok Sabha eSAKSHI Dataset (543 Parliamentary Constituencies)',
+      active_dataset: 'Official Parliamentary eSAKSHI Dataset (543 Lok Sabha + 231 Rajya Sabha = 774 Portfolios)',
       deterministic_scoring_weights: {
         cost_variance: 0.35,
         duplicate_intelligence: 0.30,
@@ -266,7 +266,7 @@ export const SettingsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 dark:text-slate-400">Jurisdiction Track:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">543 Lok Sabha MPs Parliamentary Funds (All 36 States/UTs)</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">774 Parliamentary Funds (543 Lok Sabha + 231 Rajya Sabha across 36 States/UTs)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 dark:text-slate-400">Cryptographic Integrity:</span>
@@ -293,28 +293,43 @@ export const SettingsPage: React.FC = () => {
           {activeSection === 'dataset' && (
             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Official 18th Lok Sabha eSAKSHI Dataset</h2>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Official Parliamentary eSAKSHI Dataset (Lok Sabha & Rajya Sabha)</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Package derived directly from the official MoSPI eSAKSHI portal (<code className="text-[11px] font-mono">mplads.gov.in</code>).
+                  Package derived directly from the official MoSPI eSAKSHI portal (<code className="text-[11px] font-mono">mplads.gov.in</code>), covering both Parliamentary Houses.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Total Portfolios</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">543 MPs</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">774 MPs</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Allocated Limit</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹8,333.67 Cr</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹11,681.90 Cr</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Expenditure</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹2,771.91 Cr</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹3,995.34 Cr</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
                   <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Works Monitored</span>
-                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">106,458</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">131,141</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+                <div className="p-3.5 rounded-xl border border-cyan-200/70 dark:border-cyan-900/50 bg-cyan-50/30 dark:bg-cyan-950/20">
+                  <span className="font-bold text-cyan-800 dark:text-cyan-300 block mb-1">Lok Sabha Portfolios (543 MPs)</span>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Allocated: <strong>₹8,333.67 Cr</strong> • Disbursed: <strong>₹2,771.91 Cr</strong> (33.3% utilization) • <strong>106,458</strong> works sanctioned/recommended across all 543 constituencies.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl border border-purple-200/70 dark:border-purple-900/50 bg-purple-50/30 dark:bg-purple-950/20">
+                  <span className="font-bold text-purple-800 dark:text-purple-300 block mb-1">Rajya Sabha Portfolios (231 MPs)</span>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                    Allocated: <strong>₹3,363.85 Cr</strong> • Disbursed: <strong>₹1,237.92 Cr</strong> (36.8% utilization) • <strong>25,144</strong> works sanctioned/recommended across 231 sitting MPs.
+                  </p>
                 </div>
               </div>
 

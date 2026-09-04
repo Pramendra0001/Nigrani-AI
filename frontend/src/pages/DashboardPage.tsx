@@ -11,6 +11,7 @@ import {
   ArrowRight,
   TrendingUp,
   Sparkles,
+  Building2,
 } from 'lucide-react';
 import { api } from '../api';
 import { DashboardData, Project } from '../types';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab }) => {
+  const [parliamentType, setParliamentType] = useState<'All' | 'Lok Sabha' | 'Rajya Sabha'>('All');
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
   const loadData = async () => {
     try {
       setLoading(true);
-      const res = await api.getDashboard();
+      const res = await api.getDashboard(parliamentType);
       setData(res);
       setError(null);
     } catch (err: any) {
@@ -43,7 +45,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [parliamentType]);
 
   if (loading) {
     return (
@@ -105,7 +107,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Continuous vigilance and statistical anomaly screening across {metrics.total_projects.toLocaleString()} official 18th Lok Sabha Parliamentary Constituency portfolios (All 543 Lok Sabha MPs across 36 States & UTs). Identifying unusual expenditure patterns, schedule deficits, and prioritizing {metrics.projects_requiring_review} high-variance cases for human review.
+              Continuous vigilance and statistical anomaly screening across {metrics.total_projects.toLocaleString()} official {parliamentType === 'All' ? 'parliamentary portfolios (543 Lok Sabha & 231 Rajya Sabha Members of Parliament across 36 States & UTs)' : parliamentType === 'Lok Sabha' ? '18th Lok Sabha Parliamentary Constituency portfolios across 36 States & UTs' : 'Rajya Sabha Parliamentary portfolios (231 Hon\'ble Members of Parliament across States & UTs)'}. Identifying unusual expenditure patterns, schedule deficits, and prioritizing {metrics.projects_requiring_review} high-variance cases for human review.
             </p>
           </div>
 
@@ -132,47 +134,129 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
         <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-sky-500/10 blur-3xl pointer-events-none" />
       </div>
 
+      {/* Parliamentary Scope Selector */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#0b1222] p-3 sm:p-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs w-full min-w-0">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-cyan-400 border border-sky-200/60 dark:border-sky-800/40">
+            <Building2 className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-slate-900 dark:text-white block">
+              Parliamentary Scope Filter
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+              Toggle scope to inspect combined or house-specific MPLADS performance & anomalies
+            </span>
+          </div>
+        </div>
+
+        <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 self-start sm:self-auto">
+          <button
+            onClick={() => setParliamentType('All')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              parliamentType === 'All'
+                ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-cyan-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            All Parliament (774)
+          </button>
+          <button
+            onClick={() => setParliamentType('Lok Sabha')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              parliamentType === 'Lok Sabha'
+                ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-cyan-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            Lok Sabha (543)
+          </button>
+          <button
+            onClick={() => setParliamentType('Rajya Sabha')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              parliamentType === 'Rajya Sabha'
+                ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            Rajya Sabha (231)
+          </button>
+        </div>
+      </div>
+
       {/* National Fiscal & Operational Overview */}
       <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-4 shadow-xs w-full min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-2.5 mb-3 gap-1">
           <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-sky-500" />
-            <span>National MPLADS eSAKSHI Overview (Official 18th Lok Sabha Dataset)</span>
+            <span>
+              {parliamentType === 'All' && "National MPLADS eSAKSHI Overview (All Parliament: Lok Sabha & Rajya Sabha)"}
+              {parliamentType === 'Lok Sabha' && "National MPLADS eSAKSHI Overview (Lok Sabha Parliamentary Portfolio)"}
+              {parliamentType === 'Rajya Sabha' && "National MPLADS eSAKSHI Overview (Rajya Sabha Parliamentary Portfolio)"}
+            </span>
           </span>
           <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-            All 36 States & Union Territories • 543 Hon'ble Members of Parliament
+            {parliamentType === 'All' && "All 36 States & Union Territories • 774 Hon'ble MPs (543 Lok Sabha + 231 Rajya Sabha)"}
+            {parliamentType === 'Lok Sabha' && "All 36 States & Union Territories • 543 Hon'ble Members of Lok Sabha"}
+            {parliamentType === 'Rajya Sabha' && "States & UTs • 231 Hon'ble Members of Rajya Sabha (Elected & Nominated)"}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 text-xs w-full min-w-0">
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Total Allocation</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">₹8,333.67 Cr</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹15.35 Cr Avg / MP</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">
+              {parliamentType === 'All' ? '₹11,681.90 Cr' : parliamentType === 'Lok Sabha' ? '₹8,333.67 Cr' : '₹3,363.85 Cr'}
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
+              {parliamentType === 'All' ? '₹15.09 Cr Avg / MP' : parliamentType === 'Lok Sabha' ? '₹15.35 Cr Avg / MP' : '₹14.56 Cr Avg / MP'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Cumulative Expenditure</span>
-            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400 block truncate">₹2,771.91 Cr</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">33.26% Utilization</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-cyan-400 block truncate">
+              {parliamentType === 'All' ? '₹3,995.34 Cr' : parliamentType === 'Lok Sabha' ? '₹2,771.91 Cr' : '₹1,237.92 Cr'}
+            </span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">
+              {parliamentType === 'All' ? '34.20% Utilization' : parliamentType === 'Lok Sabha' ? '33.26% Utilization' : '36.80% Utilization'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Recommended</span>
-            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">106,458</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹5,705.28 Cr Value</span>
+            <span className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-white block truncate">
+              {parliamentType === 'All' ? '131,141' : parliamentType === 'Lok Sabha' ? '106,458' : '25,144'}
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
+              {parliamentType === 'All' ? '₹7,908.15 Cr Value' : parliamentType === 'Lok Sabha' ? '₹5,705.28 Cr Value' : '₹2,202.87 Cr Value'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Sanctioned</span>
-            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-sky-400 block truncate">79,082</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">₹4,169.27 Cr Value</span>
+            <span className="text-base sm:text-lg font-black font-mono text-sky-600 dark:text-sky-400 block truncate">
+              {parliamentType === 'All' ? '98,245' : parliamentType === 'Lok Sabha' ? '79,082' : '19,163'}
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
+              {parliamentType === 'All' ? '₹5,842.10 Cr Value' : parliamentType === 'Lok Sabha' ? '₹4,169.27 Cr Value' : '₹1,672.83 Cr Value'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Works Completed</span>
-            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 block truncate">34,275</span>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">32.2% Physical Rate</span>
+            <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 block truncate">
+              {parliamentType === 'All' ? '44,028' : parliamentType === 'Lok Sabha' ? '34,275' : '9,927'}
+            </span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5 truncate">
+              {parliamentType === 'All' ? '33.57% Physical Rate' : parliamentType === 'Lok Sabha' ? '32.2% Physical Rate' : '39.48% Physical Rate'}
+            </span>
           </div>
           <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden col-span-2 sm:col-span-1 xl:col-span-1">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">Calamity Consented</span>
-            <span className="text-base sm:text-lg font-black font-mono text-amber-600 dark:text-amber-400 block truncate">₹4.06 Cr</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block mt-0.5 truncate">Special Disaster Aid</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase truncate">
+              {parliamentType === 'Rajya Sabha' ? 'Total Transactions' : 'Calamity Consented'}
+            </span>
+            <span className="text-base sm:text-lg font-black font-mono text-amber-600 dark:text-amber-400 block truncate">
+              {parliamentType === 'Rajya Sabha' ? '24,680' : '₹4.06 Cr'}
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block mt-0.5 truncate">
+              {parliamentType === 'Rajya Sabha' ? 'Official Portals' : 'Special Disaster Aid'}
+            </span>
           </div>
         </div>
       </div>
@@ -222,7 +306,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
           <MetricCard
             title="Total Projects"
             value={metrics.total_projects}
-            subtitle="543 LS Parliamentary Funds"
+            subtitle={parliamentType === 'All' ? '774 Parliamentary Funds' : parliamentType === 'Lok Sabha' ? '543 LS Constituencies' : '231 RS Portfolios'}
             icon={FolderKanban}
             variant="default"
             onClick={() => onNavigateTab('projects')}
@@ -371,7 +455,15 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
                   <td className="py-3 px-4 max-w-xs font-medium text-slate-800 dark:text-slate-200 truncate" title={p.project_name}>
                     {p.project_name}
                   </td>
-                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{p.category}</td>
+                  <td className="py-3 px-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono border ${
+                      p.category?.includes('Rajya') || p.parliament_type === 'Rajya Sabha'
+                        ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60'
+                        : 'bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800/60'
+                    }`}>
+                      {p.category || (p.parliament_type ? `MPLADS — ${p.parliament_type}` : 'MPLADS')}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
                     {p.district}, <span className="font-semibold text-slate-800 dark:text-slate-200">{p.state}</span>
                   </td>

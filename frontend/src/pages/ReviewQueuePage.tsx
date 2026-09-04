@@ -15,6 +15,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [parliamentFilter, setParliamentFilter] = useState<'ALL' | 'Lok Sabha' | 'Rajya Sabha'>('ALL');
   const [loading, setLoading] = useState(true);
 
   const loadQueue = async () => {
@@ -23,6 +24,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
       const res = await api.getReviewQueue({
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
+        parliament_type: parliamentFilter === 'ALL' ? undefined : parliamentFilter,
         page,
         page_size: 20,
       });
@@ -37,7 +39,7 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
 
   useEffect(() => {
     loadQueue();
-  }, [page, statusFilter, priorityFilter]);
+  }, [page, statusFilter, priorityFilter, parliamentFilter]);
 
   return (
     <div className="space-y-6">
@@ -87,8 +89,24 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
           </button>
         ))}
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="font-bold text-slate-700 dark:text-slate-300">Severity:</span>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+            {(['ALL', 'Lok Sabha', 'Rajya Sabha'] as const).map((house) => (
+              <button
+                key={house}
+                onClick={() => { setParliamentFilter(house); setPage(1); }}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                  parliamentFilter === house
+                    ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {house}
+              </button>
+            ))}
+          </div>
+
+          <span className="font-bold text-slate-700 dark:text-slate-300 ml-2">Severity:</span>
           <select
             value={priorityFilter}
             onChange={(e) => { setPriorityFilter(e.target.value); setPage(1); }}
@@ -126,8 +144,15 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
               className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] hover:border-sky-500/50 hover:bg-sky-50/20 dark:hover:bg-slate-800/30 transition-all cursor-pointer shadow-xs gap-4"
             >
               <div className="space-y-1.5 flex-1">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">{c.project_code || c.project_id}</span>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    (c.category?.includes('Rajya Sabha') || (c.project_code || c.project_id)?.includes('-RS-'))
+                      ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60'
+                      : 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800/60'
+                  }`}>
+                    {c.category?.includes('Rajya Sabha') || (c.project_code || c.project_id)?.includes('-RS-') ? 'Rajya Sabha' : 'Lok Sabha'}
+                  </span>
                   <StatusBadge status={c.status} type="review" />
                   <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">•</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">

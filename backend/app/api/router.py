@@ -36,74 +36,102 @@ review_service = ReviewService()
 # 1. Executive Dashboard
 # -------------------------------------------------------------
 @api_router.get("/dashboard")
-async def get_dashboard(db: AsyncSession = Depends(get_db)):
-    total_projects = (await db.execute(select(func.count()).select_from(Project))).scalar() or 0
+async def get_dashboard(
+    parliament_type: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    project_filter = []
+    if parliament_type and parliament_type.upper() != "ALL":
+        project_filter.append(
+            or_(
+                Project.parliament_type.ilike(f"%{parliament_type}%"),
+                Project.category.ilike(f"%{parliament_type}%"),
+            )
+        )
+
+    # Total projects
+    tot_q = select(func.count()).select_from(Project)
+    for f in project_filter:
+        tot_q = tot_q.where(f)
+    total_projects = (await db.execute(tot_q)).scalar() or 0
 
     # Risk level counts
     risk_counts: Dict[str, int] = {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0}
     for lvl in ("LOW", "MEDIUM", "HIGH", "CRITICAL"):
-        c = (await db.execute(
-            select(func.count()).select_from(Project).where(Project.risk_level == lvl)
-        )).scalar() or 0
+        lvl_q = select(func.count()).select_from(Project).where(Project.risk_level == lvl)
+        for f in project_filter:
+            lvl_q = lvl_q.where(f)
+        c = (await db.execute(lvl_q)).scalar() or 0
         risk_counts[lvl] = c
 
     # Review queue cases
-    rev_count = (await db.execute(
-        select(func.count()).select_from(ReviewCase).where(ReviewCase.status != "RESOLVED")
-    )).scalar() or 0
+    rev_q = select(func.count()).select_from(ReviewCase).join(Project).where(ReviewCase.status != "RESOLVED")
+    for f in project_filter:
+        rev_q = rev_q.where(f)
+    rev_count = (await db.execute(rev_q)).scalar() or 0
 
     # Anomaly counters
-    cost_anomalies = (await db.execute(
-        select(func.count()).select_from(ProjectAnalysis).where(ProjectAnalysis.cost_risk_score >= 50.0)
-    )).scalar() or 0
+    cost_q = select(func.count()).select_from(ProjectAnalysis).join(Project).where(ProjectAnalysis.cost_risk_score >= 50.0)
+    for f in project_filter:
+        cost_q = cost_q.where(f)
+    cost_anomalies = (await db.execute(cost_q)).scalar() or 0
 
-    delay_cases = (await db.execute(
-        select(func.count()).select_from(ProjectAnalysis).where(ProjectAnalysis.delay_risk_score >= 50.0)
-    )).scalar() or 0
+    delay_q = select(func.count()).select_from(ProjectAnalysis).join(Project).where(ProjectAnalysis.delay_risk_score >= 50.0)
+    for f in project_filter:
+        delay_q = delay_q.where(f)
+    delay_cases = (await db.execute(delay_q)).scalar() or 0
 
-    dup_cases = (await db.execute(
-        select(func.count()).select_from(ProjectAnalysis).where(ProjectAnalysis.duplicate_risk_score >= 50.0)
-    )).scalar() or 0
+    dup_q = select(func.count()).select_from(ProjectAnalysis).join(Project).where(ProjectAnalysis.duplicate_risk_score >= 50.0)
+    for f in project_filter:
+        dup_q = dup_q.where(f)
+    dup_cases = (await db.execute(dup_q)).scalar() or 0
 
-    dq_cases = (await db.execute(
-        select(func.count()).select_from(ProjectAnalysis).where(ProjectAnalysis.data_quality_risk_score >= 35.0)
-    )).scalar() or 0
+    dq_q = select(func.count()).select_from(ProjectAnalysis).join(Project).where(ProjectAnalysis.data_quality_risk_score >= 35.0)
+    for f in project_filter:
+        dq_q = dq_q.where(f)
+    dq_cases = (await db.execute(dq_q)).scalar() or 0
 
     # Category breakdown
-    cat_res = await db.execute(
+    cat_q = (
         select(Project.category, func.count(), func.avg(Project.risk_score))
         .where(Project.category.isnot(None))
-        .group_by(Project.category)
     )
+    for f in project_filter:
+        cat_q = cat_q.where(f)
+    cat_q = cat_q.group_by(Project.category)
+    cat_res = await db.execute(cat_q)
     categories = [
         {"category": r[0], "count": r[1], "avg_risk": round(r[2] or 0.0, 1)}
         for r in cat_res.all()
     ]
 
     # State breakdown
-    state_res = await db.execute(
+    state_q = (
         select(Project.state, func.count(), func.avg(Project.risk_score))
         .where(Project.state.isnot(None))
-        .group_by(Project.state)
     )
+    for f in project_filter:
+        state_q = state_q.where(f)
+    state_q = state_q.group_by(Project.state)
+    state_res = await db.execute(state_q)
     states = [
         {"state": r[0], "count": r[1], "avg_risk": round(r[2] or 0.0, 1)}
         for r in state_res.all()
     ]
 
     # Top 10 High-Priority Projects
-    hp_res = await db.execute(
-        select(Project)
-        .where(Project.risk_score.isnot(None))
-        .order_by(desc(Project.risk_score))
-        .limit(10)
-    )
+    hp_q = select(Project).where(Project.risk_score.isnot(None))
+    for f in project_filter:
+        hp_q = hp_q.where(f)
+    hp_q = hp_q.order_by(desc(Project.risk_score)).limit(10)
+    hp_res = await db.execute(hp_q)
     high_priority = [
         {
             "id": p.id,
             "project_id": p.project_id,
             "project_name": p.project_name,
             "category": p.category,
+            "parliament_type": p.parliament_type or ("Rajya Sabha" if "Rajya" in (p.category or "") else "Lok Sabha"),
             "state": p.state,
             "district": p.district,
             "budget": p.budget,
@@ -141,6 +169,7 @@ async def list_projects(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     search: Optional[str] = None,
+    parliament_type: Optional[str] = None,
     state: Optional[str] = None,
     district: Optional[str] = None,
     category: Optional[str] = None,
@@ -162,6 +191,13 @@ async def list_projects(
         )
         filters.append(search_filter)
 
+    if parliament_type and parliament_type.upper() != "ALL":
+        filters.append(
+            or_(
+                Project.parliament_type.ilike(f"%{parliament_type}%"),
+                Project.category.ilike(f"%{parliament_type}%"),
+            )
+        )
     if state and state != "ALL":
         filters.append(Project.state == state)
     if district and district != "ALL":
@@ -200,6 +236,7 @@ async def list_projects(
                 "state": p.state,
                 "district": p.district,
                 "category": p.category,
+                "parliament_type": p.parliament_type or ("Rajya Sabha" if "Rajya" in (p.category or "") else "Lok Sabha"),
                 "budget": p.budget,
                 "actual_cost": p.actual_cost,
                 "start_date": p.start_date.isoformat() if p.start_date else None,
@@ -226,6 +263,7 @@ async def get_project_filters(db: AsyncSession = Depends(get_db)):
     categories = [r[0] for r in (await db.execute(select(Project.category).where(Project.category.isnot(None)).distinct())).all()]
 
     return {
+        "parliament_types": ["Lok Sabha", "Rajya Sabha"],
         "states": sorted(states),
         "districts": sorted(districts),
         "categories": sorted(categories),
@@ -517,22 +555,34 @@ async def reload_mplads_dataset(db: AsyncSession = Depends(get_db)):
 # 7. Analytics & Settings
 # -------------------------------------------------------------
 @api_router.get("/analytics")
-async def get_system_analytics(db: AsyncSession = Depends(get_db)):
-    cat_res = await db.execute(
-        select(Project.category, func.avg(Project.risk_score), func.count())
-        .where(Project.risk_score.isnot(None))
-        .group_by(Project.category)
-    )
+async def get_system_analytics(
+    parliament_type: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    p_filter = []
+    if parliament_type and parliament_type.upper() != "ALL":
+        p_filter.append(
+            or_(
+                Project.parliament_type.ilike(f"%{parliament_type}%"),
+                Project.category.ilike(f"%{parliament_type}%"),
+            )
+        )
+
+    cat_q = select(Project.category, func.avg(Project.risk_score), func.count()).where(Project.risk_score.isnot(None))
+    for f in p_filter:
+        cat_q = cat_q.where(f)
+    cat_q = cat_q.group_by(Project.category)
+    cat_res = await db.execute(cat_q)
     category_risks = [
         {"category": r[0], "avg_risk": round(r[1] or 0.0, 1), "project_count": r[2]}
         for r in cat_res.all()
     ]
 
-    state_res = await db.execute(
-        select(Project.state, func.avg(Project.risk_score), func.count())
-        .where(Project.risk_score.isnot(None))
-        .group_by(Project.state)
-    )
+    state_q = select(Project.state, func.avg(Project.risk_score), func.count()).where(Project.risk_score.isnot(None))
+    for f in p_filter:
+        state_q = state_q.where(f)
+    state_q = state_q.group_by(Project.state)
+    state_res = await db.execute(state_q)
     state_risks = [
         {"state": r[0], "avg_risk": round(r[1] or 0.0, 1), "project_count": r[2]}
         for r in state_res.all()
@@ -540,7 +590,10 @@ async def get_system_analytics(db: AsyncSession = Depends(get_db)):
 
     rev_stats = {}
     for st in ("NEW", "UNDER_REVIEW", "ADDITIONAL_INFORMATION_REQUIRED", "RESOLVED"):
-        c = (await db.execute(select(func.count()).select_from(ReviewCase).where(ReviewCase.status == st))).scalar() or 0
+        q_st = select(func.count()).select_from(ReviewCase).join(Project).where(ReviewCase.status == st)
+        for f in p_filter:
+            q_st = q_st.where(f)
+        c = (await db.execute(q_st)).scalar() or 0
         rev_stats[st] = c
 
     return {

@@ -6,6 +6,7 @@ export interface Project {
   state?: string;
   district?: string;
   category?: string;
+  parliament_type?: 'Lok Sabha' | 'Rajya Sabha' | string;
   budget?: number;
   actual_cost?: number;
   start_date?: string;

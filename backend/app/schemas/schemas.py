@@ -12,6 +12,7 @@ class ProjectBase(BaseModel):
     state: Optional[str] = None
     district: Optional[str] = None
     category: Optional[str] = None
+    parliament_type: Optional[str] = "Lok Sabha"
     budget: Optional[float] = None
     actual_cost: Optional[float] = None
     start_date: Optional[date] = None
@@ -30,6 +31,7 @@ class ProjectResponse(ProjectBase):
     id: str
     risk_score: Optional[float] = None
     risk_level: Optional[str] = None
+    parliament_type: Optional[str] = "Lok Sabha"
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

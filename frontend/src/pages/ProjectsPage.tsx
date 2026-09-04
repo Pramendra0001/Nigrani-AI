@@ -19,10 +19,11 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
   const [search, setSearch] = useState('');
   const [state, setState] = useState('ALL');
   const [category, setCategory] = useState('ALL');
+  const [parliamentType, setParliamentType] = useState('ALL');
   const [riskLevel, setRiskLevel] = useState('ALL');
   const [status, setStatus] = useState('ALL');
   const [sortBy, setSortBy] = useState('risk_score');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Filter options from API
   const [filterOptions, setFilterOptions] = useState<{
@@ -52,6 +53,7 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
         page,
         page_size: pageSize,
         search,
+        parliament_type: parliamentType === 'ALL' ? undefined : parliamentType,
         state: state === 'ALL' ? undefined : state,
         category: category === 'ALL' ? undefined : category,
         risk_level: riskLevel === 'ALL' ? undefined : riskLevel,
@@ -70,7 +72,7 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
 
   useEffect(() => {
     fetchProjects();
-  }, [page, state, category, riskLevel, status, sortBy, sortOrder]);
+  }, [page, parliamentType, state, category, riskLevel, status, sortBy, sortOrder]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,7 +100,7 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
             Project Intelligence Database
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Browse, filter, and inspect {total.toLocaleString()} official MPLADS projects across all 36 States & Union Territories.
+            Browse, filter, and inspect {total.toLocaleString()} official MPLADS projects across Lok Sabha & Rajya Sabha portfolios.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -153,7 +155,20 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
         </form>
 
         {/* Dropdowns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Parliament Type</label>
+            <select
+              value={parliamentType}
+              onChange={(e) => { setParliamentType(e.target.value); setPage(1); }}
+              className="w-full rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:border-sky-500 focus:outline-none font-medium"
+            >
+              <option value="ALL">All Parliament (Both)</option>
+              <option value="Lok Sabha">Lok Sabha</option>
+              <option value="Rajya Sabha">Rajya Sabha</option>
+            </select>
+          </div>
+
           <div>
             <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">State / UT</label>
             <select
@@ -292,7 +307,15 @@ export const ProjectsPage: React.FC<Props> = ({ onSelectProject }) => {
                       </p>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{p.description}</p>
                     </td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{p.category}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                        (p.parliament_type === 'Rajya Sabha' || p.category?.includes('Rajya Sabha'))
+                          ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60'
+                          : 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800/60'
+                      }`}>
+                        {p.category || (p.parliament_type ? `MPLADS — ${p.parliament_type}` : 'MPLADS')}
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                       {p.district}, <span className="font-semibold text-slate-800 dark:text-slate-200">{p.state}</span>
                     </td>

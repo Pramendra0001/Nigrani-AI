@@ -21,6 +21,7 @@ class Project(Base):
     state: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
     district: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
     category: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
+    parliament_type: Mapped[Optional[str]] = mapped_column(String(50), index=True, default="Lok Sabha", nullable=True)  # Lok Sabha, Rajya Sabha
     budget: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # in Lakhs
     actual_cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # in Lakhs
     start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
@@ -56,6 +57,7 @@ class Project(Base):
     __table_args__ = (
         Index("ix_projects_category_district", "category", "district"),
         Index("ix_projects_risk_level", "risk_level"),
+        Index("ix_projects_parliament_type", "parliament_type"),
     )
 
     def to_dict(self) -> dict:
@@ -67,6 +69,7 @@ class Project(Base):
             "state": self.state,
             "district": self.district,
             "category": self.category,
+            "parliament_type": self.parliament_type or ("Rajya Sabha" if "Rajya" in (self.category or "") else "Lok Sabha"),
             "budget": self.budget,
             "actual_cost": self.actual_cost,
             "start_date": self.start_date.isoformat() if self.start_date else None,
