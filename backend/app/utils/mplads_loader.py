@@ -310,13 +310,22 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
         logger.warning("Neither MPLADS JSON nor Excel dataset found on filesystem. Skipping real data ingestion.")
         return 0
 
-    # Check if database already has official 774 MPLADS data (543 Lok Sabha + 231 Rajya Sabha)
+    # Check if database already has official 774 MPLADS data AND has been analyzed
     existing_count = (await db.execute(select(func.count()).select_from(Project))).scalar() or 0
+    analyzed_count = (await db.execute(select(func.count()).select_from(ProjectAnalysis))).scalar() or 0
     first_proj = (await db.execute(select(Project).limit(1))).scalar_one_or_none()
     is_mplads_already = first_proj and first_proj.project_id.startswith("MPLADS-")
+    has_risk_levels = first_proj and first_proj.risk_level is not None
 
-    if existing_count == 774 and is_mplads_already and not force_reload:
-        logger.info(f"Database already contains {existing_count} official parliamentary project records (Lok Sabha + Rajya Sabha). Skipping re-seed.")
+    if existing_count == 774 and is_mplads_already and (analyzed_count < 774 or not has_risk_levels) and not force_reload:
+        logger.info(f"Database has {existing_count} records but incomplete analysis ({analyzed_count}/774). Running self-healing batch analysis...")
+        analysis_service = AnalysisService()
+        analysis_summary = await analysis_service.analyze_batch(db)
+        logger.info(f"Self-healing complete: {analysis_summary['completed']} analyzed, {analysis_summary['errors']} errors.")
+        return existing_count
+
+    if existing_count == 774 and analyzed_count == 774 and is_mplads_already and has_risk_levels and not force_reload:
+        logger.info(f"Database already contains {existing_count} fully analyzed official parliamentary project records (Lok Sabha + Rajya Sabha). Skipping re-seed.")
         return existing_count
 
     # Prepare items to insert
@@ -346,6 +355,8 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
                 "status": item["status"],
                 "latitude": float(item["latitude"]),
                 "longitude": float(item["longitude"]),
+                "risk_score": float(item.get("risk_score") or 0.0),
+                "risk_level": item.get("risk_level") or "LOW",
                 "raw_record": item,
             })
     elif excel_path:
@@ -400,6 +411,8 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
             status=item["status"],
             latitude=item["latitude"],
             longitude=item["longitude"],
+            risk_score=item.get("risk_score"),
+            risk_level=item.get("risk_level", "LOW"),
         )
         db.add(proj)
 
@@ -435,7 +448,7 @@ def export_mplads_json_for_frontend(dest_path: str) -> int:
         return 0
 
     raw_records = parse_mplads_excel(excel_path)
-    output = []
+    transformed_items = []
     ls_idx = 1
     rs_idx = 1
     for raw in raw_records:
@@ -446,49 +459,55 @@ def export_mplads_json_for_frontend(dest_path: str) -> int:
         else:
             rs_idx += 1
         item = transform_mplads_record(raw, idx)
-        # Compute baseline initial risk score for frontend offline mode
-        alloc = item["budget"]
-        cost = item["actual_cost"]
-        comp = item["completion_percentage"]
+        transformed_items.append(item)
 
-        # Anomaly scoring heuristics matching backend RiskEngine
-        risk_score = 15.0
-        if comp == 0.0 and cost > 100.0:
-            risk_score += 55.0  # High spend with 0 completion
-        elif comp < 20.0 and cost > (alloc * 0.6):
-            risk_score += 40.0
-        elif alloc > 0 and (cost / alloc) > 1.2:
-            risk_score += 35.0  # Cost overrun
+    all_dicts = [
+        {
+            "id": it["project_id"],
+            "project_id": it["project_id"],
+            "project_name": it["project_name"],
+            "description": it["description"],
+            "state": it["state"],
+            "district": it["district"],
+            "category": it["category"],
+            "parliament_type": it.get("parliament_type", "Lok Sabha"),
+            "budget": it["budget"],
+            "actual_cost": it["actual_cost"],
+            "start_date": it["start_date"].isoformat(),
+            "expected_end_date": it["expected_end_date"].isoformat(),
+            "completion_percentage": it["completion_percentage"],
+            "status": it["status"],
+            "latitude": it["latitude"],
+            "longitude": it["longitude"],
+        }
+        for it in transformed_items
+    ]
 
-        risk_score = round(min(98.0, max(5.0, risk_score)), 1)
-        if risk_score >= 80.0:
-            risk_level = "CRITICAL"
-        elif risk_score >= 60.0:
-            risk_level = "HIGH"
-        elif risk_score >= 30.0:
-            risk_level = "MEDIUM"
-        else:
-            risk_level = "LOW"
+    svc = AnalysisService()
+    output = []
+    for p_dict in all_dicts:
+        comps = svc.cost_engine.find_comparable_projects(p_dict, all_dicts)
+        cost_res = svc.cost_engine.analyze(p_dict, comps)
+        delay_res = svc.delay_engine.analyze(p_dict)
+        dq_res = svc.dq_engine.analyze(p_dict)
+        dup_candidates = svc.duplicate_engine.find_candidates(p_dict, all_dicts, top_k=3)
+        dup_risk = svc.duplicate_engine.calculate_risk_score(dup_candidates)
 
-        output.append({
-            "project_id": item["project_id"],
-            "project_name": item["project_name"],
-            "description": item["description"],
-            "state": item["state"],
-            "district": item["district"],
-            "category": item["category"],
-            "parliament_type": item.get("parliament_type", "Lok Sabha"),
-            "budget": item["budget"],
-            "actual_cost": item["actual_cost"],
-            "start_date": item["start_date"].isoformat(),
-            "expected_end_date": item["expected_end_date"].isoformat(),
-            "completion_percentage": item["completion_percentage"],
-            "status": item["status"],
-            "latitude": item["latitude"],
-            "longitude": item["longitude"],
-            "risk_score": risk_score,
-            "risk_level": risk_level,
-        })
+        risk_res = svc.risk_engine.calculate(
+            cost_risk=cost_res["risk_score"],
+            duplicate_risk=dup_risk,
+            delay_risk=delay_res["risk_score"],
+            dq_risk=dq_res["risk_score"],
+        )
+
+        rec = dict(p_dict)
+        rec["risk_score"] = risk_res["overall_risk_score"]
+        rec["risk_level"] = risk_res["risk_level"]
+        rec["cost_risk_score"] = cost_res["risk_score"]
+        rec["delay_risk_score"] = delay_res["risk_score"]
+        rec["duplicate_risk_score"] = dup_risk
+        rec["data_quality_risk_score"] = dq_res["risk_score"]
+        output.append(rec)
 
     os.makedirs(os.path.dirname(os.path.abspath(dest_path)), exist_ok=True)
     with open(dest_path, "w", encoding="utf-8") as f:

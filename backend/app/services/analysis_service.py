@@ -256,11 +256,40 @@ class AnalysisService:
                 p.risk_score = score
                 p.risk_level = level
 
+                # Create or update ProjectAnalysis entity
+                pa_res = await db.execute(select(ProjectAnalysis).where(ProjectAnalysis.project_id == p.id))
+                existing_pa = pa_res.scalar_one_or_none()
+                if existing_pa:
+                    existing_pa.cost_risk_score = cost_res["risk_score"]
+                    existing_pa.duplicate_risk_score = dup_risk
+                    existing_pa.delay_risk_score = delay_res["risk_score"]
+                    existing_pa.data_quality_risk_score = dq_res["risk_score"]
+                    existing_pa.overall_risk_score = score
+                    existing_pa.risk_level = level
+                    existing_pa.analyzed_at = datetime.utcnow()
+                else:
+                    db.add(
+                        ProjectAnalysis(
+                            project_id=p.id,
+                            cost_risk_score=cost_res["risk_score"],
+                            duplicate_risk_score=dup_risk,
+                            delay_risk_score=delay_res["risk_score"],
+                            data_quality_risk_score=dq_res["risk_score"],
+                            overall_risk_score=score,
+                            risk_level=level,
+                            analysis_status="COMPLETED",
+                            analyzed_at=datetime.utcnow(),
+                        )
+                    )
+
                 # Check ReviewCase
                 if level in ("MEDIUM", "HIGH", "CRITICAL"):
                     rc_res = await db.execute(select(ReviewCase).where(ReviewCase.project_id == p.id))
-                    if not rc_res.scalar_one_or_none():
+                    existing_rc = rc_res.scalar_one_or_none()
+                    if not existing_rc:
                         db.add(ReviewCase(project_id=p.id, status="NEW", priority=level))
+                    else:
+                        existing_rc.priority = level
 
                 completed += 1
             except Exception as e:

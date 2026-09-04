@@ -64,6 +64,16 @@ async def get_dashboard(
         c = (await db.execute(lvl_q)).scalar() or 0
         risk_counts[lvl] = c
 
+    # Self-healing: if risk levels are unassigned or ProjectAnalysis is incomplete, execute batch analysis immediately
+    pa_total = (await db.execute(select(func.count()).select_from(ProjectAnalysis))).scalar() or 0
+    if total_projects > 0 and (sum(risk_counts.values()) == 0 or pa_total < total_projects):
+        await analysis_service.analyze_batch(db)
+        for lvl in ("LOW", "MEDIUM", "HIGH", "CRITICAL"):
+            lvl_q = select(func.count()).select_from(Project).where(Project.risk_level == lvl)
+            for f in project_filter:
+                lvl_q = lvl_q.where(f)
+            risk_counts[lvl] = (await db.execute(lvl_q)).scalar() or 0
+
     # Review queue cases
     rev_q = select(func.count()).select_from(ReviewCase).join(Project).where(ReviewCase.status != "RESOLVED")
     for f in project_filter:

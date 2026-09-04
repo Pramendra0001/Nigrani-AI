@@ -35,9 +35,9 @@ class RiskEngine:
         # Classification
         if overall <= 30.0:
             risk_level = "LOW"
-        elif overall <= 60.0:
+        elif overall <= 55.0:
             risk_level = "MEDIUM"
-        elif overall <= 80.0:
+        elif overall <= 70.0:
             risk_level = "HIGH"
         else:
             risk_level = "CRITICAL"

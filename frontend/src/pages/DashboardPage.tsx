@@ -75,12 +75,18 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
 
   const { metrics, risk_distribution, category_distribution, state_distribution, high_priority_projects } = data;
 
-  // Donut chart data
+  // Donut chart data - resilient case handling
+  const rd = risk_distribution || {};
+  const lowCount = rd.LOW ?? rd.low ?? 0;
+  const medCount = rd.MEDIUM ?? rd.medium ?? 0;
+  const highCount = rd.HIGH ?? rd.high ?? 0;
+  const critCount = rd.CRITICAL ?? rd.critical ?? 0;
+
   const donutData = [
-    { label: 'Low Risk', value: risk_distribution.LOW || 0, color: '#10b981' },
-    { label: 'Medium Risk', value: risk_distribution.MEDIUM || 0, color: '#f59e0b' },
-    { label: 'High Risk', value: risk_distribution.HIGH || 0, color: '#f97316' },
-    { label: 'Critical Risk', value: risk_distribution.CRITICAL || 0, color: '#ef4444' },
+    { label: 'Low Risk', value: lowCount, color: '#10b981' },
+    { label: 'Medium Risk', value: medCount, color: '#f59e0b' },
+    { label: 'High Risk', value: highCount, color: '#f97316' },
+    { label: 'Critical Risk', value: critCount, color: '#ef4444' },
   ];
 
   return (
