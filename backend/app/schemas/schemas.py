@@ -88,3 +88,66 @@ class RiskWeightsUpdate(BaseModel):
     duplicate: float = 0.30
     delay: float = 0.25
     data_quality: float = 0.10
+
+
+# -------------------------------------------------------------
+# Authentication & User Profile Schemas
+# -------------------------------------------------------------
+class UserRegisterRequest(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=150)
+    email: str
+    phone: str
+    password: str = Field(..., min_length=8)
+    organization: Optional[str] = "National Infrastructure Review Cell"
+    designation: Optional[str] = "Project Review Analyst"
+
+
+class UserLoginRequest(BaseModel):
+    identifier: str  # Email or phone number
+    password: str
+
+
+class VerifyEmailOtpRequest(BaseModel):
+    email: str
+    otp: str = Field(..., min_length=4, max_length=10)
+
+
+class VerifyPhoneOtpRequest(BaseModel):
+    phone: str
+    otp: str = Field(..., min_length=4, max_length=10)
+
+
+class ResendOtpRequest(BaseModel):
+    target: str  # Email or phone
+    code_type: str = "EMAIL_VERIFICATION"  # EMAIL_VERIFICATION or PHONE_VERIFICATION
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str = Field(..., min_length=8)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
+
+
+class UpdateProfileRequest(BaseModel):
+    full_name: Optional[str] = None
+    organization: Optional[str] = None
+    designation: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class DeleteAccountRequest(BaseModel):
+    password_confirmation: str
+

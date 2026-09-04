@@ -201,14 +201,14 @@ class DemoDataGenerator:
         budget = round(rng.gauss(cat_info["median"], cat_info["median"] * 0.20), 2)
         budget = max(cat_info["min"], min(cat_info["max"], budget))
 
-        # Baseline dates (between 2022 and 2025)
-        days_offset = rng.randint(0, 750)
-        start = date(2023, 1, 1) + timedelta(days=days_offset)
+        # Baseline dates (aligned to current 2026 operational context)
+        days_offset = rng.randint(0, 550)
+        start = date(2025, 1, 1) + timedelta(days=days_offset)
         duration = rng.randint(180, 730)
         end = start + timedelta(days=duration)
 
-        # Progress
-        today = date.today()
+        # Progress evaluated against current year 2026
+        today = date(2026, 9, 4)
         if today < start:
             comp = 0.0
             status = "NOT_STARTED"
@@ -245,13 +245,13 @@ class DemoDataGenerator:
             status = "ONGOING"
 
         elif anomaly == "severe_delay":
-            start = date(2022, 3, 1) + timedelta(days=rng.randint(0, 180))
-            end = start + timedelta(days=rng.randint(240, 400))  # should already be ended
-            comp = round(rng.uniform(8.0, 24.0), 1)  # only ~15% done
+            start = date(2024, 3, 1) + timedelta(days=rng.randint(0, 180))
+            end = start + timedelta(days=rng.randint(240, 400))  # planned completion ended in 2025/early 2026
+            comp = round(rng.uniform(8.0, 24.0), 1)  # only ~15% done in 2026
             status = "DELAYED"
 
         elif anomaly == "moderate_delay":
-            start = date(2023, 1, 15) + timedelta(days=rng.randint(0, 180))
+            start = date(2025, 1, 15) + timedelta(days=rng.randint(0, 180))
             end = start + timedelta(days=rng.randint(300, 500))
             comp = round(rng.uniform(20.0, 40.0), 1)
             status = "DELAYED"
@@ -274,7 +274,7 @@ class DemoDataGenerator:
 
         elif anomaly == "compound_cost_delay":
             budget = round(cat_info["median"] * rng.uniform(2.8, 4.0), 2)
-            start = date(2022, 5, 1) + timedelta(days=rng.randint(0, 120))
+            start = date(2024, 5, 1) + timedelta(days=rng.randint(0, 120))
             end = start + timedelta(days=rng.randint(250, 400))
             comp = round(rng.uniform(10.0, 25.0), 1)
             status = "DELAYED"

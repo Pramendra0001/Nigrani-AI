@@ -160,3 +160,45 @@ export interface ReviewCaseItem {
   notes_count: number;
   created_at?: string;
 }
+
+// -------------------------------------------------------------
+// Authentication, Profile & Session Data Types
+// -------------------------------------------------------------
+export const APP_CURRENT_YEAR = 2026;
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  role: 'User' | 'Analyst' | 'Reviewer' | 'Administrator' | string;
+  organization: string;
+  designation: string;
+  avatar_url?: string | null;
+  is_email_verified: boolean;
+  is_phone_verified: boolean;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface AuthResponse {
+  user: UserProfile;
+  access_token: string;
+  session_token: string;
+  verification?: {
+    email_verified: boolean;
+    phone_verified: boolean;
+    sandbox_email_otp?: string | null;
+    sandbox_phone_otp?: string | null;
+  };
+  message?: string;
+}
+
+export interface UserSessionItem {
+  id: string;
+  device_info: string;
+  ip_address: string;
+  created_at: string;
+  is_current: boolean;
+}
+
