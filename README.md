@@ -21,10 +21,10 @@ The platform analyzes available project, financial, expenditure, progress, timel
 | Service | Access |
 |---|---|
 | 🚀 Live Application | [Open Nigrani AI](https://pramendra0001.github.io/Nigrani-AI/) |
+| 💻 Nigrani AI Project Repository | [View Project on GitHub](https://github.com/Pramendra0001/Nigrani-AI) |
 | ⚙️ Backend API | [Backend Service](https://nigrani-ai-u7gz.onrender.com/) |
 | 📚 API Documentation | [Interactive API Docs](https://nigrani-ai-u7gz.onrender.com/docs) |
-| ❤️ Health Check | [API Health Status](https://nigrani-ai-u7gz.onrender.com/health) |
-| 💻 Source Code | [GitHub Repository](https://github.com/Pramendra0001/Nigrani-AI) |
+| ❤️ API Health Check | [Check API Status](https://nigrani-ai-u7gz.onrender.com/health) |
 
 ---
 
