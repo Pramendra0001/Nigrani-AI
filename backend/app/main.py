@@ -26,19 +26,10 @@ async def lifespan(app: FastAPI):
 
     if settings.DEMO_MODE:
         async with async_session() as session:
-            logger.info("Demo Mode Active: checking benchmark demo projects...")
-            count = await seed_demo_database(session)
-            logger.info(f"Demo project records active: {count}")
-
-            # Run initial baseline intelligence analysis if needed
-            from sqlalchemy import select, func
-            from app.models.models import ProjectAnalysis
-            analyzed_count = (await session.execute(select(func.count()).select_from(ProjectAnalysis))).scalar() or 0
-            if analyzed_count == 0:
-                logger.info("Running initial baseline intelligence analysis on benchmark dataset...")
-                svc = AnalysisService()
-                res = await svc.analyze_batch(session)
-                logger.info(f"Baseline analysis complete: {res['completed']} analyzed, {res['errors']} errors.")
+            logger.info("Initializing official MPLADS national public project dataset...")
+            from app.utils.mplads_loader import seed_mplads_database
+            count = await seed_mplads_database(session)
+            logger.info(f"Official MPLADS project records active: {count}")
 
     logger.info(f"Nigrani AI running with CORS allowed origins: {settings.CORS_ORIGINS}")
     yield

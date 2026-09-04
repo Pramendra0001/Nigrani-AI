@@ -88,10 +88,10 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
           <span className="inline-block rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-300 backdrop-blur-sm mb-2">
             Intelligence Overview
           </span>
-          <h1 className="text-2xl font-black tracking-tight">Public Project Vigilance Dashboard</h1>
+          <h1 className="text-2xl font-black tracking-tight">MPLADS National Vigilance Dashboard</h1>
           <p className="text-sm text-slate-300 mt-1 max-w-2xl">
-            Automated screening of {metrics.total_projects.toLocaleString()} ongoing and completed infrastructure assets across 10 states.
-            Prioritizing {metrics.projects_requiring_review} high-variance cases for immediate expert review.
+            Official MPLADS Intelligence Screening: Monitoring {metrics.total_projects.toLocaleString()} Parliamentary Constituency development funds across all {state_distribution.length || 36} States & Union Territories.
+            Prioritizing {metrics.projects_requiring_review} flagged cases for expert audit.
           </p>
         </div>
         <div className="flex items-center gap-3">

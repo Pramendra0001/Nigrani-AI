@@ -246,9 +246,15 @@ async def get_project_investigation(project_id: str, db: AsyncSession = Depends(
     if not p:
         raise HTTPException(404, detail=f"Project not found: {project_id}")
 
-    # Aggregated Analysis
+    # Aggregated Analysis (auto-generate on demand if not yet computed)
     pa_res = await db.execute(select(ProjectAnalysis).where(ProjectAnalysis.project_id == p.id))
     pa = pa_res.scalar_one_or_none()
+    if not pa:
+        try:
+            await analysis_service.analyze_project(db, p.project_id)
+            pa = (await db.execute(select(ProjectAnalysis).where(ProjectAnalysis.project_id == p.id))).scalar_one_or_none()
+        except Exception:
+            pass
 
     # Cost Analysis
     ca_res = await db.execute(select(CostAnalysis).where(CostAnalysis.project_id == p.id))
@@ -492,6 +498,19 @@ async def commit_dataset_import(req: ImportCommitRequest, db: AsyncSession = Dep
 
     _upload_buffer.pop(req.import_token, None)
     return res
+
+
+@api_router.post("/data/mplads/reload")
+async def reload_mplads_dataset(db: AsyncSession = Depends(get_db)):
+    """Reloads the official MPLADS national dataset and executes batch anomaly screening."""
+    from app.utils.mplads_loader import seed_mplads_database
+    count = await seed_mplads_database(db, force_reload=True)
+    return {
+        "status": "success",
+        "dataset": "MPLADS_Nigrani_AI_Data_Package",
+        "total_records": count,
+        "message": f"Successfully reloaded and screened {count} official MPLADS parliamentary project portfolios.",
+    }
 
 
 # -------------------------------------------------------------

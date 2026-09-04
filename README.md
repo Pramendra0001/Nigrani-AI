@@ -38,7 +38,7 @@ The complete Nigrani AI platform is deployed and fully accessible from any phone
 
 | Service | Public URL | Description |
 | :--- | :--- | :--- |
-| **Live Frontend Web Application** | **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)** | Hosted React dashboard, 500-project registry & forensic workstation |
+| **Live Frontend Web Application** | **[https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/)** | Hosted React dashboard, 774 MPLADS project registry & forensic workstation |
 | **Public Backend REST API** | **[https://nigrani-ai-u7gz.onrender.com/](https://nigrani-ai-u7gz.onrender.com/)** | Cloud FastAPI backend service on Render |
 | **Interactive API Documentation** | **[https://nigrani-ai-u7gz.onrender.com/docs](https://nigrani-ai-u7gz.onrender.com/docs)** | Live Swagger UI to test and execute API calls directly |
 | **Backend Health Check** | **[https://nigrani-ai-u7gz.onrender.com/health](https://nigrani-ai-u7gz.onrender.com/health)** | Live monitoring & uptime verification endpoint |
@@ -67,11 +67,12 @@ The complete Nigrani AI platform is deployed and fully accessible from any phone
                             ▼
 ┌────────────────────────────────────────────────────────┐
 │                  Database Layer                        │
-│   SQLite (Self-Seeding Demo) or Cloud PostgreSQL       │
+│   PostgreSQL (Render Cloud) or SQLite (Local Dev)      │
+│   774 Official MPLADS Projects (543 LS + 231 RS MPs)   │
 └────────────────────────────────────────────────────────┘
 ```
 
-> **Client Fallback Guarantee:** If the cloud backend is cold-starting from idle, the frontend automatically utilizes its embedded client intelligence engine with all 500 benchmark projects. The web app will never crash with connection errors.
+> **Client Fallback Guarantee:** If the cloud backend is cold-starting from idle, the frontend automatically utilizes its embedded client intelligence engine with all 774 official MPLADS benchmark projects across all 36 States & Union Territories. The web app will never crash with connection errors.
 
 ---
 
@@ -118,6 +119,12 @@ The platform is equipped with a `MockAIProvider` that generates forensic investi
 ### 3. Flexible Dataset Ingestion & Column Mapping
 Allows analysts to upload custom CSV datasets with varying column nomenclature (e.g. `work_name` vs `project_title`, `sanctioned_amount` vs `budget`). The fuzzy mapper suggests standard assignments, presents a preview and validation report, and ingests with one click.
 
+### 4. Official MPLADS National Dataset Integration
+Nigrani AI is pre-loaded with the official dataset sourced directly from the Ministry of Statistics and Programme Implementation (`mplads.gov.in`):
+- **Scale:** 774 Members of Parliament (543 Lok Sabha + 231 Rajya Sabha) across all 36 States and Union Territories.
+- **Financial Scope:** ₹11,682 Crore total allocation, ₹3,995 Crore actual expenditure, 131,141 recommended works, and 44,028 completed works.
+- **Forensic Pipeline:** Automatically flags severe completion backlogs, zero-completion anomalies despite large expenditures, unspent balance accumulation, and stalled constituency works into an actionable vigilance queue.
+
 ---
 
 ## 📂 Project Structure
@@ -146,7 +153,9 @@ Nigrani-AI/
 │   │   │   ├── import_service.py  # CSV parser & fuzzy column mapper
 │   │   │   └── review_service.py  # Triage queue and audit notes
 │   │   ├── utils/
-│   │   │   └── demo_data.py       # 500-project realistic benchmark generator
+│   │   │   ├── mplads_loader.py   # Official MPLADS Excel/XML ingestion engine (774 MPs)
+│   │   │   ├── mplads_data.json   # Bundled 774 MPLADS project records
+│   │   │   └── demo_data.py       # Benchmark generator & legacy compatibility layer
 │   │   ├── config.py              # App settings & dynamic CORS
 │   │   ├── database.py            # Async engine with SQLite / Postgres support
 │   │   └── main.py                # FastAPI entrypoint, healthcheck & OpenAPI
@@ -160,7 +169,7 @@ Nigrani-AI/
 │   │   ├── components/            # UI components (Navbar, Sidebar, Charts, Badges)
 │   │   ├── pages/                 # Dashboard, Projects, Investigation, Review, Upload, Analytics
 │   │   ├── api.ts                 # Typed client with production Render URL & fallback
-│   │   ├── demo_projects.json     # 500 benchmark projects dataset
+│   │   ├── demo_projects.json     # 774 official MPLADS benchmark projects dataset
 │   │   ├── types.ts               # TypeScript data models
 │   │   ├── App.tsx                # Master app shell
 │   │   └── main.tsx
