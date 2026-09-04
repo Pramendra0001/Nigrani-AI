@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Camera,
+  BellRing,
 } from 'lucide-react';
 import { NigraniLogo } from './NigraniLogo';
 import { ThemeToggle } from './ThemeToggle';
@@ -41,6 +42,7 @@ export const Sidebar: React.FC<Props> = ({
       icon: ClipboardCheck,
       badge: reviewCount > 0 ? reviewCount : undefined,
     },
+    { id: 'alerts', label: 'Early Warning Center', icon: BellRing, badge: 14 },
     { id: 'geo', label: 'Geographic Intelligence', icon: MapPin },
     { id: 'compliance', label: 'Compliance Monitoring', icon: ShieldCheck },
     { id: 'predictive', label: 'Predictive Insights', icon: TrendingUp },

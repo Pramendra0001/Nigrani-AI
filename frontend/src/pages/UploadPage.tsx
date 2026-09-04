@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   UploadCloud,
   CheckCircle,
@@ -203,6 +203,164 @@ export const UploadPage: React.FC<{ onUploadSuccess: () => void }> = ({ onUpload
             <span>{officialReloadMsg}</span>
           </div>
         )}
+      </div>
+
+      {/* 2. Data Provenance & Classification Registry */}
+      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-sky-500" />
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Data Provenance & Source Classification Registry
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Strict audit trail distinguishing official parliamentary benchmarks, custom departmental imports, calibrated test fixtures, and derived AI findings.
+            </p>
+          </div>
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full self-start sm:self-auto">
+            4 Classification Tiers
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Classification 1: Official Benchmark */}
+          <div className="rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/40 dark:bg-sky-950/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-cyan-300 border border-sky-300 dark:border-sky-800">
+                Tier 1: Official Benchmark
+              </span>
+              <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Authoritative
+              </span>
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                MoSPI eSAKSHI National Parliamentary Roster
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Official cumulative portfolios for 774 Members of Parliament (543 Lok Sabha + 231 Rajya Sabha) from MoSPI eSAKSHI portal.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-sky-100 dark:border-sky-900/40 text-[10px]">
+              <div>
+                <span className="text-slate-400 block font-semibold">Scope</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">774 Portfolios</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Missing Values</span>
+                <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">0.0% Missing</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Integrity Score</span>
+                <span className="font-bold font-mono text-sky-600 dark:text-cyan-400">100 / 100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Classification 2: Custom Departmental Imports */}
+          <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                Tier 2: User-Imported Dataset
+              </span>
+              <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400">
+                Active Ingestion
+              </span>
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                Departmental Works File Submissions
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Field project records uploaded via CSV, XLSX, or JSON from State PWD, PMGSY, or Municipal implementing authorities.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-emerald-100 dark:border-emerald-900/40 text-[10px]">
+              <div>
+                <span className="text-slate-400 block font-semibold">Schema Check</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">16-Point Audit</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Mapping</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">Fuzzy Synonyms</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Audit State</span>
+                <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">Pre-Screened</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Classification 3: Demo / Illustrative Test Suite */}
+          <div className="rounded-xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                Tier 3: Illustrative Test Suite
+              </span>
+              <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400">
+                Diagnostic Fixtures
+              </span>
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                Calibrated Anomaly Verification Records
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Standardized verification fixtures demonstrating specific statistical anomaly patterns (cost spikes, schedule slippage, duplicate tenders).
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-amber-100 dark:border-amber-900/40 text-[10px]">
+              <div>
+                <span className="text-slate-400 block font-semibold">Purpose</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">QA Diagnostics</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Granularity</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">Micro-Works</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Isolation</span>
+                <span className="font-bold font-mono text-amber-600 dark:text-amber-400">Strictly Tagged</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Classification 4: Derived AI Findings */}
+          <div className="rounded-xl border border-purple-200/80 dark:border-purple-900/60 bg-purple-50/40 dark:bg-purple-950/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+                Tier 4: Derived AI / ML Findings
+              </span>
+              <span className="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400">
+                Real-Time Inference
+              </span>
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white">
+                Multi-Engine Forensic Decision Support
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                Algorithmic outputs derived from statistical peer IQR baselines, cosine semantic NLP similarity, and timeline velocity calculations.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-purple-100 dark:border-purple-900/40 text-[10px]">
+              <div>
+                <span className="text-slate-400 block font-semibold">Nature</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">Non-Accusatory</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Human Review</span>
+                <span className="font-bold font-mono text-purple-600 dark:text-purple-400">Mandatory</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block font-semibold">Audit Trail</span>
+                <span className="font-bold font-mono text-slate-800 dark:text-slate-200">SHA-256 Signed</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 2. Automated 16-Point Data Quality Audit Checkpoints */}

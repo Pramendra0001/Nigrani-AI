@@ -313,9 +313,14 @@ async def seed_mplads_database(db: AsyncSession, force_reload: bool = False) -> 
     # Check if database already has official 774 MPLADS data AND has been analyzed
     existing_count = (await db.execute(select(func.count()).select_from(Project))).scalar() or 0
     analyzed_count = (await db.execute(select(func.count()).select_from(ProjectAnalysis))).scalar() or 0
+    rs_count = (await db.execute(select(func.count()).select_from(Project).where(Project.parliament_type == "Rajya Sabha"))).scalar() or 0
     first_proj = (await db.execute(select(Project).limit(1))).scalar_one_or_none()
     is_mplads_already = first_proj and first_proj.project_id.startswith("MPLADS-")
     has_risk_levels = first_proj and first_proj.risk_level is not None
+
+    if rs_count == 0 and existing_count > 0:
+        logger.info("Database records missing Rajya Sabha parliament_type tags. Forcing data reload...")
+        force_reload = True
 
     if existing_count == 774 and is_mplads_already and (analyzed_count < 774 or not has_risk_levels) and not force_reload:
         logger.info(f"Database has {existing_count} records but incomplete analysis ({analyzed_count}/774). Running self-healing batch analysis...")

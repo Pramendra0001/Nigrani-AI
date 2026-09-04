@@ -233,6 +233,13 @@ class AnalysisService:
         # Load all project dicts once for speed
         all_dicts = [p.to_dict() for p in projects]
 
+        # Preload existing analysis and review cases to prevent N+1 queries and UNIQUE constraint collisions
+        pa_res = await db.execute(select(ProjectAnalysis))
+        pa_map = {pa.project_id: pa for pa in pa_res.scalars().all()}
+
+        rc_res = await db.execute(select(ReviewCase))
+        rc_map = {rc.project_id: rc for rc in rc_res.scalars().all()}
+
         for p in projects:
             try:
                 p_dict = p.to_dict()
@@ -257,8 +264,7 @@ class AnalysisService:
                 p.risk_level = level
 
                 # Create or update ProjectAnalysis entity
-                pa_res = await db.execute(select(ProjectAnalysis).where(ProjectAnalysis.project_id == p.id))
-                existing_pa = pa_res.scalar_one_or_none()
+                existing_pa = pa_map.get(p.id)
                 if existing_pa:
                     existing_pa.cost_risk_score = cost_res["risk_score"]
                     existing_pa.duplicate_risk_score = dup_risk
@@ -268,26 +274,27 @@ class AnalysisService:
                     existing_pa.risk_level = level
                     existing_pa.analyzed_at = datetime.utcnow()
                 else:
-                    db.add(
-                        ProjectAnalysis(
-                            project_id=p.id,
-                            cost_risk_score=cost_res["risk_score"],
-                            duplicate_risk_score=dup_risk,
-                            delay_risk_score=delay_res["risk_score"],
-                            data_quality_risk_score=dq_res["risk_score"],
-                            overall_risk_score=score,
-                            risk_level=level,
-                            analysis_status="COMPLETED",
-                            analyzed_at=datetime.utcnow(),
-                        )
+                    new_pa = ProjectAnalysis(
+                        project_id=p.id,
+                        cost_risk_score=cost_res["risk_score"],
+                        duplicate_risk_score=dup_risk,
+                        delay_risk_score=delay_res["risk_score"],
+                        data_quality_risk_score=dq_res["risk_score"],
+                        overall_risk_score=score,
+                        risk_level=level,
+                        analysis_status="COMPLETED",
+                        analyzed_at=datetime.utcnow(),
                     )
+                    db.add(new_pa)
+                    pa_map[p.id] = new_pa
 
                 # Check ReviewCase
                 if level in ("MEDIUM", "HIGH", "CRITICAL"):
-                    rc_res = await db.execute(select(ReviewCase).where(ReviewCase.project_id == p.id))
-                    existing_rc = rc_res.scalar_one_or_none()
+                    existing_rc = rc_map.get(p.id)
                     if not existing_rc:
-                        db.add(ReviewCase(project_id=p.id, status="NEW", priority=level))
+                        new_rc = ReviewCase(project_id=p.id, status="NEW", priority=level)
+                        db.add(new_rc)
+                        rc_map[p.id] = new_rc
                     else:
                         existing_rc.priority = level
 

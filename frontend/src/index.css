@@ -73,3 +73,21 @@ html.dark aside nav button:hover svg {
   color: #67e8f9;
 }
 
+/* Scoped Dark Mode Form Controls & Select Option High Contrast */
+html.dark select option {
+  background-color: #0b1222;
+  color: #f8fafc;
+}
+
+html.dark input::placeholder,
+html.dark select::placeholder {
+  color: #64748b;
+}
+
+/* Top Header full-width viewport coverage */
+header {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+

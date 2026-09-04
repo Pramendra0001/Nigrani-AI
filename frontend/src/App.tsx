@@ -12,11 +12,12 @@ import { GeoMapPage } from './pages/GeoMapPage';
 import { CompliancePage } from './pages/CompliancePage';
 import { PredictivePage } from './pages/PredictivePage';
 import { EvidencePage } from './pages/EvidencePage';
+import { AlertsPage } from './pages/AlertsPage';
 import { api } from './api';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'projects' | 'investigation' | 'review' | 'upload' | 'analytics' | 'settings' | 'geo' | 'compliance' | 'predictive' | 'evidence'
+    'dashboard' | 'projects' | 'investigation' | 'review' | 'alerts' | 'upload' | 'analytics' | 'settings' | 'geo' | 'compliance' | 'predictive' | 'evidence'
   >('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [reviewCount, setReviewCount] = useState<number>(0);
@@ -95,6 +96,10 @@ export function App() {
 
           {activeTab === 'review' && (
             <ReviewQueuePage onSelectProject={handleSelectProject} />
+          )}
+
+          {activeTab === 'alerts' && (
+            <AlertsPage onSelectProject={handleSelectProject} />
           )}
 
           {activeTab === 'geo' && (

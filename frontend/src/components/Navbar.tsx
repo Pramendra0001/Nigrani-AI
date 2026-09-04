@@ -9,6 +9,7 @@ import {
 import { api } from '../api';
 import { NigraniLogo } from './NigraniLogo';
 import { ThemeToggle } from './ThemeToggle';
+import { IntelligenceSweepModal } from './IntelligenceSweepModal';
 
 interface Props {
   onNavigateTab: (tab: string) => void;
@@ -25,10 +26,12 @@ export const Navbar: React.FC<Props> = ({
 }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [sweepNotice, setSweepNotice] = useState(false);
+  const [isSweepModalOpen, setIsSweepModalOpen] = useState(false);
 
   const handleBatch = async () => {
     try {
       setAnalyzing(true);
+      setIsSweepModalOpen(true);
       await api.analyzeBatch();
       if (onBatchAnalyze) onBatchAnalyze();
       setSweepNotice(true);
@@ -103,6 +106,12 @@ export const Navbar: React.FC<Props> = ({
         {/* Theme Selector (Light / Dark / System) */}
         <ThemeToggle variant="segmented" />
       </div>
+
+      <IntelligenceSweepModal
+        isOpen={isSweepModalOpen}
+        onClose={() => setIsSweepModalOpen(false)}
+        onNavigateTab={onNavigateTab}
+      />
     </header>
   );
 };

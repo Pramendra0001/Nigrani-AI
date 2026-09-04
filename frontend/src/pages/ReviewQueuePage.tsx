@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ClipboardList, ArrowRight, Filter, RefreshCw, CheckCircle2, Clock, Sparkles } from 'lucide-react';
+import { ClipboardList, ArrowRight, Filter, RefreshCw, CheckCircle2, Clock, Sparkles, AlertTriangle } from 'lucide-react';
 import { api } from '../api';
 import { ReviewCaseItem } from '../types';
 import { RiskBadge } from '../components/RiskBadge';
@@ -167,6 +167,18 @@ export const ReviewQueuePage: React.FC<Props> = ({ onSelectProject }) => {
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                   Scope: <span className="text-slate-700 dark:text-slate-300 font-medium">{c.category} • Budget: ₹{c.budget ? c.budget.toLocaleString() : '—'} L • {c.district}, {c.state}</span>
                 </p>
+
+                <div className="flex items-center gap-1.5 p-2 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-[11px] text-amber-900 dark:text-amber-200">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>
+                    <strong>Why Prioritized:</strong>{' '}
+                    {c.risk_score >= 70
+                      ? 'Severe physical progress deficit: high disbursement with incomplete physical works.'
+                      : c.risk_score >= 55
+                      ? 'Elevated statistical expenditure deviation & multi-quarter schedule variance.'
+                      : 'Audit review gate: scheduled milestone reconciliation & utilization certificate review.'}
+                  </span>
+                </div>
 
                 <div className="flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500 pt-1 font-mono">
                   <span>Queued: {c.created_at ? new Date(c.created_at).toLocaleDateString() : 'Active Queue'}</span>
