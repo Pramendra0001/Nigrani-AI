@@ -1,45 +1,38 @@
 import React, { useState } from 'react';
 import {
-  Shield,
   RefreshCw,
-  User,
-  LogOut,
-  Settings as SettingsIcon,
-  ChevronDown,
   Menu,
   X,
+  Activity,
   CheckCircle2,
 } from 'lucide-react';
 import { api } from '../api';
-import { UserProfile } from '../types';
+import { NigraniLogo } from './NigraniLogo';
+import { ThemeToggle } from './ThemeToggle';
 
 interface Props {
-  user: UserProfile | null;
-  onOpenAuth: (mode: 'login' | 'register') => void;
   onNavigateTab: (tab: string) => void;
-  onLogout: () => void;
   onBatchAnalyze?: () => void;
   onToggleMobileSidebar?: () => void;
   isMobileSidebarOpen?: boolean;
 }
 
 export const Navbar: React.FC<Props> = ({
-  user,
-  onOpenAuth,
   onNavigateTab,
-  onLogout,
   onBatchAnalyze,
   onToggleMobileSidebar,
   isMobileSidebarOpen,
 }) => {
   const [analyzing, setAnalyzing] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sweepNotice, setSweepNotice] = useState(false);
 
   const handleBatch = async () => {
     try {
       setAnalyzing(true);
       await api.analyzeBatch();
       if (onBatchAnalyze) onBatchAnalyze();
+      setSweepNotice(true);
+      setTimeout(() => setSweepNotice(false), 3500);
     } catch (err: any) {
       alert(`Batch analysis error: ${err.message}`);
     } finally {
@@ -47,23 +40,14 @@ export const Navbar: React.FC<Props> = ({
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  };
-
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white/95 px-4 sm:px-6 backdrop-blur-md">
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-[#070b14]/90 px-4 sm:px-6 backdrop-blur-md transition-colors">
       {/* Brand & Identity */}
       <div className="flex items-center gap-3">
         {onToggleMobileSidebar && (
           <button
             onClick={onToggleMobileSidebar}
-            className="md:hidden rounded-lg p-1.5 text-slate-600 hover:bg-slate-100"
+            className="md:hidden rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             aria-label="Toggle navigation menu"
           >
             {isMobileSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -72,129 +56,52 @@ export const Navbar: React.FC<Props> = ({
 
         <div
           onClick={() => onNavigateTab('dashboard')}
-          className="cursor-pointer flex items-center gap-2.5"
+          className="cursor-pointer flex items-center gap-3 group"
+          title="Nigrani AI — Public Project Intelligence"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gov-700 to-gov-900 text-white shadow-md shadow-gov-900/20">
-            <Shield className="w-5 h-5 text-amber-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-slate-900">
-                NIGRANI <span className="text-blue-600">AI</span>
-              </span>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 uppercase tracking-wide border border-slate-200">
-                National Vigilance Platform • 2026
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
-              AI-Powered Public Project Intelligence & Explainable Anomaly Review Platform
-            </p>
+          <NigraniLogo size="md" showWordmark={true} showSubtitle={false} />
+          
+          <div className="hidden xl:flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+            <span className="rounded-md bg-sky-50 dark:bg-sky-950/40 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:text-sky-300 tracking-wide border border-sky-200/70 dark:border-sky-800/50">
+              Official MPLADS Intelligence
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Right Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Offline Demo Mode indicator */}
-        <div className="hidden lg:flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3 py-1 text-xs font-semibold text-emerald-800 shadow-sm">
+      {/* Right Action Controls */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Offline Demo Mode Status Badge */}
+        <div className="hidden lg:flex items-center gap-2 rounded-full border border-emerald-200/80 dark:border-emerald-800/60 bg-emerald-50/80 dark:bg-emerald-950/30 px-3 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-xs">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span>Offline AI Active</span>
+          <span className="text-[11px] font-medium">Offline Intelligence Active</span>
         </div>
 
-        {/* Batch Analyze trigger */}
+        {/* Sweep Success Notification Pill */}
+        {sweepNotice && (
+          <div className="hidden md:flex items-center gap-1.5 rounded-full border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/60 px-3 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300 animate-in fade-in duration-200">
+            <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+            <span className="text-[11px]">Screening Complete</span>
+          </div>
+        )}
+
+        {/* Batch Anomaly Sweep Trigger */}
         <button
           onClick={handleBatch}
           disabled={analyzing}
-          className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg bg-gov-700 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-gov-800 active:scale-95 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700/60 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition active:scale-95 disabled:opacity-50"
+          title="Run statistical anomaly screening across all active project portfolios"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">{analyzing ? 'Analyzing All...' : 'Run Intelligence Sweep'}</span>
-          <span className="sm:hidden">{analyzing ? '...' : 'Sweep'}</span>
+          <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${analyzing ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline text-[11px]">{analyzing ? 'Screening...' : 'Run Intelligence Sweep'}</span>
+          <span className="sm:hidden text-[11px]">{analyzing ? '...' : 'Sweep'}</span>
         </button>
 
-        {/* Authentication Section */}
-        {user ? (
-          <div className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 py-1 px-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-            >
-              <div className="h-7 w-7 rounded-full bg-gov-700 text-white flex items-center justify-center text-[10px] font-bold">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt={user.full_name} className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  getInitials(user.full_name)
-                )}
-              </div>
-              <div className="hidden md:block text-left">
-                <p className="font-bold leading-tight">{user.full_name.split(' ')[0]}</p>
-                <p className="text-[10px] text-slate-500">{user.role || 'Analyst'}</p>
-              </div>
-              <ChevronDown className="h-3 w-3 text-slate-400" />
-            </button>
-
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 mt-2 w-52 rounded-xl bg-white p-1.5 shadow-xl border border-slate-200 text-xs z-50 animate-in fade-in duration-150"
-                onClick={() => setDropdownOpen(false)}
-              >
-                <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="font-bold text-slate-900">{user.full_name}</p>
-                  <p className="text-[11px] text-slate-500 font-mono truncate">{user.email}</p>
-                  <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-blue-600">
-                    <Shield className="h-3 w-3" />
-                    <span>Role: {user.role || 'Analyst'}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onNavigateTab('profile')}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <User className="h-4 w-4 text-slate-400" />
-                  <span>My Profile</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigateTab('settings')}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <SettingsIcon className="h-4 w-4 text-slate-400" />
-                  <span>Account Settings</span>
-                </button>
-
-                <div className="my-1 border-t border-slate-100"></div>
-
-                <button
-                  onClick={onLogout}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-rose-600 hover:bg-rose-50 transition font-semibold"
-                >
-                  <LogOut className="h-4 w-4 text-rose-500" />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => onOpenAuth('login')}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => onOpenAuth('register')}
-              className="hidden sm:inline-block rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition"
-            >
-              Register
-            </button>
-          </div>
-        )}
+        {/* Theme Selector (Light / Dark / System) */}
+        <ThemeToggle variant="segmented" />
       </div>
     </header>
   );

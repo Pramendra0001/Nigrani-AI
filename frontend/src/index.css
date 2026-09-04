@@ -1,4 +1,46 @@
-/* Nigrani AI Base CSS */
+/* Nigrani AI Enterprise Design System Tokens */
+@layer base {
+  :root {
+    /* Light Mode Semantic Tokens */
+    --canvas-bg: #f8fafc;
+    --surface-card: #ffffff;
+    --surface-elevated: #f1f5f9;
+    --surface-hover: #f8fafc;
+    --border-subtle: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --brand-primary: #0284c7;
+    --brand-cyan: #06b6d4;
+    --brand-green: #10b981;
+    --risk-low: #10b981;
+    --risk-medium: #f59e0b;
+    --risk-high: #f97316;
+    --risk-critical: #ef4444;
+  }
+
+  html.dark {
+    /* Dark Mode Semantic Tokens (Deep Navy / International Enterprise AI) */
+    --canvas-bg: #070b14;
+    --surface-card: #0b1222;
+    --surface-elevated: #111c34;
+    --surface-hover: #182647;
+    --border-subtle: #1e293b;
+    --border-strong: #2c3c56;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #8092a8;
+    --brand-primary: #0284c7;
+    --brand-cyan: #22d3ee;
+    --brand-green: #10b981;
+    --risk-low: #10b981;
+    --risk-medium: #f59e0b;
+    --risk-high: #f97316;
+    --risk-critical: #ef4444;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,4 +50,11 @@ html, body, #root {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+}
+
+/* Subtle transitions when switching themes */
+body, header, aside, main, div, button, input, select, table {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }

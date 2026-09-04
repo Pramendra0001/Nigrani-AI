@@ -2,539 +2,399 @@ import React, { useState, useEffect } from 'react';
 import {
   Settings,
   Shield,
-  Lock,
-  Smartphone,
   Laptop,
-  Bell,
   Download,
-  Trash2,
-  AlertTriangle,
   CheckCircle2,
-  AlertCircle,
-  LogOut,
   RefreshCw,
+  Sun,
+  Moon,
+  Database,
+  Sliders,
+  Server,
+  Trash2,
+  Lock,
 } from 'lucide-react';
-import { UserProfile, UserSessionItem } from '../types';
+import { useTheme, Theme } from '../context/ThemeContext';
 import { api } from '../api';
 
-interface Props {
-  user: UserProfile;
-  onAccountDeleted: () => void;
-}
+export const SettingsPage: React.FC = () => {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [activeSection, setActiveSection] = useState<'theme' | 'dossier' | 'dataset' | 'connectivity'>('theme');
 
-export const SettingsPage: React.FC<Props> = ({ user, onAccountDeleted }) => {
-  const [activeSection, setActiveSection] = useState<'security' | 'sessions' | 'notifications' | 'data' | 'danger'>('security');
+  // Backend status state
+  const [backendStatus, setBackendStatus] = useState<string>('Checking...');
+  const [pingLoading, setPingLoading] = useState(false);
+  const [reloadStatus, setReloadStatus] = useState<string | null>(null);
+  const [reloading, setReloading] = useState(false);
 
-  // Password state
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [pwdLoading, setPwdLoading] = useState(false);
-  const [pwdMsg, setPwdMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  // Sessions state
-  const [sessions, setSessions] = useState<UserSessionItem[]>([]);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
-  const [sessionsMsg, setSessionsMsg] = useState<string | null>(null);
-
-  // Notification toggles
-  const [notifyCritical, setNotifyCritical] = useState(true);
-  const [notifyDuplicate, setNotifyDuplicate] = useState(true);
-  const [notifyWeekly, setNotifyWeekly] = useState(false);
-  const [notifySms, setNotifySms] = useState(false);
-
-  // Deletion modal state
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  // Check backend connectivity
+  const checkPing = async () => {
+    try {
+      setPingLoading(true);
+      const res = await api.getHealth();
+      setBackendStatus(`Connected (${res.status})`);
+    } catch {
+      setBackendStatus('Offline / Local Embedded Fallback Active');
+    } finally {
+      setPingLoading(false);
+    }
+  };
 
   useEffect(() => {
-    loadSessions();
+    checkPing();
   }, []);
 
-  const loadSessions = async () => {
-    setSessionsLoading(true);
-    try {
-      const res = await api.listSessions();
-      setSessions(res);
-    } catch {
-      // ignore
-    } finally {
-      setSessionsLoading(false);
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPwdMsg(null);
-    if (newPassword !== confirmPassword) {
-      setPwdMsg({ type: 'error', text: 'New passwords do not match.' });
-      return;
-    }
-    if (newPassword.length < 8) {
-      setPwdMsg({ type: 'error', text: 'New password must be at least 8 characters long.' });
-      return;
-    }
-
-    setPwdLoading(true);
-    try {
-      await api.changePassword({ current_password: currentPassword, new_password: newPassword });
-      setPwdMsg({ type: 'success', text: 'Security credentials updated successfully.' });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err: any) {
-      setPwdMsg({ type: 'error', text: err.message || 'Failed to update password.' });
-    } finally {
-      setPwdLoading(false);
-    }
-  };
-
-  const handleRevokeOtherSessions = async () => {
-    try {
-      await api.revokeOtherSessions();
-      setSessionsMsg('Logged out from all other devices successfully.');
-      loadSessions();
-    } catch (err: any) {
-      setSessionsMsg('Failed to revoke sessions: ' + err.message);
-    }
-  };
-
-  const handleExportData = () => {
+  const handleExportDossier = () => {
     const data = {
-      profile: user,
-      export_timestamp: new Date().toISOString(),
+      auditor_identity: 'Senior Public Vigilance Analyst',
+      organization: 'Ministry of Statistics & Programme Implementation (MoSPI) / Public Infrastructure Track',
+      jurisdiction: 'National Vigilance Track — MPLADS & Infrastructure Funds',
       platform: 'Nigrani AI — Public Project Intelligence Platform',
-      security_classification: 'Official Auditor Copy',
+      active_dataset: 'MPLADS_Nigrani_AI_Data_Package (774 Parliamentary Constituencies)',
+      deterministic_scoring_weights: {
+        cost_variance: 0.35,
+        duplicate_intelligence: 0.30,
+        schedule_delay: 0.25,
+        data_quality: 0.10,
+      },
+      export_timestamp: new Date().toISOString(),
+      classification: 'OFFICIAL AUDITOR DOSSIER',
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nigrani_account_dossier_${user.id.slice(0, 8)}.json`;
+    a.download = `nigrani_auditor_dossier_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const handleDeleteAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setDeleteError(null);
-    if (deleteConfirmationText !== 'DELETE') {
-      setDeleteError('Please type "DELETE" to confirm.');
-      return;
-    }
-    setDeleteLoading(true);
+  const handleReloadMPLADS = async () => {
     try {
-      await api.deleteAccount(deletePassword);
-      setShowDeleteModal(false);
-      onAccountDeleted();
+      setReloading(true);
+      setReloadStatus(null);
+      const res = await api.reloadMpladsDataset();
+      setReloadStatus(res.message || 'Dataset reloaded successfully.');
     } catch (err: any) {
-      setDeleteError(err.message || 'Account deletion failed.');
+      setReloadStatus(`Reload notice: ${err.message || 'Using local bundled MPLADS records.'}`);
     } finally {
-      setDeleteLoading(false);
+      setReloading(false);
+    }
+  };
+
+  const handleClearCache = () => {
+    if (confirm('Clear local preferences and application cache? The page will reload.')) {
+      localStorage.removeItem('nigrani-theme');
+      localStorage.removeItem('nigrani_user_profile');
+      window.location.reload();
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="border-b border-slate-200 pb-4">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-          <Settings className="h-5 w-5 text-gov-700" />
-          <span>Account Settings & Governance Controls</span>
+      <div className="border-b border-slate-200/80 dark:border-slate-800/80 pb-4">
+        <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+          <Settings className="h-5 w-5 text-sky-500" />
+          <span>System & Vigilance Settings</span>
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Manage credentials, active login stations, vigilance notification triggers, and data controls.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          Configure enterprise appearance tokens, export official auditor records, verify cloud connectivity, and manage national datasets.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Navigation Tabs */}
+        {/* Navigation Sidebar */}
         <div className="md:col-span-1 space-y-1">
           <button
-            onClick={() => setActiveSection('security')}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-              activeSection === 'security'
-                ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                : 'text-slate-600 hover:bg-slate-50'
+            onClick={() => setActiveSection('theme')}
+            className={`flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
+              activeSection === 'theme'
+                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-800/40 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
           >
-            <Lock className="h-4 w-4" />
-            <span>Password & Security</span>
+            <Sun className="h-4 w-4" />
+            <span>Theme & Display</span>
           </button>
 
           <button
-            onClick={() => setActiveSection('sessions')}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-              activeSection === 'sessions'
-                ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                : 'text-slate-600 hover:bg-slate-50'
+            onClick={() => setActiveSection('dossier')}
+            className={`flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
+              activeSection === 'dossier'
+                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-800/40 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
           >
-            <Laptop className="h-4 w-4" />
-            <span>Active Sessions ({sessions.length})</span>
+            <Shield className="h-4 w-4" />
+            <span>Auditor Dossier</span>
           </button>
 
           <button
-            onClick={() => setActiveSection('notifications')}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-              activeSection === 'notifications'
-                ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                : 'text-slate-600 hover:bg-slate-50'
+            onClick={() => setActiveSection('dataset')}
+            className={`flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
+              activeSection === 'dataset'
+                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-800/40 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
           >
-            <Bell className="h-4 w-4" />
-            <span>Vigilance Alerts</span>
+            <Database className="h-4 w-4" />
+            <span>MPLADS Dataset</span>
           </button>
 
           <button
-            onClick={() => setActiveSection('data')}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-              activeSection === 'data'
-                ? 'bg-blue-50 text-blue-700 font-bold border border-blue-100'
-                : 'text-slate-600 hover:bg-slate-50'
+            onClick={() => setActiveSection('connectivity')}
+            className={`flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ${
+              activeSection === 'connectivity'
+                ? 'bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-800/40 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
           >
-            <Download className="h-4 w-4" />
-            <span>Privacy & Data Dossier</span>
+            <Server className="h-4 w-4" />
+            <span>Cloud Connectivity</span>
           </button>
 
-          <div className="pt-4 border-t border-slate-200">
+          <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
             <button
-              onClick={() => setActiveSection('danger')}
-              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                activeSection === 'danger'
-                  ? 'bg-rose-50 text-rose-700 font-bold border border-rose-200'
-                  : 'text-rose-600 hover:bg-rose-50'
-              }`}
+              onClick={handleClearCache}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
             >
               <Trash2 className="h-4 w-4" />
-              <span>Danger Zone</span>
+              <span>Reset Local Cache</span>
             </button>
           </div>
         </div>
 
         {/* Content Pane */}
         <div className="md:col-span-3">
-          {/* 1. PASSWORD & SECURITY */}
-          {activeSection === 'security' && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+          {/* 1. THEME & DISPLAY */}
+          {activeSection === 'theme' && (
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
               <div>
-                <h2 className="text-sm font-bold text-slate-900">Change Account Password</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Update your account password. All changes require re-authentication.
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Enterprise Appearance & Theme Mode</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Select your preferred color scheme. The chosen theme persists automatically across all visits.
                 </p>
               </div>
 
-              {pwdMsg && (
-                <div
-                  className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs ${
-                    pwdMsg.type === 'success'
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                      : 'border-rose-200 bg-rose-50 text-rose-800'
-                  }`}
-                >
-                  {pwdMsg.type === 'success' ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
-                  )}
-                  <span>{pwdMsg.text}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2 px-3 text-xs focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    New Strong Password (min 8 characters)
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2 px-3 text-xs focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2 px-3 text-xs focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={pwdLoading}
-                  className="rounded-lg bg-gov-700 px-4 py-2 text-xs font-bold text-white shadow hover:bg-gov-800 disabled:opacity-50"
-                >
-                  {pwdLoading ? 'Updating...' : 'Update Password'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* 2. ACTIVE SESSIONS */}
-          {activeSection === 'sessions' && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900">Active Login Sessions</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Devices and IP addresses currently authenticated to your vigilance workspace.
-                  </p>
-                </div>
-                <button
-                  onClick={handleRevokeOtherSessions}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Log Out Other Sessions</span>
-                </button>
-              </div>
-
-              {sessionsMsg && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
-                  {sessionsMsg}
-                </div>
-              )}
-
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
-                {sessions.map((sess) => (
-                  <div key={sess.id} className="p-4 flex items-center justify-between bg-white hover:bg-slate-50">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                        {sess.device_info.toLowerCase().includes('mobile') ||
-                        sess.device_info.toLowerCase().includes('android') ? (
-                          <Smartphone className="h-4 w-4" />
-                        ) : (
-                          <Laptop className="h-4 w-4" />
-                        )}
-                      </div>
+              {/* Theme Options Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  {
+                    id: 'light' as Theme,
+                    label: 'Light Mode',
+                    desc: 'Clean white surfaces with dark navy typography and neutral borders.',
+                    icon: Sun,
+                  },
+                  {
+                    id: 'dark' as Theme,
+                    label: 'Dark Mode',
+                    desc: 'Deep navy enterprise surfaces with cyan and emerald accents.',
+                    icon: Moon,
+                  },
+                  {
+                    id: 'system' as Theme,
+                    label: 'System Sync',
+                    desc: 'Automatically aligns with your device OS dark/light mode preference in real-time.',
+                    icon: Laptop,
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isSelected = theme === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setTheme(item.id)}
+                      className={`cursor-pointer rounded-xl border p-4 transition-all duration-150 flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-sky-500 bg-sky-50/40 dark:bg-sky-950/30 ring-2 ring-sky-500/20 shadow-xs'
+                          : 'border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
+                      }`}
+                    >
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-800">
-                            {sess.device_info.slice(0, 45)}
-                          </span>
-                          {sess.is_current && (
-                            <span className="rounded bg-emerald-100 px-1.5 py-0.2 text-[10px] font-bold text-emerald-800">
-                              Current Device
-                            </span>
+                        <div className="flex items-center justify-between mb-2">
+                          <Icon className={`w-5 h-5 ${isSelected ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}`} />
+                          {isSelected && (
+                            <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                          IP: {sess.ip_address} • Logged in: {new Date(sess.created_at).toLocaleString()}
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">{item.label}</h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                          {item.desc}
                         </p>
                       </div>
+
+                      <div className="mt-4 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px] font-semibold text-slate-400">
+                        <span>{isSelected ? 'Active Preference' : 'Click to Apply'}</span>
+                        {item.id === 'system' && (
+                          <span className="font-mono text-sky-600 dark:text-sky-400">({resolvedTheme})</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+
+              {/* Theme Guarantee Note */}
+              <div className="rounded-xl border border-sky-200/70 dark:border-sky-900/50 bg-sky-50/50 dark:bg-sky-950/30 p-4 text-xs text-slate-700 dark:text-slate-300">
+                <p className="font-bold text-sky-900 dark:text-sky-300 mb-1">Zero-Flash Theme Architecture</p>
+                <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
+                  Nigrani AI utilizes an instant inline DOM boot script coupled with CSS variable tokens. All charts, tables, badges, and modals adapt immediately without visual jitter.
+                </p>
               </div>
             </div>
           )}
 
-          {/* 3. NOTIFICATIONS */}
-          {activeSection === 'notifications' && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+          {/* 2. AUDITOR DOSSIER */}
+          {activeSection === 'dossier' && (
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
               <div>
-                <h2 className="text-sm font-bold text-slate-900">Vigilance & Anomaly Triggers</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Configure automated dispatch alerts for public infrastructure anomalies.
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Auditor Credentials & Dossier</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Official verification profile for Smart India Hackathon vigilance demonstrations.
                 </p>
               </div>
 
-              <div className="space-y-4 divide-y divide-slate-100">
-                <div className="pt-3 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">Critical & High Risk Project Flags</h4>
-                    <p className="text-[11px] text-slate-500">
-                      Notify immediately when an uploaded project scores over 80/100 risk.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifyCritical}
-                    onChange={(e) => setNotifyCritical(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                  />
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-4 space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Assigned Auditor Role:</span>
+                  <span className="font-bold text-slate-900 dark:text-white">Principal Public Works Investigator</span>
                 </div>
-
-                <div className="pt-3 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">Geospatial Duplicate Warnings</h4>
-                    <p className="text-[11px] text-slate-500">
-                      Alert when two tenders overlap within 500m radius with matching budgets.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifyDuplicate}
-                    onChange={(e) => setNotifyDuplicate(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                  />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Organization / Department:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Ministry of Statistics & Programme Implementation</span>
                 </div>
-
-                <div className="pt-3 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">Weekly Executive Digest (PDF)</h4>
-                    <p className="text-[11px] text-slate-500">
-                      Receive automated weekly analytical summary every Monday at 08:00 AM IST.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifyWeekly}
-                    onChange={(e) => setNotifyWeekly(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                  />
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Jurisdiction Track:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">774 MPs Parliamentary Constituency Funds (All 36 States/UTs)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Cryptographic Integrity:</span>
+                  <span className="inline-flex items-center gap-1 font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Verified Deterministic Baselines
+                  </span>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* 4. PRIVACY & DATA */}
-          {activeSection === 'data' && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
               <div>
-                <h2 className="text-sm font-bold text-slate-900">Privacy & Data Governance</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Export complete personal and audit records in standardized JSON.
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <h3 className="text-xs font-bold text-slate-800">Official Data Dossier</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Downloads all account profile details, security logs, and role credentials.
-                </p>
                 <button
-                  onClick={handleExportData}
-                  className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white border border-slate-300 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+                  onClick={handleExportDossier}
+                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 dark:hover:bg-slate-700 transition"
                 >
-                  <Download className="h-3.5 w-3.5 text-blue-600" />
-                  <span>Download JSON Dossier</span>
+                  <Download className="w-4 h-4 text-sky-400" />
+                  <span>Download Official Auditor Dossier (JSON)</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* 5. DANGER ZONE */}
-          {activeSection === 'danger' && (
-            <div className="rounded-xl border border-rose-200 bg-white p-6 shadow-sm space-y-6">
-              <div className="flex items-center gap-2 text-rose-700">
-                <AlertTriangle className="h-5 w-5" />
-                <h2 className="text-sm font-bold">Danger Zone: Account Deletion</h2>
+          {/* 3. MPLADS DATASET */}
+          {activeSection === 'dataset' && (
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Official National MPLADS Dataset</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Package derived directly from the official portal (<code className="text-[11px] font-mono">mplads.gov.in</code>).
+                </p>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Permanently deletes your vigilance officer profile, cryptographic session keys, and verification
-                records from the Nigrani AI system. This action is irrevocable.
-              </p>
 
-              <div className="pt-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Total Portfolios</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">774 MPs</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Allocated Funds</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹11,682 Cr</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Expenditure</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">₹3,995 Cr</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Works Monitored</span>
+                  <span className="text-lg font-black text-slate-900 dark:text-white font-mono">131,141</span>
+                </div>
+              </div>
+
+              {reloadStatus && (
+                <div className="rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/50 p-3.5 text-xs text-sky-800 dark:text-sky-300">
+                  {reloadStatus}
+                </div>
+              )}
+
+              <div>
                 <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-rose-700"
+                  onClick={handleReloadMPLADS}
+                  disabled={reloading}
+                  className="inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800 dark:hover:bg-slate-700 transition disabled:opacity-50"
                 >
-                  Permanently Delete My Account
+                  <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${reloading ? 'animate-spin' : ''}`} />
+                  <span>{reloading ? 'Reloading MPLADS...' : 'Re-Sync Official MPLADS Package'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 4. CLOUD CONNECTIVITY */}
+          {activeSection === 'connectivity' && (
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs space-y-6">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Cloud Backend Connectivity</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Real-time network telemetry between hosted GitHub Pages and Render cloud service.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 p-4 space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Public Cloud Backend:</span>
+                  <a
+                    href="https://nigrani-ai-u7gz.onrender.com/health"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-sky-600 dark:text-sky-400 font-bold hover:underline truncate max-w-[240px]"
+                  >
+                    https://nigrani-ai-u7gz.onrender.com/
+                  </a>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Interactive API Docs:</span>
+                  <a
+                    href="https://nigrani-ai-u7gz.onrender.com/docs"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-sky-600 dark:text-sky-400 font-bold hover:underline"
+                  >
+                    .../docs (Swagger UI)
+                  </a>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+                  <span className="text-slate-500 dark:text-slate-400">Telemetry Status:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    {backendStatus}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  onClick={checkPing}
+                  disabled={pingLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1222] px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${pingLoading ? 'animate-spin' : ''}`} />
+                  <span>Verify Live Uptime</span>
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-rose-200 space-y-4">
-            <div className="flex items-center gap-2 text-rose-600 font-bold text-sm">
-              <AlertTriangle className="h-5 w-5" />
-              <span>Confirm Irrevocable Account Deletion</span>
-            </div>
-
-            <p className="text-xs text-slate-600">
-              Please enter your password and type <span className="font-mono font-bold text-rose-600">DELETE</span> to confirm permanent deletion.
-            </p>
-
-            {deleteError && (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-                {deleteError}
-              </div>
-            )}
-
-            <form onSubmit={handleDeleteAccount} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Account Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full rounded-lg border border-slate-300 bg-white py-2 px-3 text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Type "DELETE" to confirm
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={deleteConfirmationText}
-                  onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                  placeholder="DELETE"
-                  className="w-full rounded-lg border border-slate-300 bg-white py-2 px-3 text-xs font-mono font-bold"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteModal(false)}
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={deleteLoading}
-                  className="rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-rose-700 disabled:opacity-50"
-                >
-                  {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

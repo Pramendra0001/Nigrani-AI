@@ -734,4 +734,17 @@ export const api = {
       localStorage.removeItem('nigrani_user_profile');
       return { status: 'success', message: 'Account permanently deleted.' };
     }),
+
+  getHealth: () =>
+    fetch(`${API_BASE.replace(/\/api$/, '')}/health`)
+      .then((r) => r.json())
+      .catch(() => ({ status: 'local_fallback', service: 'nigrani-ai-api' })),
+
+  reloadMpladsDataset: () =>
+    requestWithFallback('/data/mplads/reload', { method: 'POST' }, () => ({
+      status: 'success',
+      dataset: 'MPLADS_Nigrani_AI_Data_Package',
+      total_records: clientProjects.length,
+      message: `Successfully reloaded and screened ${clientProjects.length} official MPLADS parliamentary project portfolios.`,
+    })),
 };

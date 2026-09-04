@@ -36,7 +36,7 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
   const [activeTab, setActiveTab] = useState('overview');
 
   // Review form state
-  const [noteAuthor, setNoteAuthor] = useState('Senior Vigilance Officer');
+  const [noteAuthor, setNoteAuthor] = useState('Senior Vigilance Auditor');
   const [noteContent, setNoteContent] = useState('');
   const [noteAction, setNoteAction] = useState('Desk Review Verified');
   const [reviewStatus, setReviewStatus] = useState('UNDER_REVIEW');
@@ -106,9 +106,9 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-          <span className="text-sm font-semibold">Loading forensic investigation file...</span>
+        <div className="flex flex-col items-center gap-3 text-slate-500 dark:text-slate-400">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 dark:border-slate-800 border-t-sky-500" />
+          <span className="text-xs font-semibold">Loading forensic investigation file...</span>
         </div>
       </div>
     );
@@ -136,19 +136,22 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition shadow-sm"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1222] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-xs"
+            title="Back to projects"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-blue-700 uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+              <span className="font-mono text-xs font-bold text-sky-700 dark:text-sky-300 uppercase bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded border border-sky-200/60 dark:border-sky-800/40">
                 {project.project_id}
               </span>
-              <span className="text-xs text-slate-400">•</span>
-              <span className="text-xs font-medium text-slate-500">{project.category}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{project.category}</span>
             </div>
-            <h1 className="text-lg font-black text-slate-900 mt-0.5 tracking-tight">{project.project_name}</h1>
+            <h1 className="text-lg font-black text-slate-900 dark:text-white mt-0.5 tracking-tight">
+              {project.project_name}
+            </h1>
           </div>
         </div>
 
@@ -156,9 +159,9 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
           <button
             onClick={handleRunAnalysis}
             disabled={analyzing}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1222] px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 transition"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${analyzing ? 'animate-spin text-blue-600' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${analyzing ? 'animate-spin' : ''}`} />
             <span>{analyzing ? 'Analyzing Pipeline...' : 'Re-Run Intelligence Pipeline'}</span>
           </button>
           <RiskBadge level={analysis.risk_level} score={analysis.overall_risk_score} size="lg" />
@@ -166,12 +169,12 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
       </div>
 
       {/* Top Profile Summary Card */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] p-6 shadow-xs">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
           {/* Radial Score Gauge */}
-          <div className="flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-6">
+          <div className="flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800/80 pb-6 lg:pb-0 lg:pr-6">
             <RadialRiskGauge score={analysis.overall_risk_score} level={analysis.risk_level} />
-            <p className="text-[11px] text-slate-400 text-center mt-2 max-w-[160px]">
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center mt-2 max-w-[160px]">
               Deterministic weighted sum of Cost (35%), Duplicate (30%), Delay (25%), DQ (10%).
             </p>
           </div>
@@ -180,10 +183,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
           <div className="lg:col-span-2 space-y-3.5">
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-700">Cost Anomaly Risk (35% weight)</span>
-                <span className="font-mono font-bold text-slate-900">{analysis.cost_risk_score.toFixed(1)} / 100</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Cost Anomaly Risk (35% weight)</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{analysis.cost_risk_score.toFixed(1)} / 100</span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-rose-500 rounded-full"
                   style={{ width: `${Math.min(100, analysis.cost_risk_score)}%` }}
@@ -193,10 +196,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-700">Duplicate / Overlap Risk (30% weight)</span>
-                <span className="font-mono font-bold text-slate-900">{analysis.duplicate_risk_score.toFixed(1)} / 100</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Duplicate / Overlap Risk (30% weight)</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{analysis.duplicate_risk_score.toFixed(1)} / 100</span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-amber-500 rounded-full"
                   style={{ width: `${Math.min(100, analysis.duplicate_risk_score)}%` }}
@@ -206,10 +209,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-700">Schedule Delay Risk (25% weight)</span>
-                <span className="font-mono font-bold text-slate-900">{analysis.delay_risk_score.toFixed(1)} / 100</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Schedule Delay Risk (25% weight)</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{analysis.delay_risk_score.toFixed(1)} / 100</span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-orange-500 rounded-full"
                   style={{ width: `${Math.min(100, analysis.delay_risk_score)}%` }}
@@ -219,12 +222,12 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold text-slate-700">Data Quality Deficit (10% weight)</span>
-                <span className="font-mono font-bold text-slate-900">{analysis.data_quality_risk_score.toFixed(1)} / 100</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Data Quality Deficit (10% weight)</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">{analysis.data_quality_risk_score.toFixed(1)} / 100</span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-500 rounded-full"
+                  className="h-full bg-sky-500 rounded-full"
                   style={{ width: `${Math.min(100, analysis.data_quality_risk_score)}%` }}
                 />
               </div>
@@ -232,33 +235,33 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
           </div>
 
           {/* Quick Info Box */}
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 space-y-2 text-xs">
+          <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/80 p-4 space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-slate-400 font-medium">Sanctioned Budget:</span>
-              <span className="font-mono font-bold text-slate-900">₹{project.budget ? project.budget.toLocaleString() : '—'} L</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Sanctioned Budget:</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">₹{project.budget ? project.budget.toLocaleString() : '—'} L</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400 font-medium">Actual Booked Cost:</span>
-              <span className="font-mono font-bold text-slate-900">₹{project.actual_cost ? project.actual_cost.toLocaleString() : '—'} L</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Actual Booked Cost:</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">₹{project.actual_cost ? project.actual_cost.toLocaleString() : '—'} L</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400 font-medium">Reported Completion:</span>
-              <span className="font-mono font-bold text-slate-900">{project.completion_percentage}%</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Reported Completion:</span>
+              <span className="font-mono font-bold text-slate-900 dark:text-white">{project.completion_percentage}%</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400 font-medium">Work Status:</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Work Status:</span>
               <StatusBadge status={project.status} />
             </div>
-            <div className="pt-2 border-t border-slate-200/60 flex justify-between">
-              <span className="text-slate-400 font-medium">Location:</span>
-              <span className="font-semibold text-slate-700">{project.district}, {project.state}</span>
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 flex justify-between">
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Location:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{project.district}, {project.state}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex border-b border-slate-200 bg-white rounded-xl px-2 shadow-sm overflow-x-auto">
+      <div className="flex border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#0b1222] rounded-xl px-2 shadow-xs overflow-x-auto">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isAct = activeTab === t.id;
@@ -268,15 +271,17 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-2 py-3 px-4 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
                 isAct
-                  ? 'border-blue-600 text-blue-700 font-bold'
-                  : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
+                  ? 'border-sky-500 text-sky-600 dark:text-sky-400 font-bold'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isAct ? 'text-blue-600' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isAct ? 'text-sky-500' : 'text-slate-400 dark:text-slate-500'}`} />
               <span>{t.label}</span>
               {t.badge && (
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  t.badge === '!' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
+                  t.badge === '!'
+                    ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                 }`}>
                   {t.badge}
                 </span>
@@ -287,41 +292,43 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
       </div>
 
       {/* Tab Contents */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm min-h-[400px]">
+      <div className="bg-white dark:bg-[#0b1222] rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xs min-h-[400px]">
         {/* 1. OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Work Scope & Specifications</h3>
-              <p className="mt-2 text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                {project.description || 'No work description specified in original sanction document.'}
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Work Scope & Official Details
+              </h3>
+              <p className="mt-2 text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/70 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                {project.description || 'Official parliamentary constituency works recommendation portfolio under MPLADS.'}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                <span className="text-xs text-slate-400 font-semibold block uppercase">Administrative Location</span>
-                <p className="mt-1 font-bold text-slate-800 text-sm">{project.district}, {project.state}</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  GPS: {project.latitude ?? '—'}, {project.longitude ?? '—'}
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Administrative Location</span>
+                <p className="mt-1 font-bold text-slate-800 dark:text-slate-200 text-sm">{project.district}, {project.state}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Centroid: {project.latitude ?? '—'}, {project.longitude ?? '—'}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                <span className="text-xs text-slate-400 font-semibold block uppercase">Timeline Contract</span>
-                <p className="mt-1 font-bold text-slate-800 text-sm">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Timeline Contract</span>
+                <p className="mt-1 font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {project.start_date || '—'} → {project.expected_end_date || '—'}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Duration: {delay_analysis.planned_duration_days ? `${delay_analysis.planned_duration_days} days` : 'Not recorded'}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50">
-                <span className="text-xs text-slate-400 font-semibold block uppercase">Review Status</span>
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block uppercase">Review Status</span>
                 <div className="mt-1.5 flex items-center gap-2">
                   <StatusBadge status={review_case?.status || 'NEW'} type="review" />
-                  <span className="text-xs font-semibold text-slate-600">
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                     Priority: {review_case?.priority || 'MEDIUM'}
                   </span>
                 </div>
@@ -333,10 +340,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 2. COST ANALYSIS TAB */}
         {activeTab === 'cost' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Statistical Cost Anomaly Detection</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Statistical Cost Variance Detection</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Compared against {cost_analysis.comparable_count} similar {project.category} projects in {project.district} and {project.state}.
                 </p>
               </div>
@@ -345,51 +352,51 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             {/* Benchmark Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">This Project Cost</span>
-                <p className="mt-1 text-2xl font-black text-slate-900 font-mono">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">This Project Cost</span>
+                <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white font-mono">
                   ₹{cost_analysis.project_cost?.toLocaleString()} L
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Comparable Median</span>
-                <p className="mt-1 text-2xl font-black text-slate-900 font-mono">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Comparable Median</span>
+                <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white font-mono">
                   ₹{cost_analysis.comparable_median ? cost_analysis.comparable_median.toLocaleString() : '—'} L
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Cost Deviation</span>
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Cost Deviation</span>
                 <p className={`mt-1 text-2xl font-black font-mono ${
-                  (cost_analysis.cost_deviation_percentage || 0) > 50 ? 'text-rose-600' : 'text-slate-900'
+                  (cost_analysis.cost_deviation_percentage || 0) > 50 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
                 }`}>
                   {cost_analysis.cost_deviation_percentage !== undefined ? `${cost_analysis.cost_deviation_percentage > 0 ? '+' : ''}${cost_analysis.cost_deviation_percentage}%` : '—'}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Cost Percentile Rank</span>
-                <p className="mt-1 text-2xl font-black text-slate-900 font-mono">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Cost Percentile Rank</span>
+                <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white font-mono">
                   {cost_analysis.percentile_rank !== undefined ? `${cost_analysis.percentile_rank}th` : '—'}
                 </p>
               </div>
             </div>
 
             {/* AI Contextual Narrative */}
-            <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-5">
-              <div className="flex items-center gap-2 text-xs font-bold text-blue-900 uppercase tracking-wide mb-2">
-                <Sparkles className="w-4 h-4 text-blue-600" />
+            <div className="rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-sky-50/60 dark:bg-sky-950/30 p-5">
+              <div className="flex items-center gap-2 text-xs font-bold text-sky-900 dark:text-sky-300 uppercase tracking-wide mb-2">
+                <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 <span>AI Cost Explanation & Contextual Reasoning</span>
               </div>
-              <p className="text-xs text-blue-950 leading-relaxed">
-                {cost_analysis.ai_explanation?.narrative || 'No specific cost narrative generated.'}
+              <p className="text-xs text-sky-950 dark:text-sky-200 leading-relaxed">
+                {cost_analysis.ai_explanation?.narrative || 'No significant statistical cost variance detected against category baseline.'}
               </p>
 
               {cost_analysis.ai_explanation?.recommendations && cost_analysis.ai_explanation.recommendations.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-blue-200/60">
-                  <span className="text-xs font-bold text-blue-900 block mb-2">Recommended Reviewer Actions:</span>
-                  <ul className="list-disc list-inside text-xs text-blue-950 space-y-1">
+                <div className="mt-4 pt-3 border-t border-sky-200/60 dark:border-sky-800/40">
+                  <span className="text-xs font-bold text-sky-900 dark:text-sky-300 block mb-2">Recommended Reviewer Actions:</span>
+                  <ul className="list-disc list-inside text-xs text-sky-950 dark:text-sky-200 space-y-1">
                     {cost_analysis.ai_explanation.recommendations.map((rec, i) => (
                       <li key={i}>{rec}</li>
                     ))}
@@ -403,10 +410,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 3. DUPLICATE INTELLIGENCE TAB */}
         {activeTab === 'duplicates' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Duplicate & Overlapping Asset Intelligence</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Duplicate & Overlapping Asset Intelligence</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Semantic description analysis combined with Haversine distance, concurrent timelines, and budget ratios.
                 </p>
               </div>
@@ -414,9 +421,9 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             </div>
 
             {duplicate_analysis.ai_explanation?.narrative && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-xs text-amber-950">
+              <div className="rounded-xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 p-4 text-xs text-amber-950 dark:text-amber-200">
                 <div className="flex items-center gap-2 font-bold mb-1">
-                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   <span>AI Overlap Assessment</span>
                 </div>
                 <p>{duplicate_analysis.ai_explanation.narrative}</p>
@@ -424,38 +431,38 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             )}
 
             {duplicate_analysis.top_candidates.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 font-medium">
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500 font-medium text-xs">
                 No duplicate or overlapping candidates detected in this administrative zone.
               </div>
             ) : (
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Top Matched Candidate Projects ({duplicate_analysis.top_candidates.length})
                 </h4>
                 {duplicate_analysis.top_candidates.map((cand) => (
                   <div
                     key={cand.id}
-                    className="rounded-xl border border-slate-200 p-4 hover:border-blue-300 transition bg-slate-50/50"
+                    className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 hover:border-sky-500/50 transition bg-slate-50/50 dark:bg-slate-900/40"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3 mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800/80 pb-3 mb-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs font-bold text-blue-700">{cand.target_code}</span>
+                          <span className="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">{cand.target_code}</span>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             cand.classification === 'POSSIBLE_DUPLICATE'
-                              ? 'bg-rose-100 text-rose-700'
+                              ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300'
                               : cand.classification === 'POSSIBLE_OVERLAP'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-slate-100 text-slate-700'
+                              ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                           }`}>
                             {cand.classification}
                           </span>
                         </div>
-                        <h5 className="font-bold text-slate-900 text-sm mt-0.5">{cand.target_name}</h5>
+                        <h5 className="font-bold text-slate-900 dark:text-white text-sm mt-0.5">{cand.target_name}</h5>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 uppercase font-semibold block">Combined Similarity</span>
-                        <span className="text-xl font-black font-mono text-slate-900">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-semibold block">Combined Similarity</span>
+                        <span className="text-xl font-black font-mono text-slate-900 dark:text-white">
                           {(cand.combined_score * 100).toFixed(1)}%
                         </span>
                       </div>
@@ -463,30 +470,30 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
                     {/* Similarity Breakdown Pills */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[10px] text-slate-400 block font-semibold">Semantic Match</span>
-                        <span className="font-bold font-mono">{(cand.description_similarity * 100).toFixed(0)}%</span>
+                      <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-semibold">Semantic Match</span>
+                        <span className="font-bold font-mono text-slate-800 dark:text-slate-200">{(cand.description_similarity * 100).toFixed(0)}%</span>
                       </div>
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[10px] text-slate-400 block font-semibold">Geo Proximity</span>
-                        <span className="font-bold font-mono">
+                      <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-semibold">Geo Proximity</span>
+                        <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
                           {cand.geographic_distance_km !== null && cand.geographic_distance_km !== undefined
                             ? `${cand.geographic_distance_km} km`
                             : 'Adjacent'}
                         </span>
                       </div>
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[10px] text-slate-400 block font-semibold">Timeline Overlap</span>
-                        <span className="font-bold font-mono">{(cand.timeline_overlap * 100).toFixed(0)}%</span>
+                      <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-semibold">Timeline Overlap</span>
+                        <span className="font-bold font-mono text-slate-800 dark:text-slate-200">{(cand.timeline_overlap * 100).toFixed(0)}%</span>
                       </div>
-                      <div className="bg-white p-2 rounded border border-slate-100">
-                        <span className="text-[10px] text-slate-400 block font-semibold">Budget Match</span>
-                        <span className="font-bold font-mono">{(cand.budget_similarity * 100).toFixed(0)}%</span>
+                      <div className="bg-white dark:bg-slate-800/80 p-2 rounded-lg border border-slate-100 dark:border-slate-700/60">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-semibold">Budget Match</span>
+                        <span className="font-bold font-mono text-slate-800 dark:text-slate-200">{(cand.budget_similarity * 100).toFixed(0)}%</span>
                       </div>
                       <div className="flex items-center justify-center">
                         <button
                           onClick={() => onSelectOtherProject(cand.target_code)}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline"
                         >
                           Compare <ChevronRight className="w-3.5 h-3.5" />
                         </button>
@@ -502,10 +509,10 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 4. SCHEDULE ANALYSIS TAB */}
         {activeTab === 'schedule' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Schedule & Execution Velocity Monitoring</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Schedule & Execution Velocity Monitoring</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Calculates elapsed duration against reported completion to flag progress stalls.
                 </p>
               </div>
@@ -513,15 +520,15 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             </div>
 
             {/* Timeline Progress Bar */}
-            <div className="space-y-4 rounded-xl border border-slate-200 p-5 bg-slate-50">
+            <div className="space-y-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-5 bg-slate-50/70 dark:bg-slate-900/50">
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span>Contractual Timeline Elapsed</span>
-                  <span className="font-mono">{delay_analysis.time_elapsed_percentage || 0}%</span>
+                  <span className="text-slate-700 dark:text-slate-300">Contractual Timeline Elapsed</span>
+                  <span className="font-mono text-slate-900 dark:text-white">{delay_analysis.time_elapsed_percentage || 0}%</span>
                 </div>
-                <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div className="h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-slate-600 rounded-full"
+                    className="h-full bg-slate-500 dark:bg-slate-400 rounded-full"
                     style={{ width: `${Math.min(100, delay_analysis.time_elapsed_percentage || 0)}%` }}
                   />
                 </div>
@@ -529,12 +536,12 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span>Reported Physical Completion</span>
-                  <span className="font-mono font-bold text-blue-600">{delay_analysis.completion_percentage}%</span>
+                  <span className="text-slate-700 dark:text-slate-300">Reported Physical Completion</span>
+                  <span className="font-mono font-bold text-sky-600 dark:text-sky-400">{delay_analysis.completion_percentage}%</span>
                 </div>
-                <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div className="h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-600 rounded-full"
+                    className="h-full bg-sky-500 rounded-full"
                     style={{ width: `${Math.min(100, delay_analysis.completion_percentage)}%` }}
                   />
                 </div>
@@ -543,34 +550,34 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             {/* Stats row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-slate-200 p-4">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Classification</span>
-                <p className="mt-1 text-base font-bold text-slate-900">{delay_analysis.delay_classification}</p>
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Classification</span>
+                <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{delay_analysis.delay_classification}</p>
               </div>
-              <div className="rounded-xl border border-slate-200 p-4">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Schedule Deficit</span>
-                <p className="mt-1 text-2xl font-black font-mono text-rose-600">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Schedule Deficit</span>
+                <p className="mt-1 text-2xl font-black font-mono text-rose-600 dark:text-rose-400">
                   {delay_analysis.schedule_deviation ? `${delay_analysis.schedule_deviation}%` : '0%'}
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-200 p-4">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Planned Duration</span>
-                <p className="mt-1 text-base font-bold text-slate-900 font-mono">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Planned Duration</span>
+                <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white font-mono">
                   {delay_analysis.planned_duration_days ?? '—'} days
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-200 p-4">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Elapsed Days</span>
-                <p className="mt-1 text-base font-bold text-slate-900 font-mono">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Elapsed Days</span>
+                <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white font-mono">
                   {delay_analysis.elapsed_days ?? '—'} days
                 </p>
               </div>
             </div>
 
             {delay_analysis.ai_explanation?.narrative && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-5 text-xs text-rose-950">
+              <div className="rounded-xl border border-rose-200/80 dark:border-rose-900/60 bg-rose-50/60 dark:bg-rose-950/30 p-5 text-xs text-rose-950 dark:text-rose-200">
                 <div className="flex items-center gap-2 font-bold mb-2">
-                  <Sparkles className="w-4 h-4 text-rose-600" />
+                  <Sparkles className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                   <span>AI Schedule Interpretation</span>
                 </div>
                 <p className="leading-relaxed">{delay_analysis.ai_explanation.narrative}</p>
@@ -582,47 +589,47 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 5. DATA QUALITY TAB */}
         {activeTab === 'quality' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Data Integrity & Completeness Audit</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Data Integrity & Completeness Audit</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Checks mandatory fields, logical date orders, coordinate territorial bounds, and cost sanity.
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-slate-600">
-                  Completeness: <span className="font-bold text-slate-900 font-mono">{data_quality_analysis.completeness_score}%</span>
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Completeness: <span className="font-bold text-slate-900 dark:text-white font-mono">{data_quality_analysis.completeness_score}%</span>
                 </span>
                 <RiskBadge score={data_quality_analysis.risk_score} size="md" />
               </div>
             </div>
 
             {data_quality_analysis.issues.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
+              <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500 gap-2">
                 <CheckCircle className="w-8 h-8 text-emerald-500" />
-                <span className="text-sm font-semibold text-slate-700">100% Valid Data Quality</span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">100% Valid Data Quality</span>
                 <span className="text-xs">No missing fields, invalid ranges, or geographic bounding errors detected.</span>
               </div>
             ) : (
               <div className="space-y-2.5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Identified Schema Anomaly Flags ({data_quality_analysis.total_issues})
                 </h4>
                 {data_quality_analysis.issues.map((iss, i) => (
-                  <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+                  <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50 text-xs">
                     <div className="flex items-center gap-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         iss.severity === 'CRITICAL'
-                          ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                          ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                           : iss.severity === 'HIGH'
-                          ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                          : 'bg-amber-100 text-amber-700 border border-amber-200'
+                          ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
+                          : 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                       }`}>
                         {iss.severity}
                       </span>
-                      <span className="font-semibold text-slate-800">{iss.issue}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{iss.issue}</span>
                     </div>
-                    <span className="font-mono text-slate-400 text-[11px]">{iss.field}</span>
+                    <span className="font-mono text-slate-400 dark:text-slate-500 text-[11px]">{iss.field}</span>
                   </div>
                 ))}
               </div>
@@ -633,13 +640,13 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 6. AI INVESTIGATION SUMMARY */}
         {activeTab === 'ai_summary' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-blue-600" />
-                  AI-Generated Forensic Investigation Brief
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-sky-500" />
+                  <span>AI-Generated Forensic Investigation Brief</span>
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Synthesizes multi-factor statistical evidence into an actionable vigilance brief for human decision-makers.
                 </p>
               </div>
@@ -649,39 +656,39 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             {analysis.ai_summary ? (
               <div className="space-y-5">
                 {/* Executive Brief Box */}
-                <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/80 to-white p-5">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-blue-900 mb-2">Executive Overview</h4>
-                  <p className="text-xs text-slate-800 leading-relaxed">
+                <div className="rounded-xl border border-sky-200/80 dark:border-sky-900/60 bg-gradient-to-br from-sky-50/80 to-white dark:from-sky-950/30 dark:to-[#0b1222] p-5">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-sky-900 dark:text-sky-300 mb-2">Executive Overview</h4>
+                  <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
                     {analysis.ai_summary.executive_summary}
                   </p>
                 </div>
 
                 {/* Key Findings List */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Primary Evidence Signals</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Primary Evidence Signals</h4>
                   <div className="space-y-2">
                     {analysis.ai_summary.key_findings.map((finding, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+                      <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50 text-xs">
                         <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-800 font-medium">{finding}</span>
+                        <span className="text-slate-800 dark:text-slate-200 font-medium">{finding}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Priority Action Recommended */}
-                <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
-                  <span className="text-[11px] font-bold text-amber-900 uppercase block mb-1">Recommended Vigilance Action</span>
-                  <p className="text-xs text-amber-950 font-semibold">{analysis.ai_summary.priority_action}</p>
+                <div className="rounded-xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 p-4">
+                  <span className="text-[10px] font-bold text-amber-900 dark:text-amber-300 uppercase block mb-1">Recommended Vigilance Action</span>
+                  <p className="text-xs text-amber-950 dark:text-amber-200 font-semibold">{analysis.ai_summary.priority_action}</p>
                 </div>
 
                 {/* Legal / Ethical Disclaimer */}
-                <p className="text-[11px] text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 italic bg-slate-50/60 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-100 dark:border-slate-800/80">
                   {analysis.ai_summary.disclaimer}
                 </p>
               </div>
             ) : (
-              <div className="py-12 text-center text-slate-400">
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">
                 Click "Re-Run Intelligence Pipeline" above to synthesize the AI investigation summary.
               </div>
             )}
@@ -691,21 +698,21 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 7. HUMAN REVIEW & AUDIT TAB */}
         {activeTab === 'review' && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Human Reviewer Decision & Audit Trail</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Human Reviewer Decision & Audit Trail</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Record official observations, assign investigators, and update triage status.
                 </p>
               </div>
 
               {/* Status Selector */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-500">Status:</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Status:</span>
                 <select
                   value={reviewStatus}
                   onChange={(e) => handleStatusChange(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:border-sky-500 focus:outline-none"
                 >
                   <option value="NEW">NEW CASE</option>
                   <option value="UNDER_REVIEW">UNDER REVIEW</option>
@@ -716,20 +723,20 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
             </div>
 
             {/* Note Entry Form */}
-            <form onSubmit={handleAddNote} className="space-y-3 rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Add Investigator Observation</h4>
+            <form onSubmit={handleAddNote} className="space-y-3 rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 bg-slate-50/70 dark:bg-slate-900/50">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Add Investigator Observation</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
                   placeholder="Reviewer Name / Designation"
                   value={noteAuthor}
                   onChange={(e) => setNoteAuthor(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500"
+                  className="rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-sky-500"
                 />
                 <select
                   value={noteAction}
                   onChange={(e) => setNoteAction(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500"
+                  className="rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-sky-500"
                 >
                   <option value="Desk Review Verified">Desk Review Verified</option>
                   <option value="Field Inspection Ordered">Field Inspection Ordered</option>
@@ -743,16 +750,16 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
                 placeholder="Enter detailed audit findings, justification notes, or clearance observations..."
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white p-3 text-xs focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-sky-500"
                 required
               />
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={savingNote}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gov-700 px-4 py-2 text-xs font-bold text-white hover:bg-gov-800 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 transition"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3.5 h-3.5 text-sky-400" />
                   <span>{savingNote ? 'Recording Note...' : 'Log Official Note'}</span>
                 </button>
               </div>
@@ -760,24 +767,24 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
 
             {/* Notes Audit Trail */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Audit History ({review_case?.notes.length || 0} Entries)
               </h4>
               {review_case?.notes.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-6">No reviewer notes logged yet.</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">No reviewer notes logged yet.</p>
               ) : (
                 review_case?.notes.map((note) => (
-                  <div key={note.id} className="rounded-xl border border-slate-200 p-4 text-xs space-y-1 bg-white">
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="font-bold text-slate-800">{note.author}</span>
+                  <div key={note.id} className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 p-4 text-xs space-y-1 bg-white dark:bg-slate-900/60">
+                    <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{note.author}</span>
                       <span className="font-mono text-[10px]">{new Date(note.created_at).toLocaleString()}</span>
                     </div>
                     {note.action_taken && (
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40">
                         Action: {note.action_taken}
                       </span>
                     )}
-                    <p className="text-slate-700 mt-1 leading-relaxed">{note.content}</p>
+                    <p className="text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">{note.content}</p>
                   </div>
                 ))
               )}
@@ -788,15 +795,15 @@ export const InvestigationPage: React.FC<Props> = ({ projectId, onBack, onSelect
         {/* 8. RAW EVIDENCE TAB */}
         {activeTab === 'evidence' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Explainable Raw Evidence Payload</h3>
-                <p className="text-xs text-slate-500">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Explainable Raw Evidence Payload</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Full machine-readable diagnostic schema verifying deterministic score derivation.
                 </p>
               </div>
             </div>
-            <pre className="bg-slate-950 text-emerald-400 p-4 rounded-xl text-[11px] overflow-x-auto font-mono max-h-[500px]">
+            <pre className="bg-[#070b14] border border-slate-800 text-cyan-400 p-4 rounded-xl text-[11px] overflow-x-auto font-mono max-h-[500px]">
               {JSON.stringify(
                 {
                   project_id: project.project_id,
