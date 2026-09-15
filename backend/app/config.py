@@ -27,13 +27,21 @@ def get_cors_origins() -> List[str]:
 
 
 def get_database_url() -> str:
-    """Resolve database URL, normalizing PostgreSQL schemes for async SQLAlchemy if needed."""
+    """Resolve database URL and normalize PostgreSQL schemes for async SQLAlchemy."""
     url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./nigrani.db").strip()
-    # Normalize standard Postgres URI (e.g. from Render or Heroku) to asyncpg driver
+
+    # Normalize standard Postgres URIs to the asyncpg driver used by SQLAlchemy.
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgresql://") and "+asyncpg" not in url:
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    # asyncpg does not accept libpq's `sslmode` keyword. Cloud PostgreSQL
+    # providers commonly include `sslmode=require`, so translate it to the
+    # asyncpg-compatible `ssl=require` while preserving the rest of the URL.
+    if "sslmode=" in url:
+        url = url.replace("sslmode=", "ssl=", 1)
+
     return url
 
 
