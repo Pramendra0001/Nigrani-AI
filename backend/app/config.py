@@ -2,6 +2,7 @@
 
 import os
 import secrets
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from pydantic import BaseModel
 from typing import List
 
@@ -36,11 +37,21 @@ def get_database_url() -> str:
     elif url.startswith("postgresql://") and "+asyncpg" not in url:
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-    # asyncpg does not accept libpq's `sslmode` keyword. Cloud PostgreSQL
-    # providers commonly include `sslmode=require`, so translate it to the
-    # asyncpg-compatible `ssl=require` while preserving the rest of the URL.
-    if "sslmode=" in url:
-        url = url.replace("sslmode=", "ssl=", 1)
+    # Cloud PostgreSQL providers may include libpq parameters that asyncpg
+    # does not accept. Keep the URL credentials/host intact while translating
+    # SSL configuration and dropping unsupported channel binding configuration.
+    if url.startswith("postgresql+asyncpg://"):
+        parts = urlsplit(url)
+        params = parse_qsl(parts.query, keep_blank_values=True)
+        normalized = []
+        for key, value in params:
+            if key == "sslmode":
+                normalized.append(("ssl", value))
+            elif key == "channel_binding":
+                continue
+            else:
+                normalized.append((key, value))
+        url = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(normalized), parts.fragment))
 
     return url
 
