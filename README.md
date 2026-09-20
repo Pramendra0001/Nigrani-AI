@@ -103,7 +103,7 @@ Manual portfolio audits are resource-intensive. Nigrani AI automates statistical
                                      │
 ┌────────────────────────────────────▼────────────────────────────────────┐
 │                           Database Layer                                │
-│       SQLite (Local Development) / PostgreSQL (Cloud Production)        │
+│       SQLite (Local Development) / Neon PostgreSQL (Production)         │
 │    774 Official Parliamentary Portfolios (543 Lok Sabha + 231 RS)       │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
@@ -252,7 +252,8 @@ The platform transparently discloses data limitations where external data is not
   - scikit-learn & NumPy (TF-IDF & IQR mathematical analysis)
 - **Deployment:**
   - GitHub Pages (Frontend static hosting)
-  - Render (Cloud API hosting)
+  - Render (FastAPI backend / cloud API hosting)
+  - Neon PostgreSQL (Production database)
 
 ---
 
@@ -355,6 +356,7 @@ npm run build
 
 - **Frontend (GitHub Pages):** Hosted at [https://pramendra0001.github.io/Nigrani-AI/](https://pramendra0001.github.io/Nigrani-AI/) (compiled via Vite into `frontend/dist`).
 - **Backend (Render Cloud Web Service):** Publicly available at [https://nigrani-ai-u7gz.onrender.com/](https://nigrani-ai-u7gz.onrender.com/) with interactive Swagger docs at [/docs](https://nigrani-ai-u7gz.onrender.com/docs) and health check at [/health](https://nigrani-ai-u7gz.onrender.com/health).
+- **Database (Neon PostgreSQL):** Production PostgreSQL persistence is hosted on Neon and supplied to the Render backend through the `DATABASE_URL` environment variable. The database credentials are intentionally not stored in Git.
 - **Client Fallback Resiliency:** If the remote backend is offline or waking from idle, the frontend automatically activates an embedded client intelligence engine containing all 774 official parliamentary records.
 
 ---
