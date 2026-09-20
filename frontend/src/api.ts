@@ -74,7 +74,10 @@ async function requestWithFallback<T>(url: string, options: RequestInit | undefi
     const controller = new AbortController();
     // Allow longer timeout for cloud cold starts (e.g. Render free tier spin-up) if a remote URL is configured
     const isRemote = API_BASE.startsWith('http://') || API_BASE.startsWith('https://');
-    const timeoutMs = isRemote ? 15000 : 3000;
+    // Keep the dashboard responsive on Render cold starts. If the cloud API is
+    // waking or temporarily unavailable, fall back to the bundled intelligence
+    // dataset instead of blocking the first screen for 15 seconds.
+    const timeoutMs = isRemote ? 3500 : 3000;
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     const isFormData = options?.body instanceof FormData;
@@ -184,9 +187,25 @@ export const api = {
     };
 
     return requestWithFallback<DashboardData>(url, undefined, buildFallback).then((res) => {
-      const totalRisk = Object.values(res.risk_distribution || {}).reduce((a, b) => a + b, 0);
-      if (totalRisk === 0 && (res.metrics?.total_projects || 0) > 0) {
-        const fb = buildFallback();
+      const fb = buildFallback();
+      const liveTotal = res.metrics?.total_projects || 0;
+      const liveRiskTotal = Object.values(res.risk_distribution || {}).reduce((a, b) => a + b, 0);
+      const liveHasBreakdowns =
+        (res.category_distribution?.length || 0) > 0 ||
+        (res.state_distribution?.length || 0) > 0 ||
+        (res.high_priority_projects?.length || 0) > 0;
+
+      // A live API response with zero projects is not useful for the dashboard
+      // (for example during database migration/re-seeding). Never render an
+      // apparently empty national dashboard when the bundled dataset is available.
+      if (liveTotal === 0 || (!liveHasBreakdowns && liveRiskTotal === 0)) {
+        isConnectedToLiveBackend = false;
+        return fb;
+      }
+
+      // Repair partially populated live responses using the same deterministic
+      // client aggregates used by the offline fallback.
+      if (liveRiskTotal === 0 && liveTotal > 0) {
         return {
           ...res,
           metrics: {
