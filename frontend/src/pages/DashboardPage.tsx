@@ -33,20 +33,22 @@ interface Props {
 export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab }) => {
   const [parliamentType, setParliamentType] = useState<'All' | 'Lok Sabha' | 'Rajya Sabha'>('All');
   const [activeRole, setActiveRole] = useState<DashboardRole>('MINISTRY');
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Render the bundled intelligence snapshot immediately; live API refreshes in background.
+  const [data, setData] = useState<DashboardData>(() => api.getDashboardFallback('All'));
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
+    // Never blank the dashboard while the cloud backend wakes up or revalidates.
+    // Reset instantly to the deterministic bundled snapshot for the selected scope.
+    setData(api.getDashboardFallback(parliamentType));
+    setLoading(false);
     try {
-      setLoading(true);
       const res = await api.getDashboard(parliamentType);
       setData(res);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to load executive dashboard.');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Live telemetry unavailable; showing bundled intelligence.');
     }
   };
 
@@ -54,7 +56,7 @@ export const DashboardPage: React.FC<Props> = ({ onSelectProject, onNavigateTab 
     loadData();
   }, [parliamentType]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-slate-500 dark:text-slate-400">
