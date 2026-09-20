@@ -104,90 +104,90 @@ async function requestWithFallback<T>(url: string, options: RequestInit | undefi
   return fallbackFn();
 }
 
+const buildClientDashboard = (parliamentType?: string): DashboardData => {
+  let pool = [...clientProjects];
+  const normalizedType = (parliamentType || 'ALL').trim().toUpperCase();
+  if (normalizedType !== 'ALL') {
+    pool = pool.filter(
+      (p) =>
+        (p.parliament_type && p.parliament_type.toUpperCase().includes(normalizedType)) ||
+        (p.category && p.category.toUpperCase().includes(normalizedType))
+    );
+  }
+
+  const total = pool.length;
+  const risk_distribution: Record<string, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 };
+  const catMap: Record<string, { count: number; sumRisk: number }> = {};
+  const stateMap: Record<string, { count: number; sumRisk: number }> = {};
+  let costAnomalies = 0;
+  let delayRisks = 0;
+  let dupCases = 0;
+  let dqIssues = 0;
+
+  pool.forEach((p: any) => {
+    const lvl = (p.risk_level || 'LOW').toUpperCase();
+    risk_distribution[lvl] = (risk_distribution[lvl] || 0) + 1;
+    if ((p.cost_risk_score ?? 0) >= 50.0) costAnomalies += 1;
+    if ((p.delay_risk_score ?? 0) >= 50.0) delayRisks += 1;
+    if ((p.duplicate_risk_score ?? 0) >= 50.0) dupCases += 1;
+    if ((p.data_quality_risk_score ?? 0) >= 35.0) dqIssues += 1;
+
+    if (p.category) {
+      if (!catMap[p.category]) catMap[p.category] = { count: 0, sumRisk: 0 };
+      catMap[p.category].count += 1;
+      catMap[p.category].sumRisk += p.risk_score || 0;
+    }
+    if (p.state) {
+      if (!stateMap[p.state]) stateMap[p.state] = { count: 0, sumRisk: 0 };
+      stateMap[p.state].count += 1;
+      stateMap[p.state].sumRisk += p.risk_score || 0;
+    }
+  });
+
+  const high_priority_projects = [...pool]
+    .sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))
+    .slice(0, 10);
+  const reviewCount = (risk_distribution.HIGH || 0) + (risk_distribution.CRITICAL || 0) + (risk_distribution.MEDIUM || 0);
+
+  return {
+    metrics: {
+      total_projects: total,
+      projects_requiring_review: reviewCount,
+      high_risk_count: risk_distribution.HIGH || 0,
+      critical_risk_count: risk_distribution.CRITICAL || 0,
+      duplicate_cases: dupCases || Math.round(total * 0.95),
+      cost_anomalies: costAnomalies || Math.round(total * 0.25),
+      schedule_risks: delayRisks || Math.round(total * 0.33),
+      data_quality_issues: dqIssues || 1,
+    },
+    risk_distribution,
+    category_distribution: Object.entries(catMap).map(([cat, val]) => ({
+      category: cat,
+      count: val.count,
+      avg_risk: Math.round((val.sumRisk / (val.count || 1)) * 10) / 10,
+    })),
+    state_distribution: Object.entries(stateMap).map(([st, val]) => ({
+      state: st,
+      count: val.count,
+      avg_risk: Math.round((val.sumRisk / (val.count || 1)) * 10) / 10,
+    })),
+    high_priority_projects,
+  };
+};
+
 export const api = {
   // 1. Dashboard
+  // Exposed separately so the UI can render the bundled dataset immediately,
+  // while the live API refreshes in the background.
+  getDashboardFallback: (parliamentType?: string) => buildClientDashboard(parliamentType),
+
   getDashboard: (parliamentType?: string) => {
-    const url = parliamentType && parliamentType !== 'ALL'
+    const url = parliamentType && parliamentType.toUpperCase() !== 'ALL'
       ? `/dashboard?parliament_type=${encodeURIComponent(parliamentType)}`
       : '/dashboard';
 
-    const buildFallback = (): DashboardData => {
-      let pool = [...clientProjects];
-      if (parliamentType && parliamentType !== 'ALL') {
-        const pType = parliamentType.toLowerCase();
-        pool = pool.filter(
-          (p) =>
-            (p.parliament_type && p.parliament_type.toLowerCase().includes(pType)) ||
-            (p.category && p.category.toLowerCase().includes(pType))
-        );
-      }
-
-      const total = pool.length;
-      const risk_distribution: Record<string, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0 };
-      const catMap: Record<string, { count: number; sumRisk: number }> = {};
-      const stateMap: Record<string, { count: number; sumRisk: number }> = {};
-
-      let costAnomalies = 0;
-      let delayRisks = 0;
-      let dupCases = 0;
-      let dqIssues = 0;
-
-      pool.forEach((p: any) => {
-        const lvl = (p.risk_level || 'LOW').toUpperCase();
-        risk_distribution[lvl] = (risk_distribution[lvl] || 0) + 1;
-
-        if ((p.cost_risk_score ?? 0) >= 50.0) costAnomalies += 1;
-        if ((p.delay_risk_score ?? 0) >= 50.0) delayRisks += 1;
-        if ((p.duplicate_risk_score ?? 0) >= 50.0) dupCases += 1;
-        if ((p.data_quality_risk_score ?? 0) >= 35.0) dqIssues += 1;
-
-        if (p.category) {
-          if (!catMap[p.category]) catMap[p.category] = { count: 0, sumRisk: 0 };
-          catMap[p.category].count += 1;
-          catMap[p.category].sumRisk += p.risk_score || 0;
-        }
-
-        if (p.state) {
-          if (!stateMap[p.state]) stateMap[p.state] = { count: 0, sumRisk: 0 };
-          stateMap[p.state].count += 1;
-          stateMap[p.state].sumRisk += p.risk_score || 0;
-        }
-      });
-
-      const high_priority_projects = [...pool]
-        .sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0))
-        .slice(0, 10);
-
-      const reviewCount = (risk_distribution.HIGH || 0) + (risk_distribution.CRITICAL || 0) + (risk_distribution.MEDIUM || 0);
-
-      return {
-        metrics: {
-          total_projects: total,
-          projects_requiring_review: reviewCount,
-          high_risk_count: risk_distribution.HIGH || 0,
-          critical_risk_count: risk_distribution.CRITICAL || 0,
-          duplicate_cases: dupCases || Math.round(total * 0.95),
-          cost_anomalies: costAnomalies || Math.round(total * 0.25),
-          schedule_risks: delayRisks || Math.round(total * 0.33),
-          data_quality_issues: dqIssues || 1,
-        },
-        risk_distribution,
-        category_distribution: Object.entries(catMap).map(([cat, val]) => ({
-          category: cat,
-          count: val.count,
-          avg_risk: Math.round((val.sumRisk / (val.count || 1)) * 10) / 10,
-        })),
-        state_distribution: Object.entries(stateMap).map(([st, val]) => ({
-          state: st,
-          count: val.count,
-          avg_risk: Math.round((val.sumRisk / (val.count || 1)) * 10) / 10,
-        })),
-        high_priority_projects,
-      };
-    };
-
-    return requestWithFallback<DashboardData>(url, undefined, buildFallback).then((res) => {
-      const fb = buildFallback();
+    return requestWithFallback<DashboardData>(url, undefined, () => buildClientDashboard(parliamentType)).then((res) => {
+      const fb = buildClientDashboard(parliamentType);
       const liveTotal = res.metrics?.total_projects || 0;
       const liveRiskTotal = Object.values(res.risk_distribution || {}).reduce((a, b) => a + b, 0);
       const liveHasBreakdowns =
@@ -195,16 +195,11 @@ export const api = {
         (res.state_distribution?.length || 0) > 0 ||
         (res.high_priority_projects?.length || 0) > 0;
 
-      // A live API response with zero projects is not useful for the dashboard
-      // (for example during database migration/re-seeding). Never render an
-      // apparently empty national dashboard when the bundled dataset is available.
       if (liveTotal === 0 || (!liveHasBreakdowns && liveRiskTotal === 0)) {
         isConnectedToLiveBackend = false;
         return fb;
       }
 
-      // Repair partially populated live responses using the same deterministic
-      // client aggregates used by the offline fallback.
       if (liveRiskTotal === 0 && liveTotal > 0) {
         return {
           ...res,
