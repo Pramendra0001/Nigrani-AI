@@ -669,7 +669,7 @@ async def upload_dataset_file(file: UploadFile = File(...)):
 
     return {
         "import_token": import_token,
-        "filename": file.filename,
+        "filename": safe_filename,
         "headers": headers,
         "standard_fields": import_service.STANDARD_FIELDS,
         "suggested_mapping": suggested,
