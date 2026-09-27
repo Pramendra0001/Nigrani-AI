@@ -1,6 +1,9 @@
 """Main API Router for Nigrani AI."""
 
 import json
+import secrets
+import time
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -613,6 +616,17 @@ async def get_review_notes(case_id: str, db: AsyncSession = Depends(get_db)):
 # 6. Data Upload & Column Mapping
 # -------------------------------------------------------------
 _upload_buffer: Dict[str, Dict[str, Any]] = {}
+_UPLOAD_TOKEN_TTL_SECONDS = 15 * 60
+_MAX_UPLOAD_BYTES = settings.MAX_FILE_SIZE_MB * 1024 * 1024
+_MAX_UPLOAD_BUFFER_ITEMS = 20
+_ALLOWED_UPLOAD_EXTENSIONS = {".csv"}
+
+
+def _cleanup_upload_buffer() -> None:
+    now = time.time()
+    expired = [token for token, item in _upload_buffer.items() if now - item.get("created_at", now) > _UPLOAD_TOKEN_TTL_SECONDS]
+    for token in expired:
+        _upload_buffer.pop(token, None)
 
 
 @api_router.post("/data/upload")
@@ -620,11 +634,24 @@ async def upload_dataset_file(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(400, "Empty filename provided.")
 
-    content = await file.read()
+    safe_filename = Path(file.filename).name
+    if not safe_filename or safe_filename.startswith("."):
+        raise HTTPException(400, "Invalid filename provided.")
+    if Path(safe_filename).suffix.lower() not in _ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(415, "Only CSV uploads are supported.")
+
+    _cleanup_upload_buffer()
+    if len(_upload_buffer) >= _MAX_UPLOAD_BUFFER_ITEMS:
+        raise HTTPException(429, "Too many pending uploads. Please try again shortly.")
+
+    content = await file.read(_MAX_UPLOAD_BYTES + 1)
+    if len(content) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "Uploaded file exceeds the configured size limit.")
+
     try:
-        content_str = content.decode("utf-8")
+        content_str = content.decode("utf-8-sig")
     except UnicodeDecodeError:
-        content_str = content.decode("latin-1")
+        raise HTTPException(400, "Uploaded CSV must use UTF-8 encoding.")
 
     headers, records = import_service.parse_csv(content_str)
     if not headers or not records:
@@ -633,10 +660,11 @@ async def upload_dataset_file(file: UploadFile = File(...)):
     suggested = import_service.suggest_mapping(headers)
     preview = import_service.validate_and_preview(records, suggested)
 
-    import_token = f"tok_{len(_upload_buffer)+1}"
+    import_token = secrets.token_urlsafe(32)
     _upload_buffer[import_token] = {
-        "filename": file.filename,
+        "filename": safe_filename,
         "records": records,
+        "created_at": time.time(),
     }
 
     return {
@@ -656,6 +684,7 @@ class ImportCommitRequest(BaseModel):
 
 @api_router.post("/data/import")
 async def commit_dataset_import(req: ImportCommitRequest, db: AsyncSession = Depends(get_db)):
+    _cleanup_upload_buffer()
     buf = _upload_buffer.get(req.import_token)
     if not buf:
         raise HTTPException(404, "Upload session expired or invalid token. Please re-upload.")
